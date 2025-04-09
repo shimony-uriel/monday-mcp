@@ -1,0 +1,9 @@
+
+overwrite: true
+schema: "src/monday-graphql/schema.graphql"
+documents: "src/**/*.graphql.ts"
+generates:
+  src/monday-graphql/generated/graphql.ts:
+    plugins:
+      - "typescript"
+      - "typescript-operations"
