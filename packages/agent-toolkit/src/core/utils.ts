@@ -1,6 +1,6 @@
 import { ApiClient } from '@mondaydotcomorg/api';
-import { ToolType } from '../core/tool';
-import { BaseMondayApiTool } from '../core/base-monday-api-tool';
+import { ToolType } from './tool';
+import { BaseMondayApiTool } from './platform-api-tools/base-monday-api-tool';
 
 export type ToolsConfiguration = {
   include?: string[];

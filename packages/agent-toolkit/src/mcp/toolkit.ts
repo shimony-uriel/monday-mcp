@@ -1,15 +1,14 @@
 import { z } from 'zod';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { ApiClient, ApiClientConfig } from '@mondaydotcomorg/api';
-import { allTools } from '../tools';
-import { filterTools, ToolsConfiguration } from '../tools/utils';
 import { CallToolResult } from '@modelcontextprotocol/sdk/types';
-import { Tool } from '../core/tool';
+import { ApiClient, ApiClientConfig } from '@mondaydotcomorg/api';
+import { Tool, allTools } from '../core';
+import { filterTools, ToolsConfiguration } from '../core/utils';
 
 export type MondayAgentToolkitConfig = {
   mondayApiToken: ApiClientConfig['token'];
-  mondayApiVersion: ApiClientConfig['apiVersion'];
-  mondayApiRequestConfig: ApiClientConfig['requestConfig'];
+  mondayApiVersion?: ApiClientConfig['apiVersion'];
+  mondayApiRequestConfig?: ApiClientConfig['requestConfig'];
   toolsConfiguration?: ToolsConfiguration;
 };
 

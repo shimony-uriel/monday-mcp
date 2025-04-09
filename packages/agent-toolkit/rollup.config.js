@@ -6,7 +6,9 @@ import json from '@rollup/plugin-json';
 import del from 'rollup-plugin-delete';
 import dts from 'rollup-plugin-dts';
 
-const subpathConfigs = ['mcp', 'tools', 'core', 'openai'].map((dir) => ({
+const subPaths = ['mcp', 'core', 'openai'];
+
+const subpathConfigs = subPaths.map((dir) => ({
   input: `src/${dir}/index.ts`,
   output: [
     {
@@ -37,14 +39,11 @@ const subpathConfigs = ['mcp', 'tools', 'core', 'openai'].map((dir) => ({
     '@mondaydotcomorg/api',
     'zod',
     'zod-to-json-schema',
-    '@langchain/core',
-    '@modelcontextprotocol/sdk',
-    'openai',
   ],
 }));
 
 // Subpath types
-const subpathTypesConfigs = ['mcp', 'tools', 'core', 'openai'].map((dir) => ({
+const subpathTypesConfigs = subPaths.map((dir) => ({
   input: `src/${dir}/index.ts`,
   output: [
     { file: `dist/cjs/${dir}/index.d.ts`, format: 'es' },

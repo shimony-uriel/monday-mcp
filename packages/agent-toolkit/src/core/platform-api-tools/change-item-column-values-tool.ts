@@ -1,11 +1,11 @@
 import { z } from 'zod';
-import { ToolInputType, ToolOutputType, ToolType } from '../core/tool';
-import { BaseMondayApiTool } from '../core/base-monday-api-tool';
-import { changeItemColumnValues } from '../monday-graphql/queries.graphql';
+import { ToolInputType, ToolOutputType, ToolType } from '../tool';
+import { BaseMondayApiTool } from './base-monday-api-tool';
+import { changeItemColumnValues } from '../../monday-graphql/queries.graphql';
 import {
   ChangeItemColumnValuesMutation,
   ChangeItemColumnValuesMutationVariables,
-} from '../monday-graphql/generated/graphql';
+} from '../../monday-graphql/generated/graphql';
 
 export const changeItemColumnValuesToolSchema = {
   itemId: z.number().describe('The ID of the item to be updated'),

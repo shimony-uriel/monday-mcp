@@ -6,14 +6,13 @@ import type {
   ChatCompletionToolMessageParam,
 } from 'openai/resources';
 import { z } from 'zod';
-import { allTools } from '../tools';
-import { filterTools, ToolsConfiguration } from '../tools/utils';
-import { Tool } from '../core/tool';
+import { Tool, allTools } from '../core';
+import { filterTools, ToolsConfiguration } from '../core/utils';
 
 export type MondayAgentToolkitConfig = {
   mondayApiToken: ApiClientConfig['token'];
-  mondayApiVersion: ApiClientConfig['apiVersion'];
-  mondayApiRequestConfig: ApiClientConfig['requestConfig'];
+  mondayApiVersion?: ApiClientConfig['apiVersion'];
+  mondayApiRequestConfig?: ApiClientConfig['requestConfig'];
   toolsConfiguration?: ToolsConfiguration;
 };
 

@@ -1,6 +1,6 @@
 # @mondaydotcomorg/agent-toolkit
 
-A powerful toolkit for building AI agents that interact with the Monday.com API. This package provides a set of tools and utilities to help you create AI-powered integrations with Monday.com, supporting both OpenAI and Model Context Protocol (MCP) implementations.
+A powerful toolkit for building AI agents that interact with the monday.com API. This package provides a set of tools and utilities to help you create AI-powered integrations with monday.com through Model Context Protocol (MCP) implementation.
 
 ## Installation
 
@@ -13,7 +13,6 @@ npm install @mondaydotcomorg/agent-toolkit
 The package provides several modular components that can be imported separately:
 
 - `@mondaydotcomorg/agent-toolkit/mcp` - MCP server implementation
-- `@mondaydotcomorg/agent-toolkit/tools` - Monday.com API tools
 - `@mondaydotcomorg/agent-toolkit/core` - Core utilities and base classes
 - `@mondaydotcomorg/agent-toolkit/openai` - OpenAI integration
 
