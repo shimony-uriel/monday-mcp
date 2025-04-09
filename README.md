@@ -4,7 +4,7 @@ This repository, maintained by the monday.com AI team, provides a comprehensive 
 
 ## Packages
 
-### 2. Monday API MCP (`@mondaydotcomorg/monday-api-mcp`)
+### 1. Monday API MCP (`@mondaydotcomorg/monday-api-mcp`)
 
 A server implementation for the Model Context Protocol (MCP) that provides an interface to interact with monday.com API. This package is designed to be run using NPX and can be easily integrated with various AI platforms.
 
@@ -17,7 +17,7 @@ Key features:
 - Support for read-only mode
 - Dynamic API tools capability
 
-### 1. Agent Toolkit (`@mondaydotcomorg/agent-toolkit`)
+### 2. Agent Toolkit (`@mondaydotcomorg/agent-toolkit`)
 
 A powerful toolkit for building AI agents that interact with the monday.com API. It provides a set of tools and utilities to help you create AI-powered integrations with monday.com, supporting both OpenAI and Model Context Protocol (MCP) implementations.
 
