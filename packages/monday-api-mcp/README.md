@@ -1,11 +1,27 @@
+<div align="center" id="top">
+
 # Monday.com API MCP Server
+
+</div>
 
 A server implementation for the [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) that provides an interface to interact with Monday.com API.
 
-## Usage
+## 💻 Claude Desktop Demo
+
+https://github.com/user-attachments/assets/ed8d24e1-256b-4f6b-9d84-38e54a8703fd
+
+## Prerequisites
+
+Before running the MCP server, make sure you have:
+
+1. Node v20 or higher installed
+2. NPM v5.2.0 or higher installed
+3. [monday.com API key](https://developer.monday.com/api-reference/docs/authentication)
+
+## ⚙️ Usage
 
 ```bash
-@mondaydotcomorg/monday-api-mcp -t abcd123
+npx @mondaydotcomorg/monday-api-mcp -t abcd123
 ```
 
 The Monday API token can also be provided via the `monday_token` environment variable.
@@ -19,23 +35,7 @@ The Monday API token can also be provided via the `monday_token` environment var
 | Read Only Mode | `--read-only`, `-ro` | Enable read-only mode | No | `false` |
 | Dynamic API Tools | `--enable-dynamic-api-tools`, `-edat` | (Beta) Enable dynamic API tools (Mode that includes the whole API schema, not supported when using read-only mode) | No | `false` |
 
-## Example Integration with Cursor
-
-```json
-{
-  "mcpServers": {
-    "monday-api-mcp": {
-      "command": "npx",
-      "args": [
-        "@mondaydotcomorg/monday-api-mcp -t abcd123"
-      ],
-      "env": {}
-    }
-  }
-}
-```
-
-### Example Integration with Claude Desktop
+## 💻 Claude Desktop Integration
 
 ```json
 {
@@ -52,7 +52,27 @@ The Monday API token can also be provided via the `monday_token` environment var
 }
 ```
 
-### Example Using Environment Variable
+## 💻 Cursor Integration
+
+### Using command line arguments
+
+```json
+{
+  "mcpServers": {
+    "monday-api-mcp": {
+      "command": "npx",
+      "args": [
+        "@mondaydotcomorg/monday-api-mcp",
+        "-t",
+        "abcd123"
+      ],
+      "env": {}
+    }
+  }
+}
+```
+
+### Using environment variable
 
 ```json
 {
@@ -72,4 +92,4 @@ The Monday API token can also be provided via the `monday_token` environment var
 
 ## License
 
-MIT
+This project is licensed under the MIT License - see the LICENSE file for details.
