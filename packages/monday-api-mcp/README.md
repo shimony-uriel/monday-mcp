@@ -8,7 +8,7 @@ A server implementation for the [Model Context Protocol (MCP)](https://modelcont
 
 ## 💻 Claude Desktop Demo
 
-<video src='https://dapulse-res.cloudinary.com/video/upload/v1744632846/claude-demo-latest.mov' width=180></video>
+https://github.com/user-attachments/assets/ed8d24e1-256b-4f6b-9d84-38e54a8703fd
 
 ## Prerequisites
 
