@@ -162,7 +162,7 @@ With Dynamic API Tools, your AI assistants can:
 Dynamic API Tools are in beta and disabled by default. Enable them with:
 
 ```bash
-npx @mondaydotcomorg/monday-api-mcp -t your_token --enable-dynamic-api-tools
+npx @mondaydotcomorg/monday-api-mcp -t your_token --enable-dynamic-api-tools true
 ```
 
 > ⚠️ **Note**: Dynamic API Tools require full API access and are not compatible with read-only mode.
