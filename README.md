@@ -12,7 +12,7 @@
   <img src="https://img.shields.io/badge/TypeScript-Powered-blue" alt="TypeScript">
 </p>
 
-**Unlock the full potential of AI agents by integrating with monday.com MCP — revolutionize the way you work.**
+**Enable AI agents to operate reliably within real workflows. This MCP is monday.com’s open framework for connecting agents into your work OS - giving them secure access to structured data, tools to take action, and the context needed to make smart decisions.**
 
 </div>
 
