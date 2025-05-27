@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { BaseMondayApiTool, MondayApiToolContext } from './base-monday-api-tool';
-import { ToolInputType, ToolOutputType, ToolType } from '../tool';
+import { ToolInputType, ToolOutputType, ToolType } from '../../tool';
 import { buildClientSchema, GraphQLSchema, IntrospectionQuery, parse, validate } from 'graphql';
 import { ApiClient } from '@mondaydotcomorg/api';
 import { introspectionQuery } from 'src/monday-graphql';
