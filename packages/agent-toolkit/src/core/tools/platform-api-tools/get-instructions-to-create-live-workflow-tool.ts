@@ -1,16 +1,22 @@
 import { ToolOutputType, ToolType } from '../../tool';
-import { BaseMondayApiTool } from './base-monday-api-tool';
+import { BaseMondayApiTool, createMondayApiAnnotations } from './base-monday-api-tool';
 
 export class GetInstructionsToCreateLiveWorkflowTool extends BaseMondayApiTool<Record<string, never>> {
-  name = 'get_instructions_to_create_live_workflow';
+  name = 'create_live_workflow_instructions';
   type = ToolType.READ;
+  annotations = createMondayApiAnnotations({
+    title: 'Get Workflow Creation Instructions',
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+  });
 
   getDescription(): string {
     return `When the user asks to create a workflow, you must use this tool, which provides instructions on how to create a workflow.
     This tool is very important and should be used only when the user asks to create a workflow.
     In general, create live workflows when the user asks you to do something automatically on monday.com items or boards.
     For example: when an item is created, set the status to done`;
-  } 
+  }
 
   getInputSchema(): Record<string, never> {
     return {};
