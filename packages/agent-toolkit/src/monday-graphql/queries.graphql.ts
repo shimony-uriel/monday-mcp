@@ -21,6 +21,36 @@ export const getBoardItemsByName = gql`
   }
 `;
 
+export const getAllBoardItems = gql`
+  query GetAllBoardItems($boardId: ID!) {
+    boards(ids: [$boardId]) {
+      items_page {
+        items {
+          id
+          name
+        }
+      }
+    }
+  }
+`;
+
+export const getBoardItemsWithColumns = gql`
+  query GetBoardItemsWithColumns($boardId: ID!) {
+    boards(ids: [$boardId]) {
+      items_page {
+        items {
+          id
+          name
+          column_values {
+            id
+            value
+          }
+        }
+      }
+    }
+  }
+`;
+
 export const createItem = gql`
   mutation createItem($boardId: ID!, $itemName: String!, $groupId: String, $columnValues: JSON) {
     create_item(board_id: $boardId, item_name: $itemName, group_id: $groupId, column_values: $columnValues) {
@@ -57,6 +87,16 @@ export const getBoardSchema = gql`
 export const getUsersByName = gql`
   query getUsersByName($name: String) {
     users(name: $name) {
+      id
+      name
+      title
+    }
+  }
+`;
+
+export const getUsersByIds = gql`
+  query GetUsersByIds($ids: [ID!]!) {
+    users(ids: $ids) {
       id
       name
       title
@@ -556,6 +596,40 @@ export const getWorkspaceInfo = gql`
     folders(workspace_ids: [$workspace_id], limit: 100) {
       id
       name
+    }
+  }
+`;
+
+export const getSprints = gql`
+  query GetSprints($sprintIds: [ID!]!) {
+    sprints(ids: $sprintIds) {
+      id
+      name
+      start_date
+      end_date
+      state
+      timeline {
+        from
+        to
+      }
+      snapshots(type: [START, COMPLETE]) {
+        id
+        type
+        items {
+          id
+          column_values {
+            id
+            type
+            value
+          }
+        }
+        columns_metadata {
+          id
+          done_status_indexes
+        }
+        created_at
+        updated_at
+      }
     }
   }
 `;
