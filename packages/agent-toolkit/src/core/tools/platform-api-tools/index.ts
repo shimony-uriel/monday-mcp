@@ -24,6 +24,9 @@ import { ReadDocsTool } from './read-docs-tool';
 import { WorkspaceInfoTool } from './workspace-info-tool/workspace-info-tool';
 import { ListWorkspaceTool } from './list-workspace-tool/list-workspace-tool';
 import { CreateDocTool } from './create-doc-tool';
+import { CreateDashboardTool } from './dashboard-tools/create-dashboard-tool';
+import { AllWidgetsSchemaTool } from './dashboard-tools/all-widgets-schema-tool';
+import { CreateWidgetTool } from './dashboard-tools/create-widget-tool';
 
 export const allGraphqlApiTools: BaseMondayApiToolConstructor[] = [
   DeleteItemTool,
@@ -51,6 +54,10 @@ export const allGraphqlApiTools: BaseMondayApiToolConstructor[] = [
   WorkspaceInfoTool,
   ListWorkspaceTool,
   CreateDocTool,
+  // Dashboard Tools
+  CreateDashboardTool,
+  AllWidgetsSchemaTool,
+  CreateWidgetTool,
 ];
 
 export * from './all-monday-api-tool';
@@ -79,3 +86,5 @@ export * from './list-workspace-tool/list-workspace-tool';
 export * from './create-doc-tool';
 export * from './get-board-activity/get-board-activity-tool';
 export * from './get-board-info/get-board-info-tool';
+// Dashboard Tools
+export * from './dashboard-tools';
