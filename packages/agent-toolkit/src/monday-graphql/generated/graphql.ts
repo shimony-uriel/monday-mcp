@@ -333,6 +333,112 @@ export type AppFeatureType = {
   updated_at?: Maybe<Scalars['Date']['output']>;
 };
 
+/** The type of the app feature. */
+export enum AppFeatureTypeE {
+  /** ACCOUNT_SETTINGS_VIEW */
+  AccountSettingsView = 'ACCOUNT_SETTINGS_VIEW',
+  /** ADMIN_VIEW */
+  AdminView = 'ADMIN_VIEW',
+  /** AI */
+  Ai = 'AI',
+  /** AI_AGENT */
+  AiAgent = 'AI_AGENT',
+  /** AI_AGENT_SKILL */
+  AiAgentSkill = 'AI_AGENT_SKILL',
+  /** AI_BOARD_MAIN_MENU_HEADER */
+  AiBoardMainMenuHeader = 'AI_BOARD_MAIN_MENU_HEADER',
+  /** AI_DOC_CONTEXTUAL_MENU */
+  AiDocContextualMenu = 'AI_DOC_CONTEXTUAL_MENU',
+  /** AI_DOC_QUICK_START */
+  AiDocQuickStart = 'AI_DOC_QUICK_START',
+  /** AI_DOC_SLASH_COMMAND */
+  AiDocSlashCommand = 'AI_DOC_SLASH_COMMAND',
+  /** AI_DOC_TOP_BAR */
+  AiDocTopBar = 'AI_DOC_TOP_BAR',
+  /** AI_EMAILS_AND_ACTIVITIES_HEADER_ACTIONS */
+  AiEmailsAndActivitiesHeaderActions = 'AI_EMAILS_AND_ACTIVITIES_HEADER_ACTIONS',
+  /** AI_FORMULA */
+  AiFormula = 'AI_FORMULA',
+  /** AI_IC_ASSISTANT_HELP_CENTER */
+  AiIcAssistantHelpCenter = 'AI_IC_ASSISTANT_HELP_CENTER',
+  /** AI_ITEM_EMAILS_AND_ACTIVITIES_ACTIONS */
+  AiItemEmailsAndActivitiesActions = 'AI_ITEM_EMAILS_AND_ACTIVITIES_ACTIONS',
+  /** AI_ITEM_UPDATE_ACTIONS */
+  AiItemUpdateActions = 'AI_ITEM_UPDATE_ACTIONS',
+  /** APP_WIZARD */
+  AppWizard = 'APP_WIZARD',
+  /** BLOCK */
+  Block = 'BLOCK',
+  /** BOARD_COLUMN_ACTION */
+  BoardColumnAction = 'BOARD_COLUMN_ACTION',
+  /** BOARD_COLUMN_EXTENSION */
+  BoardColumnExtension = 'BOARD_COLUMN_EXTENSION',
+  /** BOARD_HEADER_ACTION */
+  BoardHeaderAction = 'BOARD_HEADER_ACTION',
+  /** BOARD_VIEW */
+  BoardView = 'BOARD_VIEW',
+  /** COLUMN */
+  Column = 'COLUMN',
+  /** COLUMN_TEMPLATE */
+  ColumnTemplate = 'COLUMN_TEMPLATE',
+  /** CREDENTIALS */
+  Credentials = 'CREDENTIALS',
+  /** DASHBOARD_WIDGET */
+  DashboardWidget = 'DASHBOARD_WIDGET',
+  /** DATA_ENTITY */
+  DataEntity = 'DATA_ENTITY',
+  /** DIALOG */
+  Dialog = 'DIALOG',
+  /** DIGITAL_WORKER */
+  DigitalWorker = 'DIGITAL_WORKER',
+  /** DOC_ACTIONS */
+  DocActions = 'DOC_ACTIONS',
+  /** FIELD_TYPE */
+  FieldType = 'FIELD_TYPE',
+  /** GROUP_MENU_ACTION */
+  GroupMenuAction = 'GROUP_MENU_ACTION',
+  /** GROWTH_CONFIG */
+  GrowthConfig = 'GROWTH_CONFIG',
+  /** INTEGRATION */
+  Integration = 'INTEGRATION',
+  /** ITEM_BATCH_ACTION */
+  ItemBatchAction = 'ITEM_BATCH_ACTION',
+  /** ITEM_MENU_ACTION */
+  ItemMenuAction = 'ITEM_MENU_ACTION',
+  /** ITEM_VIEW */
+  ItemView = 'ITEM_VIEW',
+  /** MODAL */
+  Modal = 'MODAL',
+  /** NOTIFICATION_KIND */
+  NotificationKind = 'NOTIFICATION_KIND',
+  /** NOTIFICATION_SETTING_KIND */
+  NotificationSettingKind = 'NOTIFICATION_SETTING_KIND',
+  /** OAUTH */
+  Oauth = 'OAUTH',
+  /** OBJECT */
+  Object = 'OBJECT',
+  /** PACKAGED_BLOCK */
+  PackagedBlock = 'PACKAGED_BLOCK',
+  /** PRODUCT */
+  Product = 'PRODUCT',
+  /** PRODUCT_VIEW */
+  ProductView = 'PRODUCT_VIEW',
+  /** SOLUTION */
+  Solution = 'SOLUTION',
+  /** SUB_WORKFLOW */
+  SubWorkflow = 'SUB_WORKFLOW',
+  /** SURFACE_VIEW */
+  SurfaceView = 'SURFACE_VIEW',
+  /** SYNCABLE_RESOURCE */
+  SyncableResource = 'SYNCABLE_RESOURCE',
+  /** TOPBAR */
+  Topbar = 'TOPBAR',
+  /** WORKFLOW_TEMPLATE */
+  WorkflowTemplate = 'WORKFLOW_TEMPLATE',
+  /** WORKSPACE_VIEW */
+  WorkspaceView = 'WORKSPACE_VIEW'
+}
+
 /** An app install details. */
 export type AppInstall = {
   __typename?: 'AppInstall';
@@ -1583,11 +1689,13 @@ export type CreateFavoriteInput = {
   object: HierarchyObjectIdInputType;
 };
 
-/** Result type for adding an object to a personal list */
+/** Represents the response when adding an object to a list */
 export type CreateFavoriteResultType = {
   __typename?: 'CreateFavoriteResultType';
-  /** The added object hierarchy item */
-  favorites?: Maybe<HierarchyObjectItem>;
+  /** The favorite item that was created */
+  favorite?: Maybe<GraphqlHierarchyObjectItem>;
+  /** If the object that was created is a folder, this is extra data about the folder */
+  folder?: Maybe<GraphqlFolder>;
 };
 
 export type CreateFormTagInput = {
@@ -3170,6 +3278,52 @@ export type GrantMarketplaceAppDiscountResult = {
   granted_discount: GrantMarketplaceAppDiscount;
 };
 
+/** Represents a folder in the hierarchy */
+export type GraphqlFolder = {
+  __typename?: 'GraphqlFolder';
+  /** The account identifier this folder belongs to */
+  accountId?: Maybe<Scalars['ID']['output']>;
+  /** The timestamp when this folder was created */
+  createdAt?: Maybe<Scalars['Date']['output']>;
+  /** The user who created this folder */
+  createdBy?: Maybe<Scalars['ID']['output']>;
+  /** The unique identifier of the folder */
+  id?: Maybe<Scalars['ID']['output']>;
+  /** The name of the folder */
+  name?: Maybe<Scalars['String']['output']>;
+  /** The timestamp when this folder was last updated */
+  updatedAt?: Maybe<Scalars['Date']['output']>;
+};
+
+/** Represents an item in favorites */
+export type GraphqlHierarchyObjectItem = {
+  __typename?: 'GraphqlHierarchyObjectItem';
+  /** The account identifier this item belongs to */
+  accountId?: Maybe<Scalars['ID']['output']>;
+  /** The timestamp when this item was created */
+  createdAt?: Maybe<Scalars['Date']['output']>;
+  /** The folder identifier if the item is contained within a folder */
+  folderId?: Maybe<Scalars['ID']['output']>;
+  /** The unique identifier of the hierarchy item */
+  id?: Maybe<Scalars['ID']['output']>;
+  /** The object identifier and type */
+  object?: Maybe<HierarchyObjectId>;
+  /** The position of the item within its list or folder */
+  position?: Maybe<Scalars['Float']['output']>;
+  /** The timestamp when this item was last updated */
+  updatedAt?: Maybe<Scalars['Date']['output']>;
+};
+
+/** Represents a monday object. */
+export enum GraphqlMondayObject {
+  /** A monday.com board */
+  Board = 'Board',
+  /** Aggregates data from one or more boards. */
+  Dashboard = 'Dashboard',
+  /** A monday.com folder */
+  Folder = 'Folder'
+}
+
 /** A group of items in a board. */
 export type Group = {
   __typename?: 'Group';
@@ -3266,7 +3420,7 @@ export type HierarchyObjectId = {
   /** The unique identifier of the object */
   id?: Maybe<Scalars['ID']['output']>;
   /** The type of the object */
-  type?: Maybe<ObjectType>;
+  type?: Maybe<GraphqlMondayObject>;
 };
 
 /** Input type for identifying a favorites object by its ID and type */
@@ -3274,28 +3428,7 @@ export type HierarchyObjectIdInputType = {
   /** The ID of the object */
   id: Scalars['ID']['input'];
   /** The type of the object */
-  type: ObjectType;
-};
-
-/** Represents an item in the object hierarchy */
-export type HierarchyObjectItem = {
-  __typename?: 'HierarchyObjectItem';
-  /** The account identifier this item belongs to */
-  accountId?: Maybe<Scalars['Int']['output']>;
-  /** The timestamp when this item was created */
-  createdAt?: Maybe<Scalars['Date']['output']>;
-  /** The folder identifier if the item is contained within a folder */
-  folderId?: Maybe<Scalars['ID']['output']>;
-  /** The list identifier and type */
-  hierarchyListData?: Maybe<ListId>;
-  /** The unique identifier of the hierarchy item */
-  id?: Maybe<Scalars['ID']['output']>;
-  /** The object identifier and type */
-  object?: Maybe<HierarchyObjectId>;
-  /** The position of the item within its list or folder */
-  position?: Maybe<Scalars['Float']['output']>;
-  /** The timestamp when this item was last updated */
-  updatedAt?: Maybe<Scalars['Date']['output']>;
+  type: GraphqlMondayObject;
 };
 
 export enum HostType {
@@ -3519,7 +3652,7 @@ export type ItemIdValue = ColumnValue & {
   value?: Maybe<Scalars['JSON']['output']>;
 };
 
-/** The direction to order the items by */
+/** Sort direction */
 export enum ItemsOrderByDirection {
   /** Ascending order */
   Asc = 'asc',
@@ -3537,9 +3670,9 @@ export type ItemsPageByColumnValuesQuery = {
 export type ItemsQuery = {
   /** A list of rule groups */
   groups?: InputMaybe<Array<ItemsQueryGroup>>;
-  /** A list of item IDs to fetch. Use this to fetch a specific set of items by their IDs. Max: 100 IDs */
+  /** A list of item IDs to fetch. Use this to fetch a specific set of items by their IDs. Limited to 100 IDs in ItemsQuery */
   ids?: InputMaybe<Array<Scalars['ID']['input']>>;
-  /** The operator to use for the query rules or rule groups */
+  /** The operator to use for the query rules or rule groups. Default: AND */
   operator?: InputMaybe<ItemsQueryOperator>;
   /** Sort the results by specified columns */
   order_by?: InputMaybe<Array<ItemsQueryOrderBy>>;
@@ -3551,13 +3684,13 @@ export type ItemsQuery = {
 export type ItemsQueryGroup = {
   /** A list of rule groups */
   groups?: InputMaybe<Array<ItemsQueryGroup>>;
-  /** The operator to use for the query rules or rule groups */
+  /** The operator to use for the query rules or rule groups. Default: AND */
   operator?: InputMaybe<ItemsQueryOperator>;
   /** A list of rules */
   rules?: InputMaybe<Array<ItemsQueryRule>>;
 };
 
-/** The condition between the query rules */
+/** Logical operator */
 export enum ItemsQueryOperator {
   /** Logical AND */
   And = 'and',
@@ -3580,7 +3713,7 @@ export type ItemsQueryRule = {
   operator?: InputMaybe<ItemsQueryRuleOperator>;
 };
 
-/** The operator to use for the value comparison */
+/** Rule operator */
 export enum ItemsQueryRuleOperator {
   /** Any of the values */
   AnyOf = 'any_of',
@@ -3612,7 +3745,7 @@ export enum ItemsQueryRuleOperator {
   StartsWith = 'starts_with',
   /** Within the last */
   WithinTheLast = 'within_the_last',
-  /** Within the next  */
+  /** Within the next */
   WithinTheNext = 'within_the_next'
 }
 
@@ -3763,25 +3896,6 @@ export type ListBlockInput = {
   /** The parent block id to append the created block under. */
   parent_block_id?: InputMaybe<Scalars['String']['input']>;
 };
-
-/** Represents a list identifier with its type in the hierarchy */
-export type ListId = {
-  __typename?: 'ListID';
-  /** The unique identifier of the list */
-  id?: Maybe<Scalars['ID']['output']>;
-  /** The type of the list */
-  type?: Maybe<ListType>;
-};
-
-/** Types of lists in hierarchyMS */
-export enum ListType {
-  /** A customized list with specific settings */
-  CustomizedList = 'CustomizedList',
-  /** A personal list owned by a user */
-  PersonalList = 'PersonalList',
-  /** A workspace-level list */
-  Workspace = 'Workspace'
-}
 
 export type LocationValue = ColumnValue & {
   __typename?: 'LocationValue';
@@ -4082,6 +4196,8 @@ export type Mutation = {
   complexity?: Maybe<Complexity>;
   /** Connect project to portfolio */
   connect_project_to_portfolio?: Maybe<ConnectProjectResult>;
+  /** Create a new app feature. */
+  create_app_feature?: Maybe<AppFeatureType>;
   /** Create a new board. */
   create_board?: Maybe<Board>;
   /** Generic mutation for creating any column type with validation. Supports creating column with properties like title, description, and type-specific defaults/settings. The mutation validates input against the column type's schema before applying changes. Use get_column_type_schema query to understand available properties for each column type. */
@@ -4274,6 +4390,8 @@ export type Mutation = {
   update_mute_board_settings?: Maybe<Array<BoardMuteSettings>>;
   /** Updates a notification setting's enabled status. */
   update_notification_setting?: Maybe<Array<NotificationSetting>>;
+  /** Update the position of a dashboard. */
+  update_overview_hierarchy?: Maybe<UpdateOverviewHierarchy>;
   /** Updates a status column's properties including title, description, and status label settings. Status columns allow users to track item progress through customizable labels (e.g., "Working on it", "Done", "Stuck"). This mutation is specifically for status/color columns and provides type-safe updates. */
   update_status_column?: Maybe<Column>;
   /** Update managed column of type status mutation. */
@@ -4492,6 +4610,18 @@ export type MutationConnect_Project_To_PortfolioArgs = {
 
 
 /** Root mutation type for the Dependencies service */
+export type MutationCreate_App_FeatureArgs = {
+  app_id: Scalars['ID']['input'];
+  app_version_id?: InputMaybe<Scalars['ID']['input']>;
+  data?: InputMaybe<Scalars['JSON']['input']>;
+  deployment?: InputMaybe<AppFeatureReleaseInput>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  slug: Scalars['String']['input'];
+  type: AppFeatureTypeE;
+};
+
+
+/** Root mutation type for the Dependencies service */
 export type MutationCreate_BoardArgs = {
   board_kind: BoardKind;
   board_name: Scalars['String']['input'];
@@ -4608,9 +4738,7 @@ export type MutationCreate_FormArgs = {
   destination_folder_id?: InputMaybe<Scalars['Float']['input']>;
   destination_folder_name?: InputMaybe<Scalars['String']['input']>;
   destination_name?: InputMaybe<Scalars['String']['input']>;
-  destination_workspace_id?: InputMaybe<Scalars['Float']['input']>;
-  entity_names_mapping?: InputMaybe<Scalars['String']['input']>;
-  skip_target_folder_creation?: InputMaybe<Scalars['Boolean']['input']>;
+  destination_workspace_id: Scalars['Float']['input'];
 };
 
 
@@ -4776,6 +4904,7 @@ export type MutationCreate_WebhookArgs = {
 
 /** Root mutation type for the Dependencies service */
 export type MutationCreate_WidgetArgs = {
+  filter?: InputMaybe<ItemsQueryGroup>;
   kind: ExternalWidget;
   name: Scalars['String']['input'];
   parent: WidgetParentInput;
@@ -5322,6 +5451,13 @@ export type MutationUpdate_Notification_SettingArgs = {
 
 
 /** Root mutation type for the Dependencies service */
+export type MutationUpdate_Overview_HierarchyArgs = {
+  attributes: UpdateOverviewHierarchyAttributesInput;
+  overview_id: Scalars['ID']['input'];
+};
+
+
+/** Root mutation type for the Dependencies service */
 export type MutationUpdate_Status_ColumnArgs = {
   board_id: Scalars['ID']['input'];
   capabilities?: InputMaybe<StatusColumnCapabilitiesInput>;
@@ -5563,6 +5699,29 @@ export type OutOfOffice = {
   start_date?: Maybe<Scalars['Date']['output']>;
   /** Out of office type. */
   type?: Maybe<Scalars['String']['output']>;
+};
+
+/** A monday.com overview. */
+export type Overview = {
+  __typename?: 'Overview';
+  /** The time the overview was created at. */
+  created_at?: Maybe<Scalars['ISO8601DateTime']['output']>;
+  /** The creator of the overview. */
+  creator: User;
+  /** The overview's folder unique identifier. */
+  folder_id?: Maybe<Scalars['ID']['output']>;
+  /** The unique identifier of the overview. */
+  id: Scalars['ID']['output'];
+  /** The overview's kind (public/private). */
+  kind?: Maybe<Scalars['String']['output']>;
+  /** The overview's name. */
+  name: Scalars['String']['output'];
+  /** The overview's state. */
+  state: Scalars['String']['output'];
+  /** The last time the overview was updated at. */
+  updated_at?: Maybe<Scalars['ISO8601DateTime']['output']>;
+  /** The overview's workspace unique identifier. */
+  workspace_id?: Maybe<Scalars['ID']['output']>;
 };
 
 /** Input for creating page break blocks */
@@ -5908,7 +6067,7 @@ export type Query = {
   /** Export the dependency graph for a specific board */
   export_graph?: Maybe<BoardGraphExport>;
   /** Get all personal list items by list ID */
-  favorites?: Maybe<Array<HierarchyObjectItem>>;
+  favorites?: Maybe<Array<GraphqlHierarchyObjectItem>>;
   /** Get a collection of folders. Note: This query won't return folders from closed workspaces to which you are not subscribed */
   folders?: Maybe<Array<Maybe<Folder>>>;
   /** Fetch a form by its token. The returned form includes all the details of the form such as its settings, questions, title, etc. Use this endpoint when you need to retrieve complete form data for display or processing. Requires that the requesting user has read access to the associated board. */
@@ -6282,6 +6441,7 @@ export type QueryTeamsArgs = {
 /** Root query type for the Dependencies service */
 export type QueryTimelineArgs = {
   id: Scalars['ID']['input'];
+  skipConnectedItems?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 
@@ -6468,10 +6628,8 @@ export type ResponseForm = {
   active: Scalars['Boolean']['output'];
   /** Object containing visual styling settings including colors, fonts, layout, and branding. */
   appearance?: Maybe<FormAppearance>;
-  /** Boolean indicating if this form was built or modified using AI functionality. */
+  /** Boolean indicating if this form was built using monday’s AI form builder agent. */
   builtWithAI: Scalars['Boolean']['output'];
-  /** Boolean indicating if this form was initially created using AI assistance. */
-  createWithAI: Scalars['Boolean']['output'];
   /** Optional detailed description explaining the form purpose, displayed below the title. */
   description?: Maybe<Scalars['String']['output']>;
   /** Object containing feature toggles and settings like password protection, response limits, etc. */
@@ -6480,8 +6638,6 @@ export type ResponseForm = {
   id: Scalars['Int']['output'];
   /** Boolean indicating if responses are collected without identifying the submitter. */
   isAnonymous: Scalars['Boolean']['output'];
-  /** Boolean flag indicating if the form has been flagged for review due to suspicious content or activity. */
-  isSuspicious: Scalars['Boolean']['output'];
   /** The ID of the user who created and owns this form. Determines permissions. */
   ownerId?: Maybe<Scalars['Int']['output']>;
   /** Array of question objects that make up the form content, in display order. */
@@ -7367,10 +7523,11 @@ export type UpdateEmailDomainResult = {
   updated_users?: Maybe<Array<User>>;
 };
 
+/** Represents the response when adding an object to a list */
 export type UpdateFavoriteResultType = {
   __typename?: 'UpdateFavoriteResultType';
-  /** The updated favorite's object */
-  favorites?: Maybe<HierarchyObjectItem>;
+  /** The favorite item that its position was updated */
+  favorite?: Maybe<GraphqlHierarchyObjectItem>;
 };
 
 export type UpdateFormInput = {
@@ -7403,12 +7560,35 @@ export type UpdateMention = {
 };
 
 export type UpdateObjectHierarchyPositionInput = {
-  /** The new folder ID to move the object to */
+  /** The new folder ID to move the object to, if necessary */
   newFolder?: InputMaybe<Scalars['ID']['input']>;
   /** The new position for the object */
   newPosition?: InputMaybe<ObjectDynamicPositionInput>;
   /** The favorite's object to update */
   object: HierarchyObjectIdInputType;
+};
+
+/** Result type for updating an overview's hierarchy */
+export type UpdateOverviewHierarchy = {
+  __typename?: 'UpdateOverviewHierarchy';
+  /** Message about the operation result */
+  message: Scalars['String']['output'];
+  /** The updated overview */
+  overview?: Maybe<Overview>;
+  /** Whether the operation was successful */
+  success: Scalars['Boolean']['output'];
+};
+
+/** Attributes for updating an overview's hierarchy and location */
+export type UpdateOverviewHierarchyAttributesInput = {
+  /** The ID of the account product where the overview should be placed */
+  account_product_id?: InputMaybe<Scalars['ID']['input']>;
+  /** The ID of the folder where the overview should be placed */
+  folder_id?: InputMaybe<Scalars['ID']['input']>;
+  /** The position of the overview in the left pane */
+  position?: InputMaybe<DynamicPosition>;
+  /** The ID of the workspace where the overview should be placed */
+  workspace_id?: InputMaybe<Scalars['ID']['input']>;
 };
 
 /** The pin to top data of the update. */
@@ -8256,6 +8436,32 @@ export enum __TypeKind {
   NonNull = 'NON_NULL'
 }
 
+export type CreateDashboardMutationVariables = Exact<{
+  name: Scalars['String']['input'];
+  workspace_id: Scalars['Int']['input'];
+  board_ids: Array<Scalars['String']['input']> | Scalars['String']['input'];
+  kind?: InputMaybe<DashboardKind>;
+  board_folder_id?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type CreateDashboardMutation = { __typename?: 'Mutation', create_dashboard?: { __typename?: 'Dashboard', id?: string | null, name?: string | null, workspace_id?: number | null, kind?: DashboardKind | null, board_folder_id?: number | null } | null };
+
+export type GetAllWidgetsSchemaQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetAllWidgetsSchemaQuery = { __typename?: 'Query', all_widgets_schema?: Array<{ __typename?: 'WidgetSchemaInfo', widget_type?: ExternalWidget | null, schema?: any | null }> | null };
+
+export type CreateWidgetMutationVariables = Exact<{
+  parent: WidgetParentInput;
+  kind: ExternalWidget;
+  name: Scalars['String']['input'];
+  settings: Scalars['JSON']['input'];
+}>;
+
+
+export type CreateWidgetMutation = { __typename?: 'Mutation', create_widget?: { __typename?: 'WidgetModel', id?: number | null, name?: string | null, kind?: ExternalWidget | null, parent?: { __typename?: 'WidgetParentOutput', kind?: WidgetParentKind | null, id?: number | null } | null } | null };
+
 export type GetBoardAllActivityQueryVariables = Exact<{
   boardId: Scalars['ID']['input'];
   fromDate: Scalars['ISO8601DateTime']['input'];
@@ -8281,12 +8487,101 @@ export type GetColumnTypeSchemaQueryVariables = Exact<{
 
 export type GetColumnTypeSchemaQuery = { __typename?: 'Query', get_column_type_schema?: any | null };
 
+export type UserDetailsFragment = { __typename?: 'User', id: string, name: string, title?: string | null, email: string, enabled: boolean, is_admin?: boolean | null, is_guest?: boolean | null, is_pending?: boolean | null, is_verified?: boolean | null, is_view_only?: boolean | null, join_date?: any | null, last_activity?: any | null, location?: string | null, mobile_phone?: string | null, phone?: string | null, photo_thumb?: string | null, time_zone_identifier?: string | null, utc_hours_diff?: number | null };
+
+export type UserTeamMembershipFragment = { __typename?: 'Team', id: string, name: string, is_guest?: boolean | null, picture_url?: string | null };
+
+export type TeamBasicInfoFragment = { __typename?: 'Team', id: string, name: string };
+
+export type TeamExtendedInfoFragment = { __typename?: 'Team', is_guest?: boolean | null, picture_url?: string | null, id: string, name: string };
+
+export type TeamOwnerFragment = { __typename?: 'User', id: string, name: string, email: string };
+
+export type TeamMemberFragment = { __typename?: 'User', id: string, name: string, email: string, title?: string | null, is_admin?: boolean | null, is_guest?: boolean | null, is_pending?: boolean | null, is_verified?: boolean | null, is_view_only?: boolean | null, join_date?: any | null, last_activity?: any | null, location?: string | null, mobile_phone?: string | null, phone?: string | null, photo_thumb?: string | null, time_zone_identifier?: string | null, utc_hours_diff?: number | null };
+
+export type TeamMemberSimplifiedFragment = { __typename?: 'User', id: string, name: string, email: string, title?: string | null, is_admin?: boolean | null, is_guest?: boolean | null };
+
+export type UserTeamMembershipSimplifiedFragment = { __typename?: 'Team', id: string, name: string, is_guest?: boolean | null };
+
+export type ListUsersWithTeamsQueryVariables = Exact<{
+  userIds?: InputMaybe<Array<Scalars['ID']['input']> | Scalars['ID']['input']>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type ListUsersWithTeamsQuery = { __typename?: 'Query', users?: Array<{ __typename?: 'User', id: string, name: string, title?: string | null, email: string, enabled: boolean, is_admin?: boolean | null, is_guest?: boolean | null, is_pending?: boolean | null, is_verified?: boolean | null, is_view_only?: boolean | null, join_date?: any | null, last_activity?: any | null, location?: string | null, mobile_phone?: string | null, phone?: string | null, photo_thumb?: string | null, time_zone_identifier?: string | null, utc_hours_diff?: number | null, teams?: Array<{ __typename?: 'Team', id: string, name: string, is_guest?: boolean | null, picture_url?: string | null } | null> | null } | null> | null };
+
+export type ListUsersOnlyQueryVariables = Exact<{
+  userIds?: InputMaybe<Array<Scalars['ID']['input']> | Scalars['ID']['input']>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type ListUsersOnlyQuery = { __typename?: 'Query', users?: Array<{ __typename?: 'User', id: string, name: string, title?: string | null, email: string, enabled: boolean, is_admin?: boolean | null, is_guest?: boolean | null, is_pending?: boolean | null, is_verified?: boolean | null, is_view_only?: boolean | null, join_date?: any | null, last_activity?: any | null, location?: string | null, mobile_phone?: string | null, phone?: string | null, photo_thumb?: string | null, time_zone_identifier?: string | null, utc_hours_diff?: number | null, teams?: Array<{ __typename?: 'Team', id: string, name: string, is_guest?: boolean | null, picture_url?: string | null } | null> | null } | null> | null };
+
+export type ListUsersAndTeamsQueryVariables = Exact<{
+  userIds?: InputMaybe<Array<Scalars['ID']['input']> | Scalars['ID']['input']>;
+  teamIds?: InputMaybe<Array<Scalars['ID']['input']> | Scalars['ID']['input']>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type ListUsersAndTeamsQuery = { __typename?: 'Query', users?: Array<{ __typename?: 'User', id: string, name: string, title?: string | null, email: string, enabled: boolean, is_admin?: boolean | null, is_guest?: boolean | null, is_pending?: boolean | null, is_verified?: boolean | null, is_view_only?: boolean | null, join_date?: any | null, last_activity?: any | null, location?: string | null, mobile_phone?: string | null, phone?: string | null, photo_thumb?: string | null, time_zone_identifier?: string | null, utc_hours_diff?: number | null, teams?: Array<{ __typename?: 'Team', id: string, name: string, is_guest?: boolean | null } | null> | null } | null> | null, teams?: Array<{ __typename?: 'Team', is_guest?: boolean | null, picture_url?: string | null, id: string, name: string, owners: Array<{ __typename?: 'User', id: string, name: string, email: string }>, users?: Array<{ __typename?: 'User', id: string, name: string, email: string, title?: string | null, is_admin?: boolean | null, is_guest?: boolean | null } | null> | null } | null> | null };
+
+export type ListTeamsOnlyQueryVariables = Exact<{
+  teamIds?: InputMaybe<Array<Scalars['ID']['input']> | Scalars['ID']['input']>;
+}>;
+
+
+export type ListTeamsOnlyQuery = { __typename?: 'Query', teams?: Array<{ __typename?: 'Team', id: string, name: string } | null> | null };
+
+export type ListTeamsWithMembersQueryVariables = Exact<{
+  teamIds?: InputMaybe<Array<Scalars['ID']['input']> | Scalars['ID']['input']>;
+}>;
+
+
+export type ListTeamsWithMembersQuery = { __typename?: 'Query', teams?: Array<{ __typename?: 'Team', is_guest?: boolean | null, picture_url?: string | null, id: string, name: string, owners: Array<{ __typename?: 'User', id: string, name: string, email: string }>, users?: Array<{ __typename?: 'User', id: string, name: string, email: string, title?: string | null, is_admin?: boolean | null, is_guest?: boolean | null, is_pending?: boolean | null, is_verified?: boolean | null, is_view_only?: boolean | null, join_date?: any | null, last_activity?: any | null, location?: string | null, mobile_phone?: string | null, phone?: string | null, photo_thumb?: string | null, time_zone_identifier?: string | null, utc_hours_diff?: number | null } | null> | null } | null> | null };
+
+export type GetUserByNameQueryVariables = Exact<{
+  name?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type GetUserByNameQuery = { __typename?: 'Query', users?: Array<{ __typename?: 'User', id: string, name: string, title?: string | null, email: string, enabled: boolean, is_admin?: boolean | null, is_guest?: boolean | null, is_pending?: boolean | null, is_verified?: boolean | null, is_view_only?: boolean | null, join_date?: any | null, last_activity?: any | null, location?: string | null, mobile_phone?: string | null, phone?: string | null, photo_thumb?: string | null, time_zone_identifier?: string | null, utc_hours_diff?: number | null, teams?: Array<{ __typename?: 'Team', id: string, name: string, is_guest?: boolean | null, picture_url?: string | null } | null> | null } | null> | null };
+
+export type GetCurrentUserQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetCurrentUserQuery = { __typename?: 'Query', me?: { __typename?: 'User', id: string, name: string, title?: string | null, enabled: boolean, is_admin?: boolean | null, is_guest?: boolean | null } | null };
+
 export type ListWorkspacesQueryVariables = Exact<{
   limit: Scalars['Int']['input'];
 }>;
 
 
 export type ListWorkspacesQuery = { __typename?: 'Query', workspaces?: Array<{ __typename?: 'Workspace', id?: string | null, name: string, description?: string | null } | null> | null };
+
+export type CreateFormMutationVariables = Exact<{
+  destination_workspace_id: Scalars['Float']['input'];
+  destination_folder_id?: InputMaybe<Scalars['Float']['input']>;
+  destination_folder_name?: InputMaybe<Scalars['String']['input']>;
+  board_kind?: InputMaybe<BoardKind>;
+  destination_name?: InputMaybe<Scalars['String']['input']>;
+  board_owner_ids?: InputMaybe<Array<Scalars['Float']['input']> | Scalars['Float']['input']>;
+  board_owner_team_ids?: InputMaybe<Array<Scalars['Float']['input']> | Scalars['Float']['input']>;
+  board_subscriber_ids?: InputMaybe<Array<Scalars['Float']['input']> | Scalars['Float']['input']>;
+  board_subscriber_teams_ids?: InputMaybe<Array<Scalars['Float']['input']> | Scalars['Float']['input']>;
+}>;
+
+
+export type CreateFormMutation = { __typename?: 'Mutation', create_form?: { __typename?: 'DehydratedFormResponse', boardId: string, token: string } | null };
+
+export type GetFormQueryVariables = Exact<{
+  formToken: Scalars['String']['input'];
+}>;
+
+
+export type GetFormQuery = { __typename?: 'Query', form?: { __typename?: 'ResponseForm', id: number, token: string, title: string, description?: string | null, active: boolean, ownerId?: number | null, type?: string | null, builtWithAI: boolean, isAnonymous: boolean, questions?: Array<{ __typename?: 'FormQuestion', id: string, type?: FormQuestionType | null, visible: boolean, title: string, description?: string | null, required: boolean, showIfRules?: any | null, options?: Array<{ __typename?: 'FormQuestionOption', label: string }> | null, settings?: { __typename?: 'FormQuestionSettings', prefixAutofilled?: boolean | null, checkedByDefault?: boolean | null, defaultCurrentDate?: boolean | null, includeTime?: boolean | null, display?: FormQuestionSelectDisplay | null, optionsOrder?: FormQuestionSelectOrderByOptions | null, labelLimitCount?: number | null, locationAutofilled?: boolean | null, limit?: number | null, skipValidation?: boolean | null, prefill?: { __typename?: 'PrefillSettings', enabled: boolean, source?: FormQuestionPrefillSources | null, lookup: string } | null, prefixPredefined?: { __typename?: 'PhonePrefixPredefined', enabled: boolean, prefix?: string | null } | null } | null }> | null, features?: { __typename?: 'FormFeatures', isInternal: boolean, reCaptchaChallenge: boolean, shortenedLink?: { __typename?: 'FormShortenedLink', enabled: boolean, url?: string | null } | null, password?: { __typename?: 'FormPassword', enabled: boolean } | null, draftSubmission?: { __typename?: 'FormDraftSubmission', enabled: boolean } | null, requireLogin?: { __typename?: 'FormRequireLogin', enabled: boolean, redirectToLogin: boolean } | null, responseLimit?: { __typename?: 'FormResponseLimit', enabled: boolean, limit?: number | null } | null, closeDate?: { __typename?: 'FormCloseDate', enabled: boolean, date?: string | null } | null, preSubmissionView?: { __typename?: 'FormPreSubmissionView', enabled: boolean, title?: string | null, description?: string | null, startButton?: { __typename?: 'FormStartButton', text?: string | null } | null } | null, afterSubmissionView?: { __typename?: 'FormAfterSubmissionView', title?: string | null, description?: string | null, allowResubmit: boolean, showSuccessImage: boolean, allowEditSubmission: boolean, allowViewSubmission: boolean, redirectAfterSubmission?: { __typename?: 'FormRedirectAfterSubmission', enabled: boolean, redirectUrl?: string | null } | null } | null, monday?: { __typename?: 'FormMonday', itemGroupId?: string | null, includeNameQuestion: boolean, includeUpdateQuestion: boolean, syncQuestionAndColumnsTitles: boolean } | null } | null, appearance?: { __typename?: 'FormAppearance', hideBranding: boolean, showProgressBar: boolean, primaryColor?: string | null, layout?: { __typename?: 'FormLayout', format?: FormFormat | null, alignment?: FormAlignment | null, direction?: FormDirection | null } | null, background?: { __typename?: 'FormBackground', type?: FormBackgrounds | null, value?: string | null } | null, text?: { __typename?: 'FormText', font?: string | null, color?: string | null, size?: FormFontSize | null } | null, logo?: { __typename?: 'FormLogo', position?: FormLogoPosition | null, url?: string | null, size?: FormLogoSize | null } | null, submitButton?: { __typename?: 'FormSubmitButton', text?: string | null } | null } | null, accessibility?: { __typename?: 'FormAccessibility', language?: string | null, logoAltText?: string | null } | null, tags?: Array<{ __typename?: 'FormTag', id: string, name: string, value?: string | null, columnId: string }> | null } | null };
 
 export type DeleteItemMutationVariables = Exact<{
   id: Scalars['ID']['input'];

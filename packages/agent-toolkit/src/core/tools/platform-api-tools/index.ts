@@ -2,6 +2,8 @@ import { AllMondayApiTool } from './all-monday-api-tool';
 import { BaseMondayApiToolConstructor } from './base-monday-api-tool';
 import { ChangeItemColumnValuesTool } from './change-item-column-values-tool';
 import { CreateBoardTool } from './create-board-tool';
+import { CreateFormTool } from './workforms-tools/create-form-tool';
+import { GetFormTool } from './workforms-tools/get-form-tool';
 import { CreateColumnTool } from './create-column-tool';
 import { CreateCustomActivityTool } from './create-custom-activity-tool';
 import { CreateItemTool } from './create-item-tool';
@@ -22,11 +24,15 @@ import { GetUsersTool } from './get-users-tool';
 import { GetUsersByIdsTool } from './get-users-by-ids-tool';
 import { GetSprintsMetadataTool } from './get-sprints-metadata-tool';
 import { GetSprintsDataTool } from './get-sprints-data-tool';
+import { ListUsersAndTeamsTool } from './list-users-and-teams-tool/list-users-and-teams-tool';
 import { MoveItemToGroupTool } from './move-item-to-group-tool';
 import { ReadDocsTool } from './read-docs-tool';
 import { WorkspaceInfoTool } from './workspace-info-tool/workspace-info-tool';
 import { ListWorkspaceTool } from './list-workspace-tool/list-workspace-tool';
 import { CreateDocTool } from './create-doc-tool';
+import { CreateDashboardTool } from './dashboard-tools/create-dashboard-tool';
+import { AllWidgetsSchemaTool } from './dashboard-tools/all-widgets-schema-tool';
+import { CreateWidgetTool } from './dashboard-tools/create-widget-tool';
 
 export const allGraphqlApiTools: BaseMondayApiToolConstructor[] = [
   DeleteItemTool,
@@ -40,9 +46,12 @@ export const allGraphqlApiTools: BaseMondayApiToolConstructor[] = [
   GetUsersByIdsTool,
   GetSprintsMetadataTool,
   GetSprintsDataTool,
+  ListUsersAndTeamsTool,
   ChangeItemColumnValuesTool,
   MoveItemToGroupTool,
   CreateBoardTool,
+  CreateFormTool,
+  GetFormTool,
   CreateColumnTool,
   DeleteColumnTool,
   AllMondayApiTool,
@@ -57,11 +66,17 @@ export const allGraphqlApiTools: BaseMondayApiToolConstructor[] = [
   WorkspaceInfoTool,
   ListWorkspaceTool,
   CreateDocTool,
+  // Dashboard Tools
+  CreateDashboardTool,
+  AllWidgetsSchemaTool,
+  CreateWidgetTool,
 ];
 
 export * from './all-monday-api-tool';
 export * from './change-item-column-values-tool';
 export * from './create-board-tool';
+export * from './workforms-tools/create-form-tool';
+export * from './workforms-tools/get-form-tool';
 export * from './create-column-tool';
 export * from './create-custom-activity-tool';
 export * from './create-item-tool';
@@ -79,6 +94,7 @@ export * from './get-sprints-data-tool';
 export * from './get-type-details-tool';
 export * from './get-users-tool';
 export * from './get-users-by-ids-tool';
+export * from './list-users-and-teams-tool/list-users-and-teams-tool';
 export * from './manage-tools-tool';
 export * from './move-item-to-group-tool';
 export * from './create-workflow-instructions-tool';
@@ -88,3 +104,5 @@ export * from './list-workspace-tool/list-workspace-tool';
 export * from './create-doc-tool';
 export * from './get-board-activity/get-board-activity-tool';
 export * from './get-board-info/get-board-info-tool';
+// Dashboard Tools
+export * from './dashboard-tools';

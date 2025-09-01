@@ -301,6 +301,9 @@ type Query {
   timeline(
     """The id of the item"""
     id: ID!
+
+    """Whether to skip connected items"""
+    skipConnectedItems: Boolean
   ): TimelineResponse
 
   """Get managed column data."""
@@ -337,7 +340,7 @@ type Query {
   ): BoardGraphExport
 
   """Get all personal list items by list ID"""
-  favorites: [HierarchyObjectItem!]
+  favorites: [GraphqlHierarchyObjectItem!]
   marketplace_app_discounts(
     """The id of an app"""
     app_id: ID!
@@ -1429,6 +1432,38 @@ type Mutation {
     id: ID!
   ): AppFeatureType
 
+  """Create a new app feature."""
+  create_app_feature(
+    """
+    The name of the app feature. If not provided, a default name will be used.
+    """
+    name: String
+
+    """The unique slug identifier for the app feature."""
+    slug: String!
+
+    """The ID of the app to create the app feature for."""
+    app_id: ID!
+
+    """
+    The ID of the app version to create the app feature for. If not provided, the latest draft version will be used.
+    """
+    app_version_id: ID
+
+    """The type of the app feature to create."""
+    type: AppFeatureTypeE!
+
+    """
+    The app feature data to update. This structure is dynamic and depends on the different app feature types.
+    """
+    data: JSON
+
+    """
+    The deployment data for the app feature. https://developer.monday.com/apps/docs/deploy-your-app
+    """
+    deployment: AppFeatureReleaseInput
+  ): AppFeatureType
+
   """Add a file to a column value."""
   add_file_to_column(
     """The column to add the file to."""
@@ -2214,6 +2249,15 @@ type Mutation {
     new_value: String!
   ): Group
 
+  """Update the position of a dashboard."""
+  update_overview_hierarchy(
+    """The position and location attributes to update"""
+    attributes: UpdateOverviewHierarchyAttributesInput!
+
+    """The overview's unique identifier"""
+    overview_id: ID!
+  ): UpdateOverviewHierarchy
+
   """Update an existing workspace."""
   update_workspace(
     """The attributes of the workspace to update"""
@@ -2421,6 +2465,11 @@ type Mutation {
     Widget-specific settings as JSON. Each widget type has its own JSON schema that defines the required and optional fields. The settings object must conform to the JSON schema for the specific widget type being created. To discover available widget types and their schemas, use the all_widgets_schema query which returns the complete JSON schema for each supported widget type.
     """
     settings: JSON!
+
+    """
+    WORKS ONLY IN BOARD VIEWS. Optional filter to apply to the widget data using GraphQL query syntax. Supports filtering by board columns (status, numbers, date, person, etc.) with operators like any_of, greater_than, equals, contains. Structure: { rules: [{ column_id: "status", compare_value: [1, 2], operator: "any_of" }], operator: "and" }. IMPORTANT: Person/People columns require "person-{id}" format (e.g., ["person-3"] not [3]). Status columns use raw indices [0,1,2]. Numbers use raw values [2,43]. Example - Filter by person: { operator: "and", rules: [{ column_id: "project_owner", operator: "any_of", compare_value: ["person-3"] }] }
+    """
+    filter: ItemsQueryGroup
   ): WidgetModel
 
   """Create a new dashboard and return the complete Dashboard object."""
@@ -2593,7 +2642,46 @@ type Mutation {
   """
   Create a new form with specified configuration. Returns the created form with its unique token.
   """
-  create_form(destination_workspace_id: Float, destination_folder_id: Float, destination_folder_name: String, board_kind: BoardKind, destination_name: String, skip_target_folder_creation: Boolean, entity_names_mapping: String, board_owner_ids: [Float!], board_owner_team_ids: [Float!], board_subscriber_ids: [Float!], board_subscriber_teams_ids: [Float!]): DehydratedFormResponse
+  create_form(
+    """The workspace in which the form will be created in."""
+    destination_workspace_id: Float!
+
+    """The folder in which the form will be created under."""
+    destination_folder_id: Float
+
+    """The name of the folder in which the form will be created in."""
+    destination_folder_name: String
+
+    """
+    The board kind to create for the board in which the form will create items in.
+    """
+    board_kind: BoardKind
+
+    """
+    The name of the board that will be created to store the form responses in.
+    """
+    destination_name: String
+
+    """
+    Array of user IDs who will have owner permissions on the board in which the form will create items in.
+    """
+    board_owner_ids: [Float!]
+
+    """
+    Array of team IDs whose members will have owner permissions on the board in which the form will create items in.
+    """
+    board_owner_team_ids: [Float!]
+
+    """
+    Array of user IDs who will receive notifications about board activity for the board in which the form will create items in.
+    """
+    board_subscriber_ids: [Float!]
+
+    """
+    Array of team IDs whose members will receive notifications about board activity for the board in which the form will create items in.
+    """
+    board_subscriber_teams_ids: [Float!]
+  ): DehydratedFormResponse
 
   """
   Set a password on a form to restrict access. This will enable password protection for the form.
@@ -3420,7 +3508,7 @@ input GroupBySortSettingsInput {
   type: String
 }
 
-"""The direction to order the items by"""
+"""Sort direction"""
 enum ItemsOrderByDirection {
   """Ascending order"""
   asc
@@ -3437,11 +3525,11 @@ input ItemsQueryGroup {
   """A list of rule groups"""
   groups: [ItemsQueryGroup!]
 
-  """The operator to use for the query rules or rule groups"""
+  """The operator to use for the query rules or rule groups. Default: AND"""
   operator: ItemsQueryOperator = and
 }
 
-"""The condition between the query rules"""
+"""Logical operator"""
 enum ItemsQueryOperator {
   """Logical OR"""
   or
@@ -3466,7 +3554,7 @@ input ItemsQueryRule {
   operator: ItemsQueryRuleOperator = any_of
 }
 
-"""The operator to use for the value comparison"""
+"""Rule operator"""
 enum ItemsQueryRuleOperator {
   """Any of the values"""
   any_of
@@ -3510,7 +3598,7 @@ enum ItemsQueryRuleOperator {
   """Ends with the value"""
   ends_with
 
-  """Within the next """
+  """Within the next"""
   within_the_next
 
   """Within the last"""
@@ -5088,10 +5176,15 @@ input CreateFavoriteInput {
   newPosition: ObjectDynamicPositionInput
 }
 
-"""Result type for adding an object to a personal list"""
+"""Represents the response when adding an object to a list"""
 type CreateFavoriteResultType {
-  """The added object hierarchy item"""
-  favorites: HierarchyObjectItem
+  """The favorite item that was created"""
+  favorite: GraphqlHierarchyObjectItem
+
+  """
+  If the object that was created is a folder, this is extra data about the folder
+  """
+  folder: GraphqlFolder
 }
 
 """Input type for removing an object from favorites"""
@@ -5106,37 +5199,37 @@ type DeleteFavoriteInputResultType {
   success: Boolean
 }
 
-"""Represents a monday object identifier with its type"""
-type HierarchyObjectID {
-  """The unique identifier of the object"""
+"""Represents a folder in the hierarchy"""
+type GraphqlFolder {
+  """The unique identifier of the folder"""
   id: ID
 
-  """The type of the object"""
-  type: ObjectType
+  """The account identifier this folder belongs to"""
+  accountId: ID
+
+  """The name of the folder"""
+  name: String
+
+  """The timestamp when this folder was created"""
+  createdAt: Date
+
+  """The timestamp when this folder was last updated"""
+  updatedAt: Date
+
+  """The user who created this folder"""
+  createdBy: ID
 }
 
-"""Input type for identifying a favorites object by its ID and type"""
-input HierarchyObjectIDInputType {
-  """The ID of the object"""
-  id: ID!
-
-  """The type of the object"""
-  type: ObjectType!
-}
-
-"""Represents an item in the object hierarchy"""
-type HierarchyObjectItem {
+"""Represents an item in favorites"""
+type GraphqlHierarchyObjectItem {
   """The unique identifier of the hierarchy item"""
   id: ID
 
   """The account identifier this item belongs to"""
-  accountId: Int
+  accountId: ID
 
   """The object identifier and type"""
   object: HierarchyObjectID
-
-  """The list identifier and type"""
-  hierarchyListData: ListID
 
   """The folder identifier if the item is contained within a folder"""
   folderId: ID
@@ -5151,25 +5244,34 @@ type HierarchyObjectItem {
   updatedAt: Date
 }
 
-"""Represents a list identifier with its type in the hierarchy"""
-type ListID {
-  """The unique identifier of the list"""
-  id: ID
+"""Represents a monday object."""
+enum GraphqlMondayObject {
+  """A monday.com board"""
+  Board
 
-  """The type of the list"""
-  type: ListType
+  """A monday.com folder"""
+  Folder
+
+  """Aggregates data from one or more boards."""
+  Dashboard
 }
 
-"""Types of lists in hierarchyMS"""
-enum ListType {
-  """A personal list owned by a user"""
-  PersonalList
+"""Represents a monday object identifier with its type"""
+type HierarchyObjectID {
+  """The unique identifier of the object"""
+  id: ID
 
-  """A workspace-level list"""
-  Workspace
+  """The type of the object"""
+  type: GraphqlMondayObject
+}
 
-  """A customized list with specific settings"""
-  CustomizedList
+"""Input type for identifying a favorites object by its ID and type"""
+input HierarchyObjectIDInputType {
+  """The ID of the object"""
+  id: ID!
+
+  """The type of the object"""
+  type: GraphqlMondayObject!
 }
 
 input ObjectDynamicPositionInput {
@@ -5180,28 +5282,17 @@ input ObjectDynamicPositionInput {
   nextObject: HierarchyObjectIDInputType
 }
 
-"""Represents a monday object."""
-enum ObjectType {
-  """Represents a board object type."""
-  Board
-
-  """Represents an overview object type."""
-  Overview
-
-  """Represents a folder object type."""
-  Folder
-}
-
+"""Represents the response when adding an object to a list"""
 type UpdateFavoriteResultType {
-  """The updated favorite's object"""
-  favorites: HierarchyObjectItem
+  """The favorite item that its position was updated"""
+  favorite: GraphqlHierarchyObjectItem
 }
 
 input UpdateObjectHierarchyPositionInput {
   """The favorite's object to update"""
   object: HierarchyObjectIDInputType!
 
-  """The new folder ID to move the object to"""
+  """The new folder ID to move the object to, if necessary"""
   newFolder: ID
 
   """The new position for the object"""
@@ -5508,6 +5599,162 @@ type AppFeatureType {
 
   """The deployment information for the app feature"""
   deployment: JSON
+}
+
+"""The type of the app feature."""
+enum AppFeatureTypeE {
+  """OAUTH"""
+  OAUTH
+
+  """BOARD_VIEW"""
+  BOARD_VIEW
+
+  """INTEGRATION"""
+  INTEGRATION
+
+  """SOLUTION"""
+  SOLUTION
+
+  """ITEM_VIEW"""
+  ITEM_VIEW
+
+  """DASHBOARD_WIDGET"""
+  DASHBOARD_WIDGET
+
+  """ACCOUNT_SETTINGS_VIEW"""
+  ACCOUNT_SETTINGS_VIEW
+
+  """DOC_ACTIONS"""
+  DOC_ACTIONS
+
+  """OBJECT"""
+  OBJECT
+
+  """WORKSPACE_VIEW"""
+  WORKSPACE_VIEW
+
+  """AI"""
+  AI
+
+  """AI_BOARD_MAIN_MENU_HEADER"""
+  AI_BOARD_MAIN_MENU_HEADER
+
+  """AI_ITEM_UPDATE_ACTIONS"""
+  AI_ITEM_UPDATE_ACTIONS
+
+  """AI_DOC_SLASH_COMMAND"""
+  AI_DOC_SLASH_COMMAND
+
+  """AI_DOC_CONTEXTUAL_MENU"""
+  AI_DOC_CONTEXTUAL_MENU
+
+  """AI_DOC_QUICK_START"""
+  AI_DOC_QUICK_START
+
+  """AI_DOC_TOP_BAR"""
+  AI_DOC_TOP_BAR
+
+  """COLUMN_TEMPLATE"""
+  COLUMN_TEMPLATE
+
+  """AI_IC_ASSISTANT_HELP_CENTER"""
+  AI_IC_ASSISTANT_HELP_CENTER
+
+  """APP_WIZARD"""
+  APP_WIZARD
+
+  """GROUP_MENU_ACTION"""
+  GROUP_MENU_ACTION
+
+  """ITEM_MENU_ACTION"""
+  ITEM_MENU_ACTION
+
+  """NOTIFICATION_KIND"""
+  NOTIFICATION_KIND
+
+  """NOTIFICATION_SETTING_KIND"""
+  NOTIFICATION_SETTING_KIND
+
+  """BLOCK"""
+  BLOCK
+
+  """ITEM_BATCH_ACTION"""
+  ITEM_BATCH_ACTION
+
+  """AI_FORMULA"""
+  AI_FORMULA
+
+  """AI_ITEM_EMAILS_AND_ACTIVITIES_ACTIONS"""
+  AI_ITEM_EMAILS_AND_ACTIVITIES_ACTIONS
+
+  """AI_EMAILS_AND_ACTIVITIES_HEADER_ACTIONS"""
+  AI_EMAILS_AND_ACTIVITIES_HEADER_ACTIONS
+
+  """FIELD_TYPE"""
+  FIELD_TYPE
+
+  """PRODUCT"""
+  PRODUCT
+
+  """PRODUCT_VIEW"""
+  PRODUCT_VIEW
+
+  """BOARD_COLUMN_ACTION"""
+  BOARD_COLUMN_ACTION
+
+  """BOARD_COLUMN_EXTENSION"""
+  BOARD_COLUMN_EXTENSION
+
+  """PACKAGED_BLOCK"""
+  PACKAGED_BLOCK
+
+  """CREDENTIALS"""
+  CREDENTIALS
+
+  """TOPBAR"""
+  TOPBAR
+
+  """WORKFLOW_TEMPLATE"""
+  WORKFLOW_TEMPLATE
+
+  """COLUMN"""
+  COLUMN
+
+  """SUB_WORKFLOW"""
+  SUB_WORKFLOW
+
+  """BOARD_HEADER_ACTION"""
+  BOARD_HEADER_ACTION
+
+  """DIALOG"""
+  DIALOG
+
+  """DATA_ENTITY"""
+  DATA_ENTITY
+
+  """SYNCABLE_RESOURCE"""
+  SYNCABLE_RESOURCE
+
+  """AI_AGENT"""
+  AI_AGENT
+
+  """SURFACE_VIEW"""
+  SURFACE_VIEW
+
+  """GROWTH_CONFIG"""
+  GROWTH_CONFIG
+
+  """MODAL"""
+  MODAL
+
+  """ADMIN_VIEW"""
+  ADMIN_VIEW
+
+  """DIGITAL_WORKER"""
+  DIGITAL_WORKER
+
+  """AI_AGENT_SKILL"""
+  AI_AGENT_SKILL
 }
 
 type AppType {
@@ -7113,11 +7360,11 @@ input ItemsQuery {
   groups: [ItemsQueryGroup!]
 
   """
-  A list of item IDs to fetch. Use this to fetch a specific set of items by their IDs. Max: 100 IDs
+  A list of item IDs to fetch. Use this to fetch a specific set of items by their IDs. Limited to 100 IDs in ItemsQuery
   """
   ids: [ID!]
 
-  """The operator to use for the query rules or rule groups"""
+  """The operator to use for the query rules or rule groups. Default: AND"""
   operator: ItemsQueryOperator = and
 
   """Sort the results by specified columns"""
@@ -7390,6 +7637,18 @@ enum NumberValueUnitDirection {
   right
 }
 
+"""Represents a monday object."""
+enum ObjectType {
+  """Represents a board object type."""
+  Board
+
+  """Represents a folder object type."""
+  Folder
+
+  """Represents an overview object type."""
+  Overview
+}
+
 """The working status of a user."""
 type OutOfOffice {
   """Is the status active?"""
@@ -7406,6 +7665,36 @@ type OutOfOffice {
 
   """Out of office type."""
   type: String
+}
+
+"""A monday.com overview."""
+type Overview {
+  """The time the overview was created at."""
+  created_at: ISO8601DateTime
+
+  """The creator of the overview."""
+  creator: User!
+
+  """The overview's folder unique identifier."""
+  folder_id: ID
+
+  """The unique identifier of the overview."""
+  id: ID!
+
+  """The overview's kind (public/private)."""
+  kind: String
+
+  """The overview's name."""
+  name: String!
+
+  """The overview's state."""
+  state: String!
+
+  """The last time the overview was updated at."""
+  updated_at: ISO8601DateTime
+
+  """The overview's workspace unique identifier."""
+  workspace_id: ID
 }
 
 type PeopleEntity {
@@ -7910,6 +8199,33 @@ type UpdateBoardHierarchyResult {
 
   """Whether the operation was successful"""
   success: Boolean!
+}
+
+"""Result type for updating an overview's hierarchy"""
+type UpdateOverviewHierarchy {
+  """Message about the operation result"""
+  message: String!
+
+  """The updated overview"""
+  overview: Overview
+
+  """Whether the operation was successful"""
+  success: Boolean!
+}
+
+"""Attributes for updating an overview's hierarchy and location"""
+input UpdateOverviewHierarchyAttributesInput {
+  """The ID of the account product where the overview should be placed"""
+  account_product_id: ID
+
+  """The ID of the folder where the overview should be placed"""
+  folder_id: ID
+
+  """The position of the overview in the left pane"""
+  position: DynamicPosition
+
+  """The ID of the workspace where the overview should be placed"""
+  workspace_id: ID
 }
 
 """Attributes of a workspace to update"""
@@ -10214,12 +10530,7 @@ type ResponseForm {
   ownerId: Int
 
   """
-  Boolean indicating if this form was initially created using AI assistance.
-  """
-  createWithAI: Boolean!
-
-  """
-  Boolean indicating if this form was built or modified using AI functionality.
+  Boolean indicating if this form was built using monday’s AI form builder agent.
   """
   builtWithAI: Boolean!
 
@@ -10232,11 +10543,6 @@ type ResponseForm {
   Array of question objects that make up the form content, in display order.
   """
   questions: [FormQuestion!]
-
-  """
-  Boolean flag indicating if the form has been flagged for review due to suspicious content or activity.
-  """
-  isSuspicious: Boolean!
 
   """
   Boolean indicating if responses are collected without identifying the submitter.
