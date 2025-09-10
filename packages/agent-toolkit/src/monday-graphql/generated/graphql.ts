@@ -8692,6 +8692,29 @@ export type ListWorkspacesQueryVariables = Exact<{
 
 export type ListWorkspacesQuery = { __typename?: 'Query', workspaces?: Array<{ __typename?: 'Workspace', id?: string | null, name: string, description?: string | null } | null> | null };
 
+export type UpdateFolderMutationVariables = Exact<{
+  folderId: Scalars['ID']['input'];
+  name?: InputMaybe<Scalars['String']['input']>;
+  color?: InputMaybe<FolderColor>;
+  fontWeight?: InputMaybe<FolderFontWeight>;
+  customIcon?: InputMaybe<FolderCustomIcon>;
+  parentFolderId?: InputMaybe<Scalars['ID']['input']>;
+  workspaceId?: InputMaybe<Scalars['ID']['input']>;
+  accountProductId?: InputMaybe<Scalars['ID']['input']>;
+  position?: InputMaybe<DynamicPosition>;
+}>;
+
+
+export type UpdateFolderMutation = { __typename?: 'Mutation', update_folder?: { __typename?: 'Folder', id: string } | null };
+
+export type UpdateWorkspaceMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  attributes: UpdateWorkspaceAttributesInput;
+}>;
+
+
+export type UpdateWorkspaceMutation = { __typename?: 'Mutation', update_workspace?: { __typename?: 'Workspace', id?: string | null } | null };
+
 export type CreateFormMutationVariables = Exact<{
   destination_workspace_id: Scalars['Float']['input'];
   destination_folder_id?: InputMaybe<Scalars['Float']['input']>;
