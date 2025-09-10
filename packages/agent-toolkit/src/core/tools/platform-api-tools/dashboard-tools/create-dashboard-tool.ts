@@ -9,10 +9,7 @@ import { ToolInputType, ToolOutputType, ToolType } from '../../../tool';
 import { BaseMondayApiTool, createMondayApiAnnotations } from '../base-monday-api-tool';
 
 export const createDashboardToolSchema = {
-  name: z
-    .string()
-    .min(1, 'Dashboard name is required')
-    .describe('Human-readable dashboard title (UTF-8 chars)'),
+  name: z.string().min(1, 'Dashboard name is required').describe('Human-readable dashboard title (UTF-8 chars)'),
   workspace_id: z
     .string()
     .describe('ID of the workspace that will own the dashboard'),
@@ -25,7 +22,9 @@ export const createDashboardToolSchema = {
   board_folder_id: z
     .string()
     .optional()
-    .describe('Optional folder ID within workspace to place this dashboard (if not provided, dashboard will be placed in workspace root)'),
+    .describe(
+      'Optional folder ID within workspace to place this dashboard (if not provided, dashboard will be placed in workspace root)',
+    ),
 };
 
 export class CreateDashboardTool extends BaseMondayApiTool<typeof createDashboardToolSchema, never> {
@@ -59,10 +58,10 @@ export class CreateDashboardTool extends BaseMondayApiTool<typeof createDashboar
       // Prepare GraphQL variables
       const variables: CreateDashboardMutationVariables = {
         name: input.name,
-        workspace_id: input.workspace_id,
+        workspace_id: input.workspace_id.toString(),
         board_ids: input.board_ids,
         kind: input.kind,
-        board_folder_id: input.board_folder_id,
+        board_folder_id: input.board_folder_id?.toString(),
       };
 
       // Execute the GraphQL mutation
