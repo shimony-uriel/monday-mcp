@@ -8692,6 +8692,22 @@ export type ListWorkspacesQueryVariables = Exact<{
 
 export type ListWorkspacesQuery = { __typename?: 'Query', workspaces?: Array<{ __typename?: 'Workspace', id?: string | null, name: string, description?: string | null } | null> | null };
 
+export type UpdateBoardHierarchyMutationVariables = Exact<{
+  boardId: Scalars['ID']['input'];
+  attributes: UpdateBoardHierarchyAttributesInput;
+}>;
+
+
+export type UpdateBoardHierarchyMutation = { __typename?: 'Mutation', update_board_hierarchy?: { __typename?: 'UpdateBoardHierarchyResult', success: boolean, message?: string | null, board?: { __typename?: 'Board', id: string } | null } | null };
+
+export type UpdateOverviewHierarchyMutationVariables = Exact<{
+  overviewId: Scalars['ID']['input'];
+  attributes: UpdateOverviewHierarchyAttributesInput;
+}>;
+
+
+export type UpdateOverviewHierarchyMutation = { __typename?: 'Mutation', update_overview_hierarchy?: { __typename?: 'UpdateOverviewHierarchy', success: boolean, message: string, overview?: { __typename?: 'Overview', id: string } | null } | null };
+
 export type UpdateFolderMutationVariables = Exact<{
   folderId: Scalars['ID']['input'];
   name?: InputMaybe<Scalars['String']['input']>;
