@@ -31,12 +31,15 @@ The toolkit includes several pre-built tools for common monday.com operations, o
 ### Board Operations
 - `CreateBoardTool` - Create a monday.com board
 - `GetBoardSchemaTool` - Get board schema (columns and groups) by board id
+- `CreateGroupTool` - Create a new group in a monday.com board
 - `CreateColumnTool` - Create a new column in a monday.com board
 - `DeleteColumnTool` - Delete a column from a monday.com board
 
 ### WorkForms Operations
 - `CreateFormTool` - Create a monday.com form
 - `GetFormTool` - Get a form by its token, found in the form's URL
+- `UpdateFormTool` - Update a monday.com form, including updating the form's feature settings, appearance settings, accessibility settings, title, description, question order, form tags, and form password
+- `FormQuestionsEditorTool` - Create, update, or delete a question in a monday.com form
 
 ### Account Operations
 - `GetUsersTool` - Get users, can be filtered by name or partial name

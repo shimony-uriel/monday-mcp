@@ -187,9 +187,9 @@ export type AggregateSelectColumnInput = {
 export type AggregateSelectElementInput = {
   /** Alias for the selected element */
   as: Scalars['String']['input'];
-  /** Column to select. Required if type is COLUMN */
+  /** Column to select. Required if type is COLUMN. If selecting a column, the element must have a matching group by element with the same column_id or alias, if present. */
   column?: InputMaybe<AggregateSelectColumnInput>;
-  /** Function to select. Required if type is FUNCTION */
+  /** Function to select. Required if type is FUNCTION. If selecting a transformative function, the element must have a matching group by element with the same alias. If selecting an aggregative function, the select element must not have a matching group by element. */
   function?: InputMaybe<AggregateSelectFunctionInput>;
   /** Type of the selected element */
   type: AggregateSelectElementType;
@@ -606,6 +606,29 @@ export type AppsMonetizationInfo = {
    * app’s subscription among apps that utilize the seats-based monetization method
    */
   seats_count?: Maybe<Scalars['Int']['output']>;
+};
+
+/** The content blocks that make up the article. */
+export type ArticleBlock = {
+  __typename?: 'ArticleBlock';
+  /** The block's content. */
+  content?: Maybe<Scalars['JSON']['output']>;
+  /** The block's creation date. */
+  created_at?: Maybe<Scalars['String']['output']>;
+  /** The block's creator */
+  created_by?: Maybe<User>;
+  /** The block's unique identifier. */
+  id?: Maybe<Scalars['ID']['output']>;
+  /** The block's parent block unique identifier. Will be null if the block is at the top level of the article. */
+  parent_block_id?: Maybe<Scalars['ID']['output']>;
+  /** The block's position on the article. */
+  position?: Maybe<Scalars['Float']['output']>;
+  /** The unique identifier of the published article that contains this block. */
+  published_article_id?: Maybe<Scalars['ID']['output']>;
+  /** The block content type. */
+  type?: Maybe<Scalars['String']['output']>;
+  /** The block's last updated date. */
+  updated_at?: Maybe<Scalars['String']['output']>;
 };
 
 /** A file uploaded to monday.com */
@@ -1112,6 +1135,8 @@ export type BoardMuteSettings = {
   __typename?: 'BoardMuteSettings';
   /** Board ID */
   board_id?: Maybe<Scalars['ID']['output']>;
+  /** List of enabled customizable settings when the board is in CUSTOM_SETTINGS mute state. Null otherwise. */
+  enabled?: Maybe<Array<CustomizableBoardSettings>>;
   /** Human-friendly mute state for the board and current user */
   mute_state?: Maybe<BoardMuteState>;
 };
@@ -1122,11 +1147,14 @@ export type BoardMuteSettings = {
  *   - NOT_MUTED: The board is not muted at all (default state). This state, as well as MUTE_ALL, is set by the board owner(s) and only they can change it.
  *   - MUTE_ALL: All notifications for all users are muted on this board. This state, as well as NOT_MUTED, is set by the board owner(s) and only they can change it.
  *   - MENTIONS_AND_ASSIGNS_ONLY: The current user will only be notified if mentioned or assigned on the board.
+ *   - CUSTOM_SETTINGS: The current user will only be notified for the enabled custom settings. configurable settings: IM_MENTIONED, IM_ASSIGNED, AUTOMATION_NOTIFY
  *   - CURRENT_USER_MUTE_ALL: Only the current user has all notifications muted from this board.
  */
 export enum BoardMuteState {
   /** Only the current user has all notifications muted from this board */
   CurrentUserMuteAll = 'CURRENT_USER_MUTE_ALL',
+  /** The current user will only be notified for the enabled custom settings. configurable settings: IM_MENTIONED, IM_ASSIGNED, AUTOMATION_NOTIFY */
+  CustomSettings = 'CUSTOM_SETTINGS',
   /** The current user will only be notified if mentioned or assigned on the board */
   MentionsAndAssignsOnly = 'MENTIONS_AND_ASSIGNS_ONLY',
   /** All notifications for all users are muted on this board. This state is set by the board owner(s) and only they can change it. */
@@ -1540,6 +1568,12 @@ export type ColumnsConfigInput = {
   subitems_column_properties?: InputMaybe<Array<ColumnPropertyInput>>;
 };
 
+export type ColumnsMappingInput = {
+  project_owner: Scalars['ID']['input'];
+  project_status: Scalars['ID']['input'];
+  project_timeline: Scalars['ID']['input'];
+};
+
 /** Complexity data. */
 export type Complexity = {
   __typename?: 'Complexity';
@@ -1559,8 +1593,6 @@ export type ConnectProjectResult = {
   message?: Maybe<Scalars['String']['output']>;
   /** The ID of the created portfolio item, if successful. */
   portfolio_item_id?: Maybe<Scalars['String']['output']>;
-  /** The unique identifier of the operation. */
-  request_id?: Maybe<Scalars['ID']['output']>;
   /** Indicates if the operation was successful. */
   success?: Maybe<Scalars['Boolean']['output']>;
 };
@@ -1588,6 +1620,20 @@ export type Connection = {
   updatedAt?: Maybe<Scalars['String']['output']>;
   /** Identifier of the user who created the connection. */
   userId?: Maybe<Scalars['Int']['output']>;
+};
+
+export type ConvertBoardToProjectInput = {
+  board_id: Scalars['ID']['input'];
+  callback_url?: InputMaybe<Scalars['String']['input']>;
+  column_mappings: ColumnsMappingInput;
+};
+
+export type ConvertBoardToProjectResult = {
+  __typename?: 'ConvertBoardToProjectResult';
+  message?: Maybe<Scalars['String']['output']>;
+  process_id?: Maybe<Scalars['String']['output']>;
+  projectId?: Maybe<Scalars['ID']['output']>;
+  success?: Maybe<Scalars['Boolean']['output']>;
 };
 
 export type Country = {
@@ -1859,6 +1905,16 @@ export type CustomFieldValue = {
   value?: Maybe<Scalars['String']['output']>;
 };
 
+/** These settings can be customized when the board is in CUSTOM_SETTINGS mute state. Configurable settings: IM_MENTIONED, IM_ASSIGNED, AUTOMATION_NOTIFY */
+export enum CustomizableBoardSettings {
+  /** Notify me on automation notify step on this board */
+  AutomationNotify = 'AUTOMATION_NOTIFY',
+  /** Notify me when I am assigned on this board */
+  ImAssigned = 'IM_ASSIGNED',
+  /** Notify me when I am mentioned on this board */
+  ImMentioned = 'IM_MENTIONED'
+}
+
 /** API usage data. */
 export type DailyAnalytics = {
   __typename?: 'DailyAnalytics';
@@ -1884,16 +1940,16 @@ export type DailyLimit = {
 /** Aggregates data from one or more boards. */
 export type Dashboard = {
   __typename?: 'Dashboard';
-  /** Folder ID that groups the dashboard inside its workspace (null = workspace root). */
-  board_folder_id?: Maybe<Scalars['Int']['output']>;
-  /** Stable unique identifier of the dashboard. */
+  /** Folder ID that groups elements inside the workspace (null = workspace root). */
+  board_folder_id?: Maybe<Scalars['ID']['output']>;
+  /** Unique identifier of the dashboard. */
   id?: Maybe<Scalars['ID']['output']>;
   /** Visibility level: `PUBLIC` (default) or `PRIVATE`. */
   kind?: Maybe<DashboardKind>;
-  /** Dashboard title (1–255 UTF-8 chars). */
+  /** Dashboard title (UTF-8 chars). */
   name?: Maybe<Scalars['String']['output']>;
   /** ID of the workspace that owns this dashboard. */
-  workspace_id?: Maybe<Scalars['Int']['output']>;
+  workspace_id?: Maybe<Scalars['ID']['output']>;
 };
 
 /** Dashboard visibility. `PUBLIC` dashboards are visible to all workspace members; `PRIVATE` dashboards are only visible to invited users. */
@@ -2907,8 +2963,6 @@ export type FormLogoInput = {
   position?: InputMaybe<FormLogoPosition>;
   /** String specifying logo size ("small", "medium", "large") for the logo that appears on the header of the form. */
   size?: InputMaybe<FormLogoSize>;
-  /** URL pointing to the logo image file for display on the form. */
-  url?: InputMaybe<Scalars['String']['input']>;
 };
 
 export enum FormLogoPosition {
@@ -2956,13 +3010,13 @@ export type FormMondayInput = {
 
 export type FormPassword = {
   __typename?: 'FormPassword';
-  /** Boolean enabling password protection. When true, users must enter a password to access the form. */
+  /** Boolean disabling password protection. Can only be updated to false, to enable password protection, use the set_form_password mutation instead. */
   enabled: Scalars['Boolean']['output'];
 };
 
 /** Password configuration for the form. Only setting enabled to false is supported. To enable a form to be password protected, please use the set_form_password mutation instead. */
 export type FormPasswordInput = {
-  /** Boolean enabling password protection. When true, users must enter a password to access the form. */
+  /** Boolean disabling password protection. Can only be updated to false, to enable password protection, use the set_form_password mutation instead. */
   enabled?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
@@ -3046,8 +3100,6 @@ export type FormQuestionSettings = {
   display?: Maybe<FormQuestionSelectDisplay>;
   /** Date questions only: Whether to include time selection (hours and minutes) in addition to the date picker. When false, only date selection is available. */
   includeTime?: Maybe<Scalars['Boolean']['output']>;
-  /** Multi Select questions only: Limits the number of options a user can select. */
-  labelLimitCount?: Maybe<Scalars['Int']['output']>;
   /** Rating questions only: Maximum rating value that users can select. */
   limit?: Maybe<Scalars['Int']['output']>;
   /** Location questions only: Automatically detect and fill the user's current location using browser geolocation services, requiring user permission. */
@@ -4203,7 +4255,7 @@ export type Mutation = {
   /** Generic mutation for creating any column type with validation. Supports creating column with properties like title, description, and type-specific defaults/settings. The mutation validates input against the column type's schema before applying changes. Use get_column_type_schema query to understand available properties for each column type. */
   create_column?: Maybe<Column>;
   create_custom_activity?: Maybe<CustomActivity>;
-  /** Create a new dashboard and return the complete Dashboard object. */
+  /** Create a new dashboard. */
   create_dashboard?: Maybe<Dashboard>;
   /** Create a new doc. */
   create_doc?: Maybe<Document>;
@@ -4251,8 +4303,8 @@ export type Mutation = {
   create_view_table?: Maybe<BoardView>;
   /** Create a new webhook. */
   create_webhook?: Maybe<Webhook>;
-  /** Create a new widget based on the provided widget configuration. */
-  create_widget?: Maybe<WidgetModel>;
+  /** Create a new widget. */
+  create_widget?: Maybe<Widget>;
   /** Create a new workspace. */
   create_workspace?: Maybe<Workspace>;
   /** Deactivate a form to hide it from users and stop accepting submissions. Form data is preserved. */
@@ -4268,6 +4320,8 @@ export type Mutation = {
   /** Delete a column. */
   delete_column?: Maybe<Column>;
   delete_custom_activity?: Maybe<CustomActivity>;
+  /** Delete an existing dashboard. */
+  delete_dashboard?: Maybe<Scalars['Boolean']['output']>;
   /** Permanently deletes a document and all its content from the system. This action cannot be undone. The document will be removed from all user views and workspaces. Use with caution - ensure the document is no longer needed before deletion. Returns success status and the deleted document ID. */
   delete_doc?: Maybe<Scalars['JSON']['output']>;
   /** Delete a document block */
@@ -4303,6 +4357,8 @@ export type Mutation = {
   delete_view?: Maybe<BoardView>;
   /** Delete a new webhook. */
   delete_webhook?: Maybe<Webhook>;
+  /** Delete an existing widget. */
+  delete_widget?: Maybe<Scalars['Boolean']['output']>;
   /** Delete workspace. */
   delete_workspace?: Maybe<Workspace>;
   /** Duplicate a board. */
@@ -4350,6 +4406,8 @@ export type Mutation = {
   unpin_from_top: Update;
   /** Update an app feature. */
   updateAppFeature?: Maybe<AppFeatureType>;
+  /** Updates the content of a specific article block. The block must belong to a draft article that the user has permission to edit. Cannot update blocks of published articles. */
+  update_article_block?: Maybe<ArticleBlock>;
   /** Update item column value by existing assets */
   update_assets_on_item?: Maybe<Item>;
   /** Update Board attribute. */
@@ -4358,6 +4416,8 @@ export type Mutation = {
   update_board_hierarchy?: Maybe<UpdateBoardHierarchyResult>;
   /** Generic mutation for updating any column type with validation. Supports updating column properties like title, description, and type-specific defaults/settings. The mutation validates input against the column type's schema before applying changes. Use get_column_type_schema query to understand available properties for each column type. */
   update_column?: Maybe<Column>;
+  /** Update an existing dashboard. */
+  update_dashboard?: Maybe<Dashboard>;
   /** Update the dependency column for a specific pulse */
   update_dependency_column: Scalars['JSON']['output'];
   /** Update a document block */
@@ -4660,11 +4720,11 @@ export type MutationCreate_Custom_ActivityArgs = {
 
 /** Root mutation type for the Dependencies service */
 export type MutationCreate_DashboardArgs = {
-  board_folder_id?: InputMaybe<Scalars['Int']['input']>;
-  board_ids: Array<Scalars['String']['input']>;
+  board_folder_id?: InputMaybe<Scalars['ID']['input']>;
+  board_ids: Array<Scalars['ID']['input']>;
   kind?: InputMaybe<DashboardKind>;
   name: Scalars['String']['input'];
-  workspace_id: Scalars['Int']['input'];
+  workspace_id: Scalars['ID']['input'];
 };
 
 
@@ -4731,11 +4791,11 @@ export type MutationCreate_FolderArgs = {
 /** Root mutation type for the Dependencies service */
 export type MutationCreate_FormArgs = {
   board_kind?: InputMaybe<BoardKind>;
-  board_owner_ids?: InputMaybe<Array<Scalars['Float']['input']>>;
-  board_owner_team_ids?: InputMaybe<Array<Scalars['Float']['input']>>;
-  board_subscriber_ids?: InputMaybe<Array<Scalars['Float']['input']>>;
-  board_subscriber_teams_ids?: InputMaybe<Array<Scalars['Float']['input']>>;
-  destination_folder_id?: InputMaybe<Scalars['Float']['input']>;
+  board_owner_ids?: InputMaybe<Array<Scalars['ID']['input']>>;
+  board_owner_team_ids?: InputMaybe<Array<Scalars['ID']['input']>>;
+  board_subscriber_ids?: InputMaybe<Array<Scalars['ID']['input']>>;
+  board_subscriber_teams_ids?: InputMaybe<Array<Scalars['ID']['input']>>;
+  destination_folder_id?: InputMaybe<Scalars['ID']['input']>;
   destination_folder_name?: InputMaybe<Scalars['String']['input']>;
   destination_name?: InputMaybe<Scalars['String']['input']>;
   destination_workspace_id: Scalars['Float']['input'];
@@ -4965,6 +5025,12 @@ export type MutationDelete_Custom_ActivityArgs = {
 
 
 /** Root mutation type for the Dependencies service */
+export type MutationDelete_DashboardArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+/** Root mutation type for the Dependencies service */
 export type MutationDelete_DocArgs = {
   docId: Scalars['ID']['input'];
 };
@@ -5084,6 +5150,12 @@ export type MutationDelete_ViewArgs = {
 
 /** Root mutation type for the Dependencies service */
 export type MutationDelete_WebhookArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+/** Root mutation type for the Dependencies service */
+export type MutationDelete_WidgetArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -5280,6 +5352,13 @@ export type MutationUpdateAppFeatureArgs = {
 
 
 /** Root mutation type for the Dependencies service */
+export type MutationUpdate_Article_BlockArgs = {
+  block_id: Scalars['String']['input'];
+  content: Scalars['JSON']['input'];
+};
+
+
+/** Root mutation type for the Dependencies service */
 export type MutationUpdate_Assets_On_ItemArgs = {
   board_id: Scalars['ID']['input'];
   column_id: Scalars['String']['input'];
@@ -5313,6 +5392,16 @@ export type MutationUpdate_ColumnArgs = {
   revision: Scalars['String']['input'];
   settings?: InputMaybe<Scalars['JSON']['input']>;
   title?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+/** Root mutation type for the Dependencies service */
+export type MutationUpdate_DashboardArgs = {
+  board_folder_id?: InputMaybe<Scalars['ID']['input']>;
+  id: Scalars['ID']['input'];
+  kind?: InputMaybe<DashboardKind>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  workspace_id?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -5436,6 +5525,7 @@ export type MutationUpdate_Multiple_UsersArgs = {
 /** Root mutation type for the Dependencies service */
 export type MutationUpdate_Mute_Board_SettingsArgs = {
   board_id: Scalars['String']['input'];
+  enabled?: InputMaybe<Array<CustomizableBoardSettings>>;
   mute_state: BoardMuteState;
 };
 
@@ -7533,7 +7623,7 @@ export type UpdateFavoriteResultType = {
 export type UpdateFormInput = {
   /** Optional description text providing context about the form purpose. */
   description?: InputMaybe<Scalars['String']['input']>;
-  /** Ordered array of question IDs for reordering. Must include all existing question IDs. */
+  /** Ordered array of dehydrated questions, object only including each question ID, for reordering. Must include all existing question IDs. */
   questions?: InputMaybe<Array<QuestionOrderInput>>;
   /** The title text for the form. Must be at least 1 character long. */
   title?: InputMaybe<Scalars['String']['input']>;
@@ -8014,23 +8104,23 @@ export type WeekValue = ColumnValue & {
   value?: Maybe<Scalars['JSON']['output']>;
 };
 
-/** UI widget placed on a dashboard, board, or doc. */
-export type WidgetModel = {
-  __typename?: 'WidgetModel';
-  /** Stable unique identifier of this widget. */
-  id?: Maybe<Scalars['Int']['output']>;
+/** Data visualization object. */
+export type Widget = {
+  __typename?: 'Widget';
+  /** Unique identifier of this widget. */
+  id?: Maybe<Scalars['ID']['output']>;
   /** The type of widget (CHART, NUMBER, BATTERY). */
   kind?: Maybe<ExternalWidget>;
-  /** Widget label shown in the UI (1–255 UTF-8 chars). */
+  /** Widget label (UTF-8 chars). */
   name?: Maybe<Scalars['String']['output']>;
-  /** Parent container where the widget is placed (dashboard or board view). */
+  /** Parent container where the widget is placed. */
   parent?: Maybe<WidgetParentOutput>;
 };
 
 /** Parent container input where the widget will be placed. */
 export type WidgetParentInput = {
-  /** The ID of the parent container (dashboard ID or board view ID) */
-  id: Scalars['Int']['input'];
+  /** The ID of the parent container. */
+  id: Scalars['ID']['input'];
   /** The type of parent container (DASHBOARD or BOARD_VIEW) */
   kind: WidgetParentKind;
 };
@@ -8046,8 +8136,8 @@ export enum WidgetParentKind {
 /** Parent container information in widget responses. Indicates where the widget is placed. */
 export type WidgetParentOutput = {
   __typename?: 'WidgetParentOutput';
-  /** The ID of the parent container (dashboard ID or board view ID) */
-  id?: Maybe<Scalars['Int']['output']>;
+  /** The ID of the parent container. */
+  id?: Maybe<Scalars['ID']['output']>;
   /** The type of parent container (DASHBOARD or BOARD_VIEW) */
   kind?: Maybe<WidgetParentKind>;
 };
@@ -8436,16 +8526,49 @@ export enum __TypeKind {
   NonNull = 'NON_NULL'
 }
 
-export type CreateDashboardMutationVariables = Exact<{
+export type CreateFolderMutationVariables = Exact<{
+  workspaceId: Scalars['ID']['input'];
   name: Scalars['String']['input'];
-  workspace_id: Scalars['Int']['input'];
-  board_ids: Array<Scalars['String']['input']> | Scalars['String']['input'];
-  kind?: InputMaybe<DashboardKind>;
-  board_folder_id?: InputMaybe<Scalars['Int']['input']>;
+  color?: InputMaybe<FolderColor>;
+  fontWeight?: InputMaybe<FolderFontWeight>;
+  customIcon?: InputMaybe<FolderCustomIcon>;
+  parentFolderId?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
 
-export type CreateDashboardMutation = { __typename?: 'Mutation', create_dashboard?: { __typename?: 'Dashboard', id?: string | null, name?: string | null, workspace_id?: number | null, kind?: DashboardKind | null, board_folder_id?: number | null } | null };
+export type CreateFolderMutation = { __typename?: 'Mutation', create_folder?: { __typename?: 'Folder', id: string } | null };
+
+export type CreateGroupMutationVariables = Exact<{
+  boardId: Scalars['ID']['input'];
+  groupName: Scalars['String']['input'];
+  groupColor?: InputMaybe<Scalars['String']['input']>;
+  relativeTo?: InputMaybe<Scalars['String']['input']>;
+  positionRelativeMethod?: InputMaybe<PositionRelative>;
+}>;
+
+
+export type CreateGroupMutation = { __typename?: 'Mutation', create_group?: { __typename?: 'Group', id: string, title: string } | null };
+
+export type CreateWorkspaceMutationVariables = Exact<{
+  name: Scalars['String']['input'];
+  workspaceKind: WorkspaceKind;
+  description?: InputMaybe<Scalars['String']['input']>;
+  accountProductId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type CreateWorkspaceMutation = { __typename?: 'Mutation', create_workspace?: { __typename?: 'Workspace', id?: string | null } | null };
+
+export type CreateDashboardMutationVariables = Exact<{
+  name: Scalars['String']['input'];
+  workspace_id: Scalars['ID']['input'];
+  board_ids: Array<Scalars['ID']['input']> | Scalars['ID']['input'];
+  kind?: InputMaybe<DashboardKind>;
+  board_folder_id?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type CreateDashboardMutation = { __typename?: 'Mutation', create_dashboard?: { __typename?: 'Dashboard', id?: string | null, name?: string | null, workspace_id?: string | null, kind?: DashboardKind | null, board_folder_id?: string | null } | null };
 
 export type GetAllWidgetsSchemaQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -8460,7 +8583,7 @@ export type CreateWidgetMutationVariables = Exact<{
 }>;
 
 
-export type CreateWidgetMutation = { __typename?: 'Mutation', create_widget?: { __typename?: 'WidgetModel', id?: number | null, name?: string | null, kind?: ExternalWidget | null, parent?: { __typename?: 'WidgetParentOutput', kind?: WidgetParentKind | null, id?: number | null } | null } | null };
+export type CreateWidgetMutation = { __typename?: 'Mutation', create_widget?: { __typename?: 'Widget', id?: string | null, name?: string | null, kind?: ExternalWidget | null, parent?: { __typename?: 'WidgetParentOutput', kind?: WidgetParentKind | null, id?: string | null } | null } | null };
 
 export type GetBoardAllActivityQueryVariables = Exact<{
   boardId: Scalars['ID']['input'];

@@ -6,58 +6,65 @@ enum FormType {
   EnforcedItemCreationForm = 'enforced_item_creation_form',
 }
 
-enum LogoSize {
-  Small = 'small',
-  Medium = 'medium',
-  Large = 'large',
-  ExtraLarge = 'extraLarge',
+export enum LogoSize {
+  Small = 'Small',
+  Medium = 'Medium',
+  Large = 'Large',
+  ExtraLarge = 'ExtraLarge',
 }
 
-enum LogoPosition {
-  Auto = 'auto',
-  Left = 'left',
-  Center = 'center',
-  Right = 'right',
+export enum LogoPosition {
+  Auto = 'Auto',
+  Left = 'Left',
+  Center = 'Center',
+  Right = 'Right',
 }
 
-interface Tag {
+export interface Tag {
   id: string;
   name: string;
   columnId: string;
   value?: string;
 }
 
-enum BackgroundType {
-  Image = 'image',
-  Color = 'color',
-  None = 'none',
+export interface TagPayload {
+  id?: string;
+  name?: string;
+  columnId?: string;
+  value: string;
 }
 
-enum Direction {
-  LtR = 'ltr',
-  Rtl = 'rtl',
+export enum BackgroundType {
+  Image = 'Image',
+  Color = 'Color',
+  None = 'None',
 }
 
-enum Format {
-  OneByOne = 'one-by-one',
-  Classic = 'classic',
+export enum Direction {
+  LtR = 'LtR',
+  Rtl = 'Rtl',
 }
 
-enum Alignment {
-  FullLeft = 'full-left',
-  Left = 'left',
-  Center = 'center',
-  Right = 'right',
-  FullRight = 'full-right',
+export enum Format {
+  OneByOne = 'OneByOne',
+  Classic = 'Classic',
 }
 
-enum FontSize {
-  Small = 'small',
-  Medium = 'medium',
-  Large = 'large',
+export enum Alignment {
+  FullLeft = 'FullLeft',
+  Left = 'Left',
+  Center = 'Center',
+  Right = 'Right',
+  FullRight = 'FullRight',
 }
 
-enum WorkformsQuestionType {
+export enum FontSize {
+  Small = 'Small',
+  Medium = 'Medium',
+  Large = 'Large',
+}
+
+export enum WorkformsQuestionType {
   Boolean = 'Boolean',
   ConnectedBoards = 'ConnectedBoards',
   Country = 'Country',
@@ -81,7 +88,7 @@ enum WorkformsQuestionType {
   Updates = 'Updates',
 }
 
-enum PrefillSources {
+export enum PrefillSources {
   Account = 'account',
   QueryParam = 'queryParam',
 }
@@ -135,13 +142,13 @@ type DateQuestionSettings = {
   includeTime: boolean;
 };
 
-enum SelectDisplay {
+export enum SelectDisplay {
   Horizontal = 'horizontal',
   Vertical = 'vertical',
   Dropdown = 'dropdown',
 }
 
-enum SelectOrderByOptions {
+export enum SelectOrderByOptions {
   Alphabetical = 'alphabetical',
   Random = 'random',
   Custom = 'custom',
@@ -155,7 +162,6 @@ type SingleSelectQuestionSettings = {
 
 type MultiSelectQuestionSettings = {
   display: SelectDisplay;
-  labelLimitCount: number | null;
   optionsOrder: SelectOrderByOptions;
   optionsPositions?: Record<string, number>;
 };
@@ -354,7 +360,6 @@ export interface Form {
   active: boolean;
   title: string;
   ownerId?: number;
-  createWithAI: boolean;
   builtWithAI: boolean;
   description: string | null;
   closeDate: string | null;
@@ -362,7 +367,6 @@ export interface Form {
   conditions: {
     [id: string]: Condition;
   };
-  isSuspicious: boolean;
   isAnonymous: boolean;
   type: FormType;
   features: {
@@ -452,4 +456,10 @@ export interface Form {
     logoAltText: string | null;
   };
   tags: Tag[];
+}
+
+export enum FormQuestionActions {
+  Delete = 'delete',
+  Update = 'update',
+  Create = 'create',
 }
