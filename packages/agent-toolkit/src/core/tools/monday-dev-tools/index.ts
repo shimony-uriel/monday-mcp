@@ -1,5 +1,5 @@
 import { BaseMondayApiToolConstructor } from '../platform-api-tools/base-monday-api-tool';
-import { GetSprintSummaryTool } from './get-sprint-summary-tool/get-sprint-summary-tool';
+import { GetSprintSummaryTool } from './get-sprint-summary-tool';
 import { GetSprintsMetadataTool } from './get-sprints-metadata-tool';
 
 

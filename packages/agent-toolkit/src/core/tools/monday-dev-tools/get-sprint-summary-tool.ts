@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { ToolInputType, ToolOutputType, ToolType } from '../../../tool';
-import { BaseMondayApiTool, createMondayApiAnnotations } from '../../platform-api-tools/base-monday-api-tool';
+import { ToolInputType, ToolOutputType, ToolType } from '../../tool';
+import { BaseMondayApiTool, createMondayApiAnnotations } from '../platform-api-tools/base-monday-api-tool';
 import { 
   GetBoardItemsWithColumnsQuery,
   GetBoardItemsWithColumnsQueryVariables,
@@ -8,13 +8,13 @@ import {
   ReadDocsQueryVariables,
   ExportMarkdownFromDocMutation,
   ExportMarkdownFromDocMutationVariables,
-} from '../../../../monday-graphql/generated/graphql';
+} from '../../../monday-graphql/generated/graphql';
 import {
   getBoardItemsWithColumns as getSprintBoardItems,
   readDocs as readSprintSummaryDocs,
   exportMarkdownFromDoc as exportSprintSummaryMarkdown,
-} from '../../../../monday-graphql/queries.graphql';
-import { Item as BoardItem } from '../../../../monday-graphql/generated/graphql';
+} from '../../../monday-graphql/queries.graphql';
+import { Item as BoardItem } from '../../../monday-graphql/generated/graphql';
 import {
   ERROR_PREFIXES,
   REQUIRED_SPRINT_COLUMNS,
@@ -24,7 +24,7 @@ import {
   getColumnValue,
   parseColumnValue,
   validateSprintsBoardSchema,
-} from '../shared';
+} from './shared';
 
 export const getSprintSummaryToolSchema = {
   sprintId: z
