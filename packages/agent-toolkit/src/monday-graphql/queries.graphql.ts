@@ -94,16 +94,6 @@ export const getUsersByName = gql`
   }
 `;
 
-export const getUsersByIds = gql`
-  query GetUsersByIds($ids: [ID!]!) {
-    users(ids: $ids) {
-      id
-      name
-      title
-    }
-  }
-`;
-
 export const changeItemColumnValues = gql`
   mutation changeItemColumnValues($boardId: ID!, $itemId: ID!, $columnValues: JSON!) {
     change_multiple_column_values(board_id: $boardId, item_id: $itemId, column_values: $columnValues) {
