@@ -3,7 +3,7 @@ import { GetBoardItemsWithColumnsQuery, GetBoardItemsWithColumnsQueryVariables }
 import { getBoardItemsWithColumns } from '../../../monday-graphql/queries.graphql';
 import { ToolInputType, ToolOutputType, ToolType } from '../../tool';
 import { BaseMondayApiTool, createMondayApiAnnotations } from '../platform-api-tools/base-monday-api-tool';
-import { REQUIRED_SPRINT_COLUMNS, extractDocumentObjectId, validateSprintBoardSchema, getColumnDisplayName, getColumnValue, SPRINT_STATUS, parseColumnValue } from './shared';
+import { REQUIRED_SPRINT_COLUMNS, extractDocumentObjectId, validateSprintsBoardSchema, getSprintColumnDisplayName, getColumnValue, SPRINT_STATUS, parseColumnValue } from './shared';
 
 export const getSprintsMetadataToolSchema = {
   sprintsBoardId: z.number().describe('The ID of the monday-dev board containing the sprints'),
@@ -13,7 +13,7 @@ export class GetSprintsMetadataTool extends BaseMondayApiTool<typeof getSprintsM
   name = 'get_sprints_metadata';
   type = ToolType.READ;
   annotations = createMondayApiAnnotations({
-    title: 'Get Sprints Metadata',
+    title: 'monday-dev: Get Sprints Metadata',
     readOnlyHint: true,
     destructiveHint: false,
     idempotentHint: true,
@@ -23,10 +23,12 @@ export class GetSprintsMetadataTool extends BaseMondayApiTool<typeof getSprintsM
     return `Get comprehensive sprint metadata from a monday-dev sprints board including:
 
 ## 🎯 Primary Use Cases:
-- **Understand Sprint Status**: Determine if a sprint is planned, in-progress, or completed
 - **Sprint Name ↔ Sprint ID Mapping**: Find sprint IDs when you only have sprint names (essential for other sprint tools)
+- **Identify Current Sprint**: Easily recognize which sprint is currently active
+- **Understand Sprint Status**: Determine if a sprint is planned, in-progress, or completed
 
 ## Data Retrieved:
+A table of the last 25 sprints with the following information:
 - Sprint ID
 - Sprint Name
 - Sprint timeline (planned from/to dates)
@@ -36,17 +38,10 @@ export class GetSprintsMetadataTool extends BaseMondayApiTool<typeof getSprintsM
 - Sprint activation status
 - Sprint summary document object ID
 
-## Output Format:
-Returns a structured table with sprint metadata to help determine sprint status:
-- **Planned**: No start date, not activated
-- **In Progress**: Has start date, activated, not completed
-- **Completed**: Has both start and end dates, completion checked
-
-## 🔗 Integration with Other Monday Dev Tools:
+## 🔗 Integration with Other monday-dev Tools:
 - use this tool first if you only have sprint names but need sprint IDs for other sprint tools
-- use this tool first if you need summary document object id of a sprint
 
-Requires the Main Sprints board ID of the Monday dev containing your sprints.`;
+Requires the Main Sprints board ID of the monday-dev containing your sprints.`;
   }
 
   getInputSchema(): typeof getSprintsMetadataToolSchema {
@@ -68,10 +63,10 @@ Requires the Main Sprints board ID of the Monday dev containing your sprints.`;
       };
     }
 
-    // Validate board schema has required sprint columns
+    // Validate board schema has required sprint columns 
         const sprints = board.items_page?.items || [];
 
-    const schemaValidation = validateSprintBoardSchema(sprints[0]?.column_values);
+    const schemaValidation = validateSprintsBoardSchema(sprints[0]?.column_values);
     if (!schemaValidation.isValid) {
       return {
         content: schemaValidation.errorMessage,
@@ -97,7 +92,7 @@ Requires the Main Sprints board ID of the Monday dev containing your sprints.`;
     let report = `# Sprints Metadata Report\n\n`;
     report += `**Total Sprints:** ${sprints.length}\n\n`;
     report += `| Sprint Name | Sprint ID | Status | Timeline (Planned) | Start Date (Actual) | End Date (Actual) | Completion | Summary Document ObjectID |\n`;
-    report += `|-------------|-----------|--------|-------------------|-------------------|------------------|------------|---------------------------|\\n`;
+    report += `|-------------|-----------|--------|--------------------|---------------------|-------------------|------------|---------------------------|w\n`;
 
     sprints.forEach((sprint) => {
       const sprintName = sprint.name || 'Unknown';

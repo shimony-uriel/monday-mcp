@@ -21,19 +21,6 @@ export const getBoardItemsByName = gql`
   }
 `;
 
-export const getAllBoardItems = gql`
-  query GetAllBoardItems($boardId: ID!) {
-    boards(ids: [$boardId]) {
-      items_page {
-        items {
-          id
-          name
-        }
-      }
-    }
-  }
-`;
-
 export const getBoardItemsWithColumns = gql`
   query GetBoardItemsWithColumns($boardId: ID!) {
     boards(ids: [$boardId]) {
@@ -590,7 +577,7 @@ export const getWorkspaceInfo = gql`
   }
 `;
 
-export const getSprints = gql`
+export const getSprintsSnapshots = gql`
   query GetSprints($sprintIds: [ID!]!) {
     sprints(ids: $sprintIds) {
       id

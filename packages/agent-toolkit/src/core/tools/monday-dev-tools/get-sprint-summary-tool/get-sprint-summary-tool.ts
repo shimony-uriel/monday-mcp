@@ -23,6 +23,7 @@ import {
   findItemById,
   getColumnValue,
   parseColumnValue,
+  validateSprintsBoardSchema,
 } from '../shared';
 
 export const getSprintSummaryToolSchema = {
@@ -30,7 +31,7 @@ export const getSprintSummaryToolSchema = {
     .string()
     .describe('The ID of the specific sprint to get the summary for (e.g., "9526510589")'),
   sprintsBoardId: z
-    .number()
+    .string()
     .describe('The ID of the monday-dev board containing the sprints'),
 };
 
@@ -45,30 +46,30 @@ export class GetSprintSummaryTool extends BaseMondayApiTool<typeof getSprintSumm
   });
 
   getDescription(): string {
-    return `Get the complete summary and analysis of a sprint from Monday Dev.
+    return ` monday-dev: Get the complete summary and analysis of a sprint.
 
 ## Purpose:
-Retrieves  sprint analysis document content for a specific sprint.
-
-## Requirements:
-- Sprint must have an AI summary document (sprints started after 1/1/2025)
-- Summary document must exist in the sprint_summary column
+Unlock deep insights into sprint performance. 
+This tool retrieves comprehensive sprint summary documents that enable deep dive into sprint performance metrics, velocity forecasting, compleation rates, and scope management.
 
 ## What This Tool Returns:
 The complete sprint summary content including:
 - **Velocity & Performance**: Task completion rates, story points analysis distributed by developer or team
 - **Scope Management**: Analysis of planned vs. unplanned tasks, scope creep
 - **Team Performance**: Individual velocity, workload distribution per team member
-- **AI Recommendations**: Action items, process improvements, retrospective focus areas
 - **Task Distribution**: Breakdown of completed tasks by type (Feature, Bug, Tech Debt, Infrastructure, etc.)
+- **AI Recommendations**: Action items, process improvements, retrospective focus areas
 
+
+## Requirements:
+- Sprint must have an AI summary document (sprints started after 1/1/2025)
+- Summary document must exist in the sprint_summary column
 
 
 ## Important Note:
 When viewing task distribution by owner in section "Completed by Assignee", you'll see user IDs in the format "@12345678". the 8 digits after the @is the user ID. To retrieve the actual owner names, use the list_users_and_teams tool with the user ID and set includeTeams=false for optimal performance.
 
-## AI AGENT DIRECTIVE:
-Use this tool when you need comprehensive sprint analysis. For basic sprint metadata only, use get_sprints_metadata tool instead.`;
+`;
   }
 
   getInputSchema(): typeof getSprintSummaryToolSchema {
@@ -102,7 +103,7 @@ Use this tool when you need comprehensive sprint analysis. For basic sprint meta
   /**
    * Gets sprint metadata and extracts the summary document object ID
    */
-  private async getSprintMetadata(sprintsBoardId: number, sprintId: string): Promise<any> {
+  private async getSprintMetadata(sprintsBoardId: string, sprintId: string): Promise<any> {
     try {
       const variables: GetBoardItemsWithColumnsQueryVariables = {
         boardId: sprintsBoardId.toString(),
@@ -118,7 +119,17 @@ Use this tool when you need comprehensive sprint analysis. For basic sprint meta
         };
       }
 
+      // Validate board schema has required sprint columns
       const sprints = board.items_page?.items || [];
+      if (sprints.length > 0) {
+        const schemaValidation = validateSprintsBoardSchema(sprints[0]?.column_values);
+        if (!schemaValidation.isValid) {
+          return {
+            success: false,
+            error: `${ERROR_PREFIXES.VALIDATION_ERROR} ${schemaValidation.errorMessage}`,
+          };
+        }
+      }
       
       if (sprints.length === 0) {
         return {

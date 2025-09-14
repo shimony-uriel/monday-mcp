@@ -18,7 +18,7 @@ async function runServer() {
 
   const toolkit = new MondayAgentToolkit({
     mondayApiToken: validatedArgs.token,
-    mondayApiVersion: validatedArgs.version,
+    mondayApiVersion:"dev",
     mondayApiRequestConfig: {},
     toolsConfiguration: {
       readOnlyMode: validatedArgs.readOnlyMode,

@@ -2,7 +2,6 @@
  * Shared Monday Dev tools module
  * 
  * This module provides common constants and helpers
- * that are shared across all Monday Dev tools to avoid duplication and ensure consistency.
  */
 
 // Export all constants
