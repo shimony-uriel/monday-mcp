@@ -7,16 +7,9 @@ import { BaseMondayApiTool, createMondayApiAnnotations } from './base-monday-api
 // Filter type enum
 const QueryByIdEnum = z.enum(['ids', 'object_ids', 'workspace_ids']);
 
-// Single filter object schema
-const QueryByIdSchema = z.object({
-  type: QueryByIdEnum.describe('Type of id to query by: ids, object_ids, or workspace_ids'),
-  values: z.array(z.string()).min(1).describe('Array of ID values for this query type (at least 1 required)'),
-});
-
 export const readDocsToolSchema = {
-  ids: QueryByIdSchema.describe(
-    'ID query object that specifies a type (ids/object_ids/workspace_ids) and an array of values.',
-  ),
+  type: QueryByIdEnum.describe('Query type of ids parameter that is used query by: ids, object_ids, or workspace_ids'),
+  ids: z.array(z.string()).min(1).describe('Array of ID values for this query type (at least 1 required)'),
   limit: z
     .number()
     .optional()
@@ -56,16 +49,16 @@ PAGINATION:
 - Check response for 'has_more_pages' to know if you should continue paginating
 - If user asks for "all documents" and you get exactly 25 results, continue with page 2, 3, etc.
 
-FILTERING: Provide an ID filter object with:
+FILTERING: Provide a type value and array of ids:
 - type: 'ids' for specific document IDs
 - type: 'object_ids' for specific document object IDs  
 - type: 'workspace_ids' for all docs in specific workspaces
-- values: array of ID strings (at least 1 required)
+- ids: array of ID strings (at least 1 required)
 
 Examples:
-- { type: 'ids', values: ['123', '456'] }
-- { type: 'object_ids', values: ['123'] }
-- { type: 'workspace_ids', values: ['ws_101'] }
+- { type: 'ids', ids: ['123', '456'] }
+- { type: 'object_ids', ids: ['123'] }
+- { type: 'workspace_ids', ids: ['ws_101'] }
 
 USAGE PATTERNS:
 - For specific documents: use type 'ids' or 'object_ids' (A monday doc has two unique identifiers)
@@ -80,20 +73,19 @@ USAGE PATTERNS:
   protected async executeInternal(input: ToolInputType<typeof readDocsToolSchema>): Promise<ToolOutputType<never>> {
     try {
       // Extract ID values by type (now it's a single object, not an array)
-      const idObj = input.ids; // Get the ID object directly
       let ids: string[] | undefined;
       let object_ids: string[] | undefined;
       let workspace_ids: string[] | undefined;
 
-      switch (idObj.type) {
+      switch (input.type) {
         case 'ids':
-          ids = idObj.values;
+          ids = input.ids;
           break;
         case 'object_ids':
-          object_ids = idObj.values;
+          object_ids = input.ids;
           break;
         case 'workspace_ids':
-          workspace_ids = idObj.values;
+          workspace_ids = input.ids;
           break;
       }
 
