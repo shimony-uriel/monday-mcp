@@ -23,7 +23,6 @@ import { GetColumnTypeInfoTool } from './get-column-type-info/get-column-type-in
 import { GetGraphQLSchemaTool } from './get-graphql-schema-tool';
 import { GetTypeDetailsTool } from './get-type-details-tool';
 import { GetUsersTool } from './get-users-tool';
-
 import { ListUsersAndTeamsTool } from './list-users-and-teams-tool/list-users-and-teams-tool';
 import { MoveItemToGroupTool } from './move-item-to-group-tool';
 import { ReadDocsTool } from './read-docs-tool';
@@ -48,7 +47,6 @@ export const allGraphqlApiTools: BaseMondayApiToolConstructor[] = [
   GetBoardActivityTool,
   GetBoardInfoTool,
   GetUsersTool,
-
   ListUsersAndTeamsTool,
   ChangeItemColumnValuesTool,
   MoveItemToGroupTool,

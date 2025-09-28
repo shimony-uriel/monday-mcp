@@ -592,6 +592,8 @@ export const getSprintsSnapshots = gql`
       snapshots(type: [START, COMPLETE]) {
         id
         type
+        created_at
+        updated_at
         items {
           id
           column_values {
@@ -604,8 +606,6 @@ export const getSprintsSnapshots = gql`
           id
           done_status_indexes
         }
-        created_at
-        updated_at
       }
     }
   }

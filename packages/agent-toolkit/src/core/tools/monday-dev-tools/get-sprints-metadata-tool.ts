@@ -1,9 +1,9 @@
 import { z } from 'zod';
-import { GetBoardItemsWithColumnsQuery, GetBoardItemsWithColumnsQueryVariables } from '../../../monday-graphql/generated/graphql';
+import { ColumnValue, GetBoardItemsWithColumnsQuery, GetBoardItemsWithColumnsQueryVariables } from '../../../monday-graphql/generated/graphql';
 import { getBoardItemsWithColumns } from '../../../monday-graphql/queries.graphql';
 import { ToolInputType, ToolOutputType, ToolType } from '../../tool';
 import { BaseMondayApiTool, createMondayApiAnnotations } from '../platform-api-tools/base-monday-api-tool';
-import { REQUIRED_SPRINT_COLUMNS, extractDocumentObjectId, validateSprintsBoardSchema, getSprintColumnDisplayName, getColumnValue, SPRINT_STATUS, parseColumnValue } from './shared';
+import { REQUIRED_SPRINT_COLUMNS, extractDocumentObjectId, validateSprintsBoardSchema, getColumnValue, SPRINT_STATUS, parseColumnValue } from './shared';
 
 export const getSprintsMetadataToolSchema = {
   sprintsBoardId: z.number().describe('The ID of the monday-dev board containing the sprints'),
@@ -66,7 +66,7 @@ Requires the Main Sprints board ID of the monday-dev containing your sprints.`;
     // Validate board schema has required sprint columns 
         const sprints = board.items_page?.items || [];
 
-    const schemaValidation = validateSprintsBoardSchema(sprints[0]?.column_values);
+    const schemaValidation = validateSprintsBoardSchema(sprints[0]?.column_values as ColumnValue[]);
     if (!schemaValidation.isValid) {
       return {
         content: schemaValidation.errorMessage,
@@ -107,11 +107,11 @@ Requires the Main Sprints board ID of the monday-dev containing your sprints.`;
       const sprintSummary = parseColumnValue(getColumnValue(sprint, REQUIRED_SPRINT_COLUMNS.SPRINT_SUMMARY), REQUIRED_SPRINT_COLUMNS.SPRINT_SUMMARY);
 
       // Determine status
-      let status: string = SPRINT_STATUS.PLANNED;
+      let status: string = SPRINT_STATUS.Planned;
       if (sprintCompletion?.checked) {
-        status = SPRINT_STATUS.COMPLETED;
+        status = SPRINT_STATUS.Completed;
       } else if (sprintActivation?.checked || sprintStartDate) {
-        status = SPRINT_STATUS.IN_PROGRESS;
+        status = SPRINT_STATUS.Active;
       }
 
       // Format timeline
@@ -131,9 +131,9 @@ Requires the Main Sprints board ID of the monday-dev containing your sprints.`;
     });
 
     report += `\n## Status Definitions:\n`;
-    report += `- **${SPRINT_STATUS.PLANNED}**: Sprint not yet started (no activation, no start date)\n`;
-    report += `- **${SPRINT_STATUS.IN_PROGRESS}**: Sprint is active (activated or has start date, but not completed)\n`;
-    report += `- **${SPRINT_STATUS.COMPLETED}**: Sprint is finished (completion checkbox is checked)\n\n`;
+    report += `- **${SPRINT_STATUS.Planned}**: Sprint not yet started (no activation, no start date)\n`;
+    report += `- **${SPRINT_STATUS.Active}**: Sprint is active (activated or has start date, but not completed)\n`;
+    report += `- **${SPRINT_STATUS.Completed}**: Sprint is finished (completion checkbox is checked)\n\n`;
 
 
     return report;

@@ -8,6 +8,7 @@ import {
   ReadDocsQueryVariables,
   ExportMarkdownFromDocMutation,
   ExportMarkdownFromDocMutationVariables,
+  ColumnValue,
 } from '../../../monday-graphql/generated/graphql';
 import {
   getBoardItemsWithColumns as getSprintBoardItems,
@@ -122,7 +123,7 @@ When viewing task distribution by owner in section "Completed by Assignee", you'
       // Validate board schema has required sprint columns
       const sprints = board.items_page?.items || [];
       if (sprints.length > 0) {
-        const schemaValidation = validateSprintsBoardSchema(sprints[0]?.column_values);
+        const schemaValidation = validateSprintsBoardSchema(sprints[0]?.column_values as ColumnValue[]);
         if (!schemaValidation.isValid) {
           return {
             success: false,

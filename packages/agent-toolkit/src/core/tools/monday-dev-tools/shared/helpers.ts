@@ -75,16 +75,16 @@ export function extractDocumentObjectId(columnValue: any): string | null {
 /**
  * Get display name for sprint column ID
  */
-export function getSprintColumnDisplayName(columnId: string): string {
-  return SPRINT_COLUMN_DISPLAY_NAMES[columnId as keyof typeof SPRINT_COLUMN_DISPLAY_NAMES] || columnId;
+export function getSprintColumnDisplayName(columnId: keyof typeof SPRINT_COLUMN_DISPLAY_NAMES): string {
+  return SPRINT_COLUMN_DISPLAY_NAMES[columnId] || columnId;
 }
 
 /**
  * Validate sprint board schema
  */
 export function validateSprintsBoardSchema
-(boardColumns: any): { isValid: boolean; errorMessage: string } {
-  const existingColumnIds = new Set(boardColumns.map((col: any) => col.id));
+(boardColumns: ColumnValue[]): { isValid: boolean; errorMessage: string } {
+  const existingColumnIds = new Set(boardColumns.map((col: ColumnValue) => col.id));
   
   const missingColumns: string[] = [];
   const requiredColumns = Object.values(REQUIRED_SPRINT_COLUMNS);
@@ -99,7 +99,7 @@ export function validateSprintsBoardSchema
     let errorMessage = `BoardID provided is not a valid sprint board. Missing required columns:\n\n`;
     
     missingColumns.forEach(columnId => {
-      const columnDisplayName = getSprintColumnDisplayName(columnId);
+      const columnDisplayName = getSprintColumnDisplayName(columnId as keyof typeof SPRINT_COLUMN_DISPLAY_NAMES);
       errorMessage += `- ${columnDisplayName} (column ID: ${columnId})\n`;
     });
     

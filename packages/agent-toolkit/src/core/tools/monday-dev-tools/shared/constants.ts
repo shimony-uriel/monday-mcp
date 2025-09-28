@@ -1,3 +1,5 @@
+import { SprintState } from '../../../../monday-graphql/generated/graphql';
+
 /**
  * Shared constants for Monday Dev tools
  */
@@ -45,13 +47,8 @@ export const SPRINT_COLUMN_DISPLAY_NAMES = {
   [REQUIRED_SPRINT_COLUMNS.SPRINT_SUMMARY]: 'Sprint Summary',
 } as const;
 
-// Sprint status values
-export const SPRINT_STATUS = {
-  PLANNED: 'Planned',
-  IN_PROGRESS: 'In Progress',
-  COMPLETED: 'Completed',
-} as const;
-
+// Use GraphQL enum for sprint status values
+export const SPRINT_STATUS = SprintState;
 
 /**
  * Monday Dev standard task column IDs
