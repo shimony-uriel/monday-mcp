@@ -30,11 +30,14 @@ export const getDateValue = (sprint: Sprint, columnId: string): string | null =>
 
 /**
  * Get timeline value from sprint column (for sprint timeline)
+ * Returns dates in yyyy-mm-dd format
  */
 export const getTimelineValue = (sprint: Sprint, columnId: string): { from: string; to: string } | null => {
   const column = getSprintColumnValue(sprint, columnId);
   if (column?.__typename === 'TimelineValue' && column.from && column.to) {
-    return { from: column.from, to: column.to };
+    const fromDate = column.from.split('T')[0];
+    const toDate = column.to.split('T')[0];
+    return { from: fromDate, to: toDate };
   }
   return null;
 };
