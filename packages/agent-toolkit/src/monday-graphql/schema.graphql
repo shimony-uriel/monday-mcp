@@ -8803,13 +8803,13 @@ type DailyAnalytics {
   last_updated: ISO8601DateTime
 
   """API usage per day."""
-  by_day: [PlatformApiDailyAnalyticsByDay!]
+  by_day: [PlatformApiDailyAnalyticsByDay!]!
 
   """API usage per app."""
-  by_app: [PlatformApiDailyAnalyticsByApp!]
+  by_app: [PlatformApiDailyAnalyticsByApp!]!
 
   """API usage per user."""
-  by_user: [PlatformApiDailyAnalyticsByUser!]
+  by_user: [PlatformApiDailyAnalyticsByUser!]!
 }
 
 """Platform API daily limit."""
@@ -8854,7 +8854,7 @@ type PlatformApiDailyAnalyticsByDay {
 """API usage per user."""
 type PlatformApiDailyAnalyticsByUser {
   """User."""
-  user: User
+  user: User!
 
   """API usage for the user."""
   usage: Int!

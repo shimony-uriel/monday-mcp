@@ -11,85 +11,10 @@ export const deleteItem = gql`
 export const getBoardItemsByName = gql`
   query GetBoardItemsByName($boardId: ID!, $term: CompareValue!) {
     boards(ids: [$boardId]) {
-      items_page(query_params: {  rules: [{ column_id: "name", operator: contains_text, compare_value: $term }] }) {
+      items_page(query_params: { rules: [{ column_id: "name", operator: contains_text, compare_value: $term }] }) {
         items {
           id
           name
-        }
-      }
-    }
-  }
-`;
-
-export const getSprintsBoardItemsWithColumns = gql`
-  query GetSprintsBoardItemsWithColumns($boardId: ID!) {
-    boards(ids: [$boardId]) {
-      items_page {
-        items {
-          id
-          name
-          column_values {
-            __typename
-            id
-            type
-            ... on TextValue {
-              value
-            }
-            ... on DocValue {
-              file {
-                doc {
-                  object_id
-                }
-              }
-            }
-            ... on TimelineValue {
-              from
-              to
-            }
-            ... on CheckboxValue {
-              checked
-            }
-            ... on DateValue {
-              date
-            }
-          } 
-        }
-      }
-    }
-  }
-`;
-
-export const getSprintsByIds = gql`
-  query getSprintsByIds($ids: [ID!]) {
-    items(ids: $ids) {
-      id
-      name
-      board {
-        id
-      }
-      column_values {
-        id
-        type
-        __typename
-        ... on TextValue {
-          value
-        }
-        ... on DateValue {
-          date
-        }
-        ... on TimelineValue {
-          from
-          to
-        }
-        ... on CheckboxValue {
-          checked
-        }
-        ... on DocValue {
-          file {
-            doc {
-              object_id
-            }
-          }
         }
       }
     }
@@ -663,6 +588,81 @@ export const getSprintsSnapshots = gql`
         columns_metadata {
           id
           done_status_indexes
+        }
+      }
+    }
+  }
+`;
+
+export const getSprintsBoardItemsWithColumns = gql`
+  query GetSprintsBoardItemsWithColumns($boardId: ID!) {
+    boards(ids: [$boardId]) {
+      items_page {
+        items {
+          id
+          name
+          column_values {
+            __typename
+            id
+            type
+            ... on TextValue {
+              value
+            }
+            ... on DocValue {
+              file {
+                doc {
+                  object_id
+                }
+              }
+            }
+            ... on TimelineValue {
+              from
+              to
+            }
+            ... on CheckboxValue {
+              checked
+            }
+            ... on DateValue {
+              date
+            }
+          } 
+        }
+      }
+    }
+  }
+`;
+
+export const getSprintsByIds = gql`
+  query getSprintsByIds($ids: [ID!]) {
+    items(ids: $ids) {
+      id
+      name
+      board {
+        id
+      }
+      column_values {
+        id
+        type
+        __typename
+        ... on TextValue {
+          value
+        }
+        ... on DateValue {
+          date
+        }
+        ... on TimelineValue {
+          from
+          to
+        }
+        ... on CheckboxValue {
+          checked
+        }
+        ... on DocValue {
+          file {
+            doc {
+              object_id
+            }
+          }
         }
       }
     }

@@ -35,13 +35,6 @@ export const ERROR_PREFIXES = {
 // Default limits
 export const DOCS_LIMIT =   1
 
-// Document ID extraction fields
-export const DOCUMENT_ID_FIELDS = [
-  'objectId',
-  'doc_id', 
-  'docId',
-] as const;
-
 // Sprint column display names
 export const SPRINT_COLUMN_DISPLAY_NAMES = {
   [REQUIRED_SPRINT_COLUMNS.SPRINT_ACTIVATION]: 'Sprint Activation',
@@ -56,8 +49,8 @@ export const SPRINT_COLUMN_DISPLAY_NAMES = {
 export const SPRINT_STATUS = SprintState;
 
 /**
- * Monday Dev standard task column IDs
- * These are the standard column IDs used across Monday Dev boards
+ * Monday Dev task column IDs
+ * These column IDs used across all Monday Dev tasks boards
  */
 export const MONDAY_DEV_TASK_COLUMN_IDS = {
   TASK_STATUS: 'task_status',

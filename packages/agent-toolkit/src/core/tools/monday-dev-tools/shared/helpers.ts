@@ -3,7 +3,7 @@
  */
 
 import { Column } from '../../../../monday-graphql/generated/graphql';
-import { DOCUMENT_ID_FIELDS, REQUIRED_SPRINT_COLUMNS, SPRINT_COLUMN_DISPLAY_NAMES, Sprint } from './constants';
+import {REQUIRED_SPRINT_COLUMNS, SPRINT_COLUMN_DISPLAY_NAMES, Sprint } from './constants';
 
 /**
  * Get typed column value from Sprint item

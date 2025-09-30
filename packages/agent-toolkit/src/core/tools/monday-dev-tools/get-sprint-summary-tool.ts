@@ -32,7 +32,7 @@ export class GetSprintSummaryTool extends BaseMondayApiTool<typeof getSprintSumm
   name = 'get_sprint_summary';
   type = ToolType.READ;
   annotations = createMondayApiAnnotations({
-    title: 'Get Sprint Summary',
+    title: 'monday-dev: Get Sprint Summary',
     readOnlyHint: true,
     destructiveHint: false,
     idempotentHint: true,
@@ -42,8 +42,7 @@ export class GetSprintSummaryTool extends BaseMondayApiTool<typeof getSprintSumm
     return `Get the complete summary and analysis of a sprint.
 
 ## Purpose:
-Unlock deep insights into sprint performance. 
-This tool retrieves comprehensive sprint summary documents that enable deep dive into sprint performance metrics, velocity forecasting, compleation rates, and scope management.
+Unlock deep insights into completed sprint performance. 
 
 The sprint summary content including:
 - **Scope Management**: Analysis of planned vs. unplanned tasks, scope creep
@@ -51,9 +50,8 @@ The sprint summary content including:
 - **Task Distribution**: Breakdown of completed tasks by type (Feature, Bug, Tech Debt, Infrastructure, etc.)
 - **AI Recommendations**: Action items, process improvements, retrospective focus areas
 
-
 ## Requirements:
-- Sprint must have an AI summary document (sprints started after 1/1/2025)
+- Sprint must be completed and must be created after 1/1/2025 
 
 ## Important Note:
 When viewing the section "Completed by Assignee", you'll see user IDs in the format "@user-12345678". the 8 digits after the @is the user ID. To retrieve the actual owner names, use the list_users_and_teams tool with the user ID and set includeTeams=false for optimal performance.
