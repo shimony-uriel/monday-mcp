@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { GetBoardItemsPageQuery, GetBoardItemsPageQueryVariables } from '../../../../monday-graphql/generated/graphql';
+import { GetBoardItemsPageQuery, GetBoardItemsPageQueryVariables, ItemsOrderByDirection, ItemsQueryOperator, ItemsQueryRuleOperator } from '../../../../monday-graphql/generated/graphql';
 import { getBoardItemsPage } from './get-board-items-page-tool.graphql';
 import { ToolInputType, ToolOutputType, ToolType } from '../../../tool';
 import { BaseMondayApiTool, createMondayApiAnnotations } from '../base-monday-api-tool';
@@ -10,9 +10,28 @@ const MIN_LIMIT = 1;
 
 export const getBoardItemsPageToolSchema = {
   boardId: z.number().describe('The id of the board to get items from'),
+  itemIds: z.array(z.number()).optional().describe('The ids of the items to get. The count of items should be less than 100.'),
   limit: z.number().min(MIN_LIMIT).max(MAX_LIMIT).optional().default(DEFAULT_LIMIT).describe('The number of items to get'),
   cursor: z.string().optional().describe('The cursor to get the next page of items, use the nextCursor from the previous response. If the nextCursor was null, it means there are no more items to get'),
   includeColumns: z.boolean().optional().default(false).describe('Whether to include column values in the response'),
+  iltersOperator: z.nativeEnum(ItemsQueryOperator).optional().default(ItemsQueryOperator.And).describe('The operator to use for the filters'),
+
+  filtersStringified: z.string().optional().describe('**ONLY FOR MICROSOFT COPILOT**: The filters to apply on the items. This is a stringified JSON object of "filters" field. Read "filters" field description for details how to use it.'),
+  filters: z.array(z.object({
+    columnId: z.string().describe('The id of the column to filter by'),
+    compareAttribute: z.string().optional().describe('The attribute to compare the value to'),
+    compareValue: z.any().describe('The value to compare the attribute to. This can be a string or index value depending on the column type.'),
+    operator: z.nativeEnum(ItemsQueryRuleOperator).optional().default(ItemsQueryRuleOperator.AnyOf).describe('The operator to use for the filter'),
+  })).optional().describe('The configuration of filters to apply on the items. Before sending the filters, use get_board_info tool to check "Filtering Guidelines" section for filtering by the column.'),
+  filtersOperator: z.nativeEnum(ItemsQueryOperator).optional().default(ItemsQueryOperator.And).describe('The operator to use for the filters'),
+  
+  columnIds: z.array(z.string()).optional().describe('The ids of the columns to get, can be used to reduce the response size when user asks for specific columns. Works only when includeColumns is true. If not provided, all columns will be returned'),
+  orderByStringified: z.string().optional().describe('**ONLY FOR MICROSOFT COPILOT**: The order by to apply on the items. This is a stringified JSON object of "orderBy" field. Read "orderBy" field description for details how to use it.'),
+  orderBy: z.array(z.object({
+    columnId: z.string().describe('The id of the column to order by'),
+    direction: z.nativeEnum(ItemsOrderByDirection).optional().default(ItemsOrderByDirection.Asc).describe('The direction to order by'),
+  })).optional().describe('The columns to order by, will control the order of the items in the response'),
+
 };
 
 export type GetBoardItemsPageToolInput = typeof getBoardItemsPageToolSchema;
@@ -37,6 +56,16 @@ export class GetBoardItemsPageTool extends BaseMondayApiTool<GetBoardItemsPageTo
   getInputSchema(): GetBoardItemsPageToolInput {
     return getBoardItemsPageToolSchema;
   }
+
+  private parseAndAssignJsonField(input: ToolInputType<GetBoardItemsPageToolInput>, jsonKey: keyof ToolInputType<GetBoardItemsPageToolInput>, stringifiedJsonKey: keyof ToolInputType<GetBoardItemsPageToolInput>) {
+    if(input[stringifiedJsonKey] && !input[jsonKey]) {
+      try {
+        (input as any)[jsonKey] = JSON.parse(input[stringifiedJsonKey] as string);
+      } catch {
+        throw new Error(`${stringifiedJsonKey} is not a valid JSON`);
+      }
+    }
+  }
   
   protected async executeInternal(input: ToolInputType<GetBoardItemsPageToolInput>): Promise<ToolOutputType<never>> {
     const variables: GetBoardItemsPageQueryVariables = {
@@ -44,7 +73,31 @@ export class GetBoardItemsPageTool extends BaseMondayApiTool<GetBoardItemsPageTo
       limit: input.limit,
       cursor: input.cursor,
       includeColumns: input.includeColumns,
+      columnIds: input.columnIds
     };
+
+    // Passing filters + cursor returns an error as cursor has them encoded in it
+    const canIncludeFilters = !input.cursor;
+
+    this.parseAndAssignJsonField(input, 'filters', 'filtersStringified');
+    this.parseAndAssignJsonField(input, 'orderBy', 'orderByStringified');
+
+    if(canIncludeFilters && (input.itemIds || input.filters || input.orderBy)) { 
+      variables.queryParams = {
+        ids: input.itemIds?.map(id => id.toString()),
+        operator: input.filtersOperator,
+        rules: input.filters?.map(filter => ({
+          column_id: filter.columnId.toString(),
+          compare_value: filter.compareValue,
+          operator: filter.operator,
+          compare_attribute: filter.compareAttribute,
+        })),
+        order_by: input.orderBy?.map(orderBy => ({
+          column_id: orderBy.columnId,
+          direction: orderBy.direction,
+        }))
+      }
+    }
 
     const res = await this.mondayApi.request<GetBoardItemsPageQuery>(getBoardItemsPage, variables);
 
