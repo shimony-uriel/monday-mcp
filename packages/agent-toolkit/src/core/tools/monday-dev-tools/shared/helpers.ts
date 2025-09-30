@@ -2,30 +2,30 @@
  * Shared helper functions for Monday Dev tools
  */
 
-import { Item as BoardItem, ColumnValue } from '../../../../monday-graphql/generated/graphql';
+import { Item as BoardItem, ColumnValue, Column } from '../../../../monday-graphql/generated/graphql';
 import { DOCUMENT_ID_FIELDS, REQUIRED_SPRINT_COLUMNS, SPRINT_COLUMN_DISPLAY_NAMES } from './constants';
 
 /**
  * Find a column value by ID in a board item
  */
-export function findColumnValue(item: BoardItem, columnId: string): ColumnValue | undefined {
+export const findColumnValue = (item: BoardItem, columnId: string): ColumnValue | undefined => {
   return item.column_values?.find((cv: ColumnValue) => cv.id === columnId);
-}
+};
 
 /**
  * Find a board item by ID in the items array
  */
-export function findItemById(items: BoardItem[], itemId: string): BoardItem | null {
+export const findItemById = (items: BoardItem[], itemId: string): BoardItem | null => {
   return items.find((item) => item.id === itemId) || null;
-}
+};
 
 /**
  * Get column value by ID from board item
  */
-export function getColumnValue(item: BoardItem, columnId: string): any {
+export const getColumnValue = (item: BoardItem, columnId: string): any => {
   const column = item.column_values?.find((cv) => cv.id === columnId);
   return column?.value;
-}
+};
 
 /**
  * Parse column value from raw string data
@@ -49,7 +49,7 @@ export const parseColumnValue = (rawValue: any, columnValueName?: string) => {
  * Extract document object ID from column value
  * By default,in multiple files column, the first file in the files array is returned
  */
-export function extractDocumentObjectId(columnValue: any): string | null {
+export const extractDocumentObjectId = (columnValue: any): string | null => {
   if (!columnValue || typeof columnValue !== 'object') return null;
   
   // Check for document ID in various possible fields
@@ -70,21 +70,26 @@ export function extractDocumentObjectId(columnValue: any): string | null {
   }
   
   return null;
-}
+};
 
 /**
  * Get display name for sprint column ID
  */
-export function getSprintColumnDisplayName(columnId: keyof typeof SPRINT_COLUMN_DISPLAY_NAMES): string {
+export const getSprintColumnDisplayName = (columnId: keyof typeof SPRINT_COLUMN_DISPLAY_NAMES): string => {
   return SPRINT_COLUMN_DISPLAY_NAMES[columnId] || columnId;
-}
+};
 
 /**
- * Validate sprint board schema
+ * Validate sprint board schema using board columns from schema API
  */
-export function validateSprintsBoardSchema
-(boardColumns: ColumnValue[]): { isValid: boolean; errorMessage: string } {
-  const existingColumnIds = new Set(boardColumns.map((col: ColumnValue) => col.id));
+export const validateSprintsBoardSchemaFromColumns = (
+  boardColumns: Column[]
+): { isValid: boolean; errorMessage: string } => {
+  const existingColumnIds = new Set(
+    boardColumns
+      .filter((col): col is NonNullable<Column> => col !== null)
+      .map((col) => col.id)
+  );
   
   const missingColumns: string[] = [];
   const requiredColumns = Object.values(REQUIRED_SPRINT_COLUMNS);
@@ -96,17 +101,15 @@ export function validateSprintsBoardSchema
   }
   
   if (missingColumns.length > 0) {
-    let errorMessage = `BoardID provided is not a valid sprint board. Missing required columns:\n\n`;
+    let errorMessage = `BoardID provided is not a valid sprints board. Missing required columns:\n\n`;
     
     missingColumns.forEach(columnId => {
       const columnDisplayName = getSprintColumnDisplayName(columnId as keyof typeof SPRINT_COLUMN_DISPLAY_NAMES);
-      errorMessage += `- ${columnDisplayName} (column ID: ${columnId})\n`;
+      errorMessage += `- ${columnDisplayName}\n`;
     });
-    
-    errorMessage += `\nPlease ensure you're using the correct sprint board ID that contains all required sprint columns.`;
-    
+        
     return { isValid: false, errorMessage };
   }
   
   return { isValid: true, errorMessage: '' };
-}
+};

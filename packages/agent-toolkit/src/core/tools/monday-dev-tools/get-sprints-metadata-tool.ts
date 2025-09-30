@@ -1,9 +1,23 @@
 import { z } from 'zod';
-import { ColumnValue, GetBoardItemsWithColumnsQuery, GetBoardItemsWithColumnsQueryVariables } from '../../../monday-graphql/generated/graphql';
-import { getBoardItemsWithColumns } from '../../../monday-graphql/queries.graphql';
+import { 
+  Column,
+  GetBoardItemsWithColumnsQuery, 
+  GetBoardItemsWithColumnsQueryVariables,
+  GetBoardSchemaQuery,
+  GetBoardSchemaQueryVariables
+} from '../../../monday-graphql/generated/graphql';
+import { getBoardItemsWithColumns, getBoardSchema } from '../../../monday-graphql/queries.graphql';
 import { ToolInputType, ToolOutputType, ToolType } from '../../tool';
 import { BaseMondayApiTool, createMondayApiAnnotations } from '../platform-api-tools/base-monday-api-tool';
-import { REQUIRED_SPRINT_COLUMNS, extractDocumentObjectId, validateSprintsBoardSchema, getColumnValue, SPRINT_STATUS, parseColumnValue } from './shared';
+import { 
+  REQUIRED_SPRINT_COLUMNS, 
+  extractDocumentObjectId, 
+  validateSprintsBoardSchemaFromColumns, 
+  getColumnValue, 
+  SPRINT_STATUS, 
+  parseColumnValue,
+  ERROR_PREFIXES
+} from './shared';
 
 export const getSprintsMetadataToolSchema = {
   sprintsBoardId: z.number().describe('The ID of the monday-dev board containing the sprints'),
@@ -22,11 +36,6 @@ export class GetSprintsMetadataTool extends BaseMondayApiTool<typeof getSprintsM
   getDescription(): string {
     return `Get comprehensive sprint metadata from a monday-dev sprints board including:
 
-## 🎯 Primary Use Cases:
-- **Sprint Name ↔ Sprint ID Mapping**: Find sprint IDs when you only have sprint names (essential for other sprint tools)
-- **Identify Current Sprint**: Easily recognize which sprint is currently active
-- **Understand Sprint Status**: Determine if a sprint is planned, in-progress, or completed
-
 ## Data Retrieved:
 A table of the last 25 sprints with the following information:
 - Sprint ID
@@ -38,9 +47,6 @@ A table of the last 25 sprints with the following information:
 - Sprint activation status
 - Sprint summary document object ID
 
-## 🔗 Integration with Other monday-dev Tools:
-- use this tool first if you only have sprint names but need sprint IDs for other sprint tools
-
 Requires the Main Sprints board ID of the monday-dev containing your sprints.`;
   }
 
@@ -49,44 +55,82 @@ Requires the Main Sprints board ID of the monday-dev containing your sprints.`;
   }
 
   protected async executeInternal(input: ToolInputType<typeof getSprintsMetadataToolSchema>): Promise<ToolOutputType<never>> {
-    const variables: GetBoardItemsWithColumnsQueryVariables = {
-      boardId: input.sprintsBoardId.toString(),
-    };
+    try {
+      // Step 1: Validate board schema first using board schema API
+      const schemaValidation = await this.validateBoardSchema(input.sprintsBoardId.toString());
+      if (!schemaValidation.success) {
+        return {
+          content: schemaValidation.error,
+        };
+      }
 
-    const res = await this.mondayApi.request<GetBoardItemsWithColumnsQuery>(getBoardItemsWithColumns, variables);
-    
-    // Validate board exists
-    const board = res.boards?.[0];
-    if (!board) {
+      // Step 2: Fetch all sprint items from the board
+      const variables: GetBoardItemsWithColumnsQueryVariables = {
+        boardId: input.sprintsBoardId.toString(),
+      };
+
+      const res = await this.mondayApi.request<GetBoardItemsWithColumnsQuery>(getBoardItemsWithColumns, variables);
+      
+      // Validate board exists
+      const board = res.boards?.[0];
+      if (!board) {
+        return {
+          content: `${ERROR_PREFIXES.BOARD_NOT_FOUND} Board with ID ${input.sprintsBoardId} not found. Please verify the board ID is correct and you have access to it.`,
+        };
+      }
+
+      const sprints = board.items_page?.items || [];
+
+      // Step 3: Generate comprehensive sprints metadata report
+      const report = this.generateSprintsMetadataReport(sprints);
+      
       return {
-        content: `Board with ID ${input.sprintsBoardId} not found. Please verify the board ID is correct and you have access to it.`,
+        content: report,
+      };
+    } catch (error) {
+      return {
+        content: `${ERROR_PREFIXES.INTERNAL_ERROR} Error retrieving sprints metadata: ${error instanceof Error ? error.message : 'Unknown error'}`,
       };
     }
-
-    // Validate board schema has required sprint columns 
-        const sprints = board.items_page?.items || [];
-
-    const schemaValidation = validateSprintsBoardSchema(sprints[0]?.column_values as ColumnValue[]);
-    if (!schemaValidation.isValid) {
-      return {
-        content: schemaValidation.errorMessage,
-      };
-    }
-
-    
-    if (sprints.length === 0) {
-      return {
-        content: `Board ID: ${input.sprintsBoardId} has the correct sprint schema but contains no items. Please add sprint items to this board.`,
-      };
-    }
-
-    const report = this.generateSprintsMetadataReport(sprints);
-    
-    return {
-      content: report,
-    };
   }     
 
+  /**
+   * Validates that the board has the required sprint columns using board schema API
+   */
+  private async validateBoardSchema(boardId: string): Promise<any> {
+    try {
+      const variables: GetBoardSchemaQueryVariables = {
+        boardId: boardId.toString(),
+      };
+
+      const res = await this.mondayApi.request<GetBoardSchemaQuery>(getBoardSchema, variables);
+      
+      const board = res.boards?.[0];
+      if (!board) {
+        return {
+          success: false,
+          error: `${ERROR_PREFIXES.BOARD_NOT_FOUND} Board with ID ${boardId} not found. Please verify the board ID is correct and you have access to it.`,
+        };
+      }
+
+      const columns = board.columns || [];
+      const schemaValidation = validateSprintsBoardSchemaFromColumns(columns as Column[] );
+      
+      if (!schemaValidation.isValid) {
+        return {
+          success: false,
+          error: `${ERROR_PREFIXES.VALIDATION_ERROR} ${schemaValidation.errorMessage}`,
+        };
+      }
+
+      return { success: true };
+    } catch (error) {
+      return {
+        success: false,
+        error: `${ERROR_PREFIXES.INTERNAL_ERROR} Error validating board schema: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      };
+    }
+  }
 
   private generateSprintsMetadataReport(sprints: any[]): string {
     let report = `# Sprints Metadata Report\n\n`;
@@ -132,8 +176,8 @@ Requires the Main Sprints board ID of the monday-dev containing your sprints.`;
 
     report += `\n## Status Definitions:\n`;
     report += `- **${SPRINT_STATUS.Planned}**: Sprint not yet started (no activation, no start date)\n`;
-    report += `- **${SPRINT_STATUS.Active}**: Sprint is active (activated or has start date, but not completed)\n`;
-    report += `- **${SPRINT_STATUS.Completed}**: Sprint is finished (completion checkbox is checked)\n\n`;
+    report += `- **${SPRINT_STATUS.Active}**: Sprint is active (activated but not completed)\n`;
+    report += `- **${SPRINT_STATUS.Completed}**: Sprint is finished\n\n`;
 
 
     return report;

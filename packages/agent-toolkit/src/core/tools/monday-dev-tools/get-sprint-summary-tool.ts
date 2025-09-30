@@ -2,16 +2,19 @@ import { z } from 'zod';
 import { ToolInputType, ToolOutputType, ToolType } from '../../tool';
 import { BaseMondayApiTool, createMondayApiAnnotations } from '../platform-api-tools/base-monday-api-tool';
 import { 
-  GetBoardItemsWithColumnsQuery,
-  GetBoardItemsWithColumnsQueryVariables,
+  GetSpecificBoardItemQuery,
+  GetSpecificBoardItemQueryVariables,
+  GetBoardSchemaQuery,
+  GetBoardSchemaQueryVariables,
   ReadDocsQuery,
   ReadDocsQueryVariables,
   ExportMarkdownFromDocMutation,
   ExportMarkdownFromDocMutationVariables,
-  ColumnValue,
+  Column,
 } from '../../../monday-graphql/generated/graphql';
 import {
-  getBoardItemsWithColumns as getSprintBoardItems,
+  getSpecificBoardItem as getSpecificSprintItem,
+  getBoardSchema,
   readDocs as readSprintSummaryDocs,
   exportMarkdownFromDoc as exportSprintSummaryMarkdown,
 } from '../../../monday-graphql/queries.graphql';
@@ -21,10 +24,9 @@ import {
   REQUIRED_SPRINT_COLUMNS,
   DOCS_LIMIT,
   extractDocumentObjectId,
-  findItemById,
   getColumnValue,
   parseColumnValue,
-  validateSprintsBoardSchema,
+  validateSprintsBoardSchemaFromColumns,
 } from './shared';
 
 export const getSprintSummaryToolSchema = {
@@ -47,7 +49,7 @@ export class GetSprintSummaryTool extends BaseMondayApiTool<typeof getSprintSumm
   });
 
   getDescription(): string {
-    return ` monday-dev: Get the complete summary and analysis of a sprint.
+    return `Get the complete summary and analysis of a sprint.
 
 ## Purpose:
 Unlock deep insights into sprint performance. 
@@ -68,7 +70,7 @@ The complete sprint summary content including:
 
 
 ## Important Note:
-When viewing task distribution by owner in section "Completed by Assignee", you'll see user IDs in the format "@12345678". the 8 digits after the @is the user ID. To retrieve the actual owner names, use the list_users_and_teams tool with the user ID and set includeTeams=false for optimal performance.
+When viewing the section "Completed by Assignee", you'll see user IDs in the format "@user-12345678". the 8 digits after the @is the user ID. To retrieve the actual owner names, use the list_users_and_teams tool with the user ID and set includeTeams=false for optimal performance.
 
 `;
   }
@@ -106,11 +108,19 @@ When viewing task distribution by owner in section "Completed by Assignee", you'
    */
   private async getSprintMetadata(sprintsBoardId: string, sprintId: string): Promise<any> {
     try {
-      const variables: GetBoardItemsWithColumnsQueryVariables = {
+      // Step 1: Validate board schema first using board schema API
+      const schemaValidation = await this.validateBoardSchema(sprintsBoardId);
+      if (!schemaValidation.success) {
+        return schemaValidation;
+      }
+
+      // Step 2: Fetch the specific sprint item by ID
+      const variables: GetSpecificBoardItemQueryVariables = {
         boardId: sprintsBoardId.toString(),
+        itemId: sprintId.toString(),
       };
 
-      const res = await this.mondayApi.request<GetBoardItemsWithColumnsQuery>(getSprintBoardItems, variables);
+      const res = await this.mondayApi.request<GetSpecificBoardItemQuery>(getSpecificSprintItem, variables);
       
       const board = res.boards?.[0];
       if (!board) {
@@ -120,36 +130,18 @@ When viewing task distribution by owner in section "Completed by Assignee", you'
         };
       }
 
-      // Validate board schema has required sprint columns
       const sprints = board.items_page?.items || [];
-      if (sprints.length > 0) {
-        const schemaValidation = validateSprintsBoardSchema(sprints[0]?.column_values as ColumnValue[]);
-        if (!schemaValidation.isValid) {
-          return {
-            success: false,
-            error: `${ERROR_PREFIXES.VALIDATION_ERROR} ${schemaValidation.errorMessage}`,
-          };
-        }
-      }
       
       if (sprints.length === 0) {
-        return {
-          success: false,
-          error: `${ERROR_PREFIXES.BOARD_NOT_FOUND} No sprints found in the specified board. Please verify the board ID contains sprint items.`,
-        };
-      }
-
-      // Find the specific sprint
-      const sprint = findItemById(sprints as BoardItem[], sprintId);
-      
-      if (!sprint) {
         return {
           success: false,
           error: `${ERROR_PREFIXES.SPRINT_NOT_FOUND} Sprint with ID ${sprintId} not found in board ${sprintsBoardId}. Please verify the sprint ID is correct.`,
         };
       }
 
-      // Get sprint summary column value
+      const sprint = sprints[0] as BoardItem;
+
+      // Step 3: Extract sprint summary document reference
       const summaryColumnValue = getColumnValue(sprint, REQUIRED_SPRINT_COLUMNS.SPRINT_SUMMARY);
       
       if (!summaryColumnValue) {
@@ -159,7 +151,7 @@ When viewing task distribution by owner in section "Completed by Assignee", you'
         };
       }
 
-      // Extract document object ID
+      // Step 4: Parse and extract document object ID
       const sprintSummary = parseColumnValue(summaryColumnValue, REQUIRED_SPRINT_COLUMNS.SPRINT_SUMMARY);
       const documentObjectId = extractDocumentObjectId(sprintSummary);
       
@@ -185,11 +177,49 @@ When viewing task distribution by owner in section "Completed by Assignee", you'
   }
 
   /**
+   * Validates that the board has the required sprint columns using board schema API
+   */
+  private async validateBoardSchema(boardId: string): Promise<any> {
+    try {
+      const variables: GetBoardSchemaQueryVariables = {
+        boardId: boardId.toString(),
+      };
+
+      const res = await this.mondayApi.request<GetBoardSchemaQuery>(getBoardSchema, variables);
+      
+      const board = res.boards?.[0];
+      if (!board) {
+        return {
+          success: false,
+          error: `${ERROR_PREFIXES.BOARD_NOT_FOUND} Board with ID ${boardId} not found. Please verify the board ID is correct and you have access to it.`,
+        };
+      }
+
+      const columns = board.columns || [];
+      const schemaValidation = validateSprintsBoardSchemaFromColumns(columns as Column[]);
+      
+      if (!schemaValidation.isValid) {
+        return {
+          success: false,
+          error: `${ERROR_PREFIXES.VALIDATION_ERROR} ${schemaValidation.errorMessage}`,
+        };
+      }
+
+      return { success: true };
+    } catch (error) {
+      return {
+        success: false,
+        error: `${ERROR_PREFIXES.INTERNAL_ERROR} Error validating board schema: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      };
+    }
+  }
+
+  /**
    * Reads the sprint summary document content
    */
   private async readSprintSummaryDocument(documentObjectId: string): Promise<any> {
     try {
-      // First, get the document metadata
+      // Step 1: Fetch document metadata using object ID
       const readDocsVariables: ReadDocsQueryVariables = {
         object_ids: [documentObjectId],
         limit: DOCS_LIMIT,
@@ -213,7 +243,7 @@ When viewing task distribution by owner in section "Completed by Assignee", you'
         };
       }
       
-      // Export the document content as markdown
+      // Step 2: Export document content as markdown
       const exportVariables: ExportMarkdownFromDocMutationVariables = {
         docId: doc.id,
         blockIds: [], // Empty array to get all blocks
