@@ -8953,6 +8953,7 @@ export type CreateItemMutation = { __typename?: 'Mutation', create_item?: { __ty
 export type CreateUpdateMutationVariables = Exact<{
   itemId: Scalars['ID']['input'];
   body: Scalars['String']['input'];
+  mentionsList?: InputMaybe<Array<InputMaybe<UpdateMention>> | InputMaybe<UpdateMention>>;
 }>;
 
 
@@ -9120,6 +9121,18 @@ export type ExportMarkdownFromDocMutationVariables = Exact<{
 
 export type ExportMarkdownFromDocMutation = { __typename?: 'Mutation', export_markdown_from_doc?: { __typename?: 'ExportMarkdownResult', success: boolean, markdown?: string | null, error?: string | null } | null };
 
+
+export type GetBoardItemsPageQueryVariables = Exact<{
+  boardId: Scalars['ID']['input'];
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  cursor?: InputMaybe<Scalars['String']['input']>;
+  includeColumns: Scalars['Boolean']['input'];
+}>;
+
+
+export type GetBoardItemsPageQuery = { __typename?: 'Query', boards?: Array<{ __typename?: 'Board', id: string, name: string, items_page: { __typename?: 'ItemsResponse', cursor?: string | null, items: Array<{ __typename?: 'Item', id: string, name: string, created_at?: any | null, updated_at?: any | null, column_values?: Array<{ __typename?: 'BatteryValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'BoardRelationValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'ButtonValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'CheckboxValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'ColorPickerValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'CountryValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'CreationLogValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'DateValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'DependencyValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'DirectDocValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'DocValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'DropdownValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'EmailValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'FileValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'FormulaValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'GroupValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'HourValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'IntegrationValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'ItemIdValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'LastUpdatedValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'LinkValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'LocationValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'LongTextValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'MirrorValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'NumbersValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'PeopleValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'PersonValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'PhoneValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'ProgressValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'RatingValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'StatusValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'SubtasksValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'TagsValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'TeamValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'TextValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'TimeTrackingValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'TimelineValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'UnsupportedValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'VoteValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'WeekValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'WorldClockValue', id: string, text?: string | null, value?: any | null }> }> } } | null> | null };
+
+
 export type GetWorkspaceInfoQueryVariables = Exact<{
   workspace_id: Scalars['ID']['input'];
 }>;
@@ -9127,9 +9140,20 @@ export type GetWorkspaceInfoQueryVariables = Exact<{
 
 export type GetWorkspaceInfoQuery = { __typename?: 'Query', workspaces?: Array<{ __typename?: 'Workspace', id?: string | null, name: string, description?: string | null, kind?: WorkspaceKind | null, created_at?: any | null, state?: State | null, is_default_workspace?: boolean | null, owners_subscribers?: Array<{ __typename?: 'User', id: string, name: string, email: string } | null> | null } | null> | null, boards?: Array<{ __typename?: 'Board', id: string, name: string, board_folder_id?: string | null } | null> | null, docs?: Array<{ __typename?: 'Document', id: string, name: string, doc_folder_id?: string | null } | null> | null, folders?: Array<{ __typename?: 'Folder', id: string, name: string } | null> | null };
 
+
 export type GetSprintsQueryVariables = Exact<{
   sprintIds: Array<Scalars['ID']['input']> | Scalars['ID']['input'];
 }>;
 
 
 export type GetSprintsQuery = { __typename?: 'Query', sprints?: Array<{ __typename?: 'Sprint', id: string, name?: string | null, start_date?: any | null, end_date?: any | null, state?: SprintState | null, timeline?: { __typename?: 'SprintTimeline', from?: any | null, to?: any | null } | null, snapshots?: Array<{ __typename?: 'SprintSnapshot', id?: string | null, type?: SprintSnapshotKind | null, created_at?: any | null, updated_at?: any | null, items?: Array<{ __typename?: 'SprintSnapshotItem', id: string, column_values?: Array<{ __typename?: 'SprintSnapshotItemColumnValue', id: string, type: string, value?: any | null }> | null }> | null, columns_metadata?: Array<{ __typename?: 'SprintSnapshotColumnMetadata', id: string, done_status_indexes: Array<number> }> | null }> | null }> | null };
+
+export type DuplicateItemMutationVariables = Exact<{
+  boardId: Scalars['ID']['input'];
+  itemId: Scalars['ID']['input'];
+  withUpdates?: InputMaybe<Scalars['Boolean']['input']>;
+}>;
+
+
+export type DuplicateItemMutation = { __typename?: 'Mutation', duplicate_item?: { __typename?: 'Item', id: string, name: string } | null };
+

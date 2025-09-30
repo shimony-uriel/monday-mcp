@@ -9,7 +9,7 @@ import { GetFormTool } from './workforms-tools/get-form-tool';
 import { CreateColumnTool } from './create-column-tool';
 import { CreateCustomActivityTool } from './create-custom-activity-tool';
 import { CreateGroupTool } from './create-group/create-group-tool';
-import { CreateItemTool } from './create-item-tool';
+import { CreateItemTool } from './create-item-tool/create-item-tool';
 import { CreateTimelineItemTool } from './create-timeline-item-tool';
 import { CreateUpdateTool } from './create-update-tool';
 import { DeleteColumnTool } from './delete-column-tool';
@@ -18,6 +18,7 @@ import { FetchCustomActivityTool } from './fetch-custom-activity-tool';
 import { GetBoardActivityTool } from './get-board-activity/get-board-activity-tool';
 import { GetBoardInfoTool } from './get-board-info/get-board-info-tool';
 import { GetBoardItemsTool } from './get-board-items-tool';
+import { GetBoardItemsPageTool } from './get-board-items-page-tool/get-board-items-page-tool';
 import { GetBoardSchemaTool } from './get-board-schema-tool';
 import { GetColumnTypeInfoTool } from './get-column-type-info/get-column-type-info-tool';
 import { GetGraphQLSchemaTool } from './get-graphql-schema-tool';
@@ -41,6 +42,7 @@ import { MoveObjectTool } from './move-object-tool/move-object-tool';
 export const allGraphqlApiTools: BaseMondayApiToolConstructor[] = [
   DeleteItemTool,
   GetBoardItemsTool,
+  GetBoardItemsPageTool,
   CreateItemTool,
   CreateUpdateTool,
   GetBoardSchemaTool,
@@ -90,13 +92,14 @@ export * from './workforms-tools/form-questions-editor-tool';
 export * from './create-column-tool';
 export * from './create-group/create-group-tool';
 export * from './create-custom-activity-tool';
-export * from './create-item-tool';
+export * from './create-item-tool/create-item-tool';
 export * from './create-timeline-item-tool';
 export * from './create-update-tool';
 export * from './delete-column-tool';
 export * from './delete-item-tool';
 export * from './fetch-custom-activity-tool';
 export * from './get-board-items-tool';
+export * from './get-board-items-page-tool/get-board-items-page-tool';
 export * from './get-board-schema-tool';
 export * from './get-column-type-info/get-column-type-info-tool';
 export * from './get-graphql-schema-tool';

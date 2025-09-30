@@ -106,8 +106,8 @@ export const createItem = gql`
 `;
 
 export const createUpdate = gql`
-  mutation createUpdate($itemId: ID!, $body: String!) {
-    create_update(item_id: $itemId, body: $body) {
+  mutation createUpdate($itemId: ID!, $body: String!, $mentionsList: [UpdateMention]) {
+    create_update(item_id: $itemId, body: $body, mentions_list: $mentionsList) {
       id
     }
   }
@@ -668,3 +668,13 @@ export const getSprintsSnapshots = gql`
     }
   }
 `;
+
+export const duplicateItem = gql`
+  mutation duplicateItem($boardId: ID!, $itemId: ID!, $withUpdates: Boolean) {
+    duplicate_item(board_id: $boardId, item_id: $itemId, with_updates: $withUpdates) {
+      id
+      name
+    }
+  }
+`;
+
