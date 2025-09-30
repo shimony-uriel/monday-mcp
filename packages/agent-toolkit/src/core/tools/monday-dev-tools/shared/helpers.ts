@@ -2,73 +2,52 @@
  * Shared helper functions for Monday Dev tools
  */
 
-import { Item as BoardItem, ColumnValue, Column } from '../../../../monday-graphql/generated/graphql';
-import { DOCUMENT_ID_FIELDS, REQUIRED_SPRINT_COLUMNS, SPRINT_COLUMN_DISPLAY_NAMES } from './constants';
+import { Column } from '../../../../monday-graphql/generated/graphql';
+import { DOCUMENT_ID_FIELDS, REQUIRED_SPRINT_COLUMNS, SPRINT_COLUMN_DISPLAY_NAMES, Sprint } from './constants';
 
 /**
- * Find a column value by ID in a board item
+ * Get typed column value from Sprint item
  */
-export const findColumnValue = (item: BoardItem, columnId: string): ColumnValue | undefined => {
-  return item.column_values?.find((cv: ColumnValue) => cv.id === columnId);
+export const getSprintColumnValue = (sprint: Sprint, columnId: string) => {
+  return sprint.column_values?.find((cv) => cv.id === columnId);
 };
 
 /**
- * Find a board item by ID in the items array
+ * Get checkbox value from sprint column (for activation and completion)
  */
-export const findItemById = (items: BoardItem[], itemId: string): BoardItem | null => {
-  return items.find((item) => item.id === itemId) || null;
+export const getCheckboxValue = (sprint: Sprint, columnId: string): boolean|null => {
+  const column = getSprintColumnValue(sprint, columnId);
+  return column?.__typename === 'CheckboxValue' ? (column.checked ?? false) : null;
 };
 
 /**
- * Get column value by ID from board item
+ * Get date value from sprint column (for start and end dates)
  */
-export const getColumnValue = (item: BoardItem, columnId: string): any => {
-  const column = item.column_values?.find((cv) => cv.id === columnId);
-  return column?.value;
+export const getDateValue = (sprint: Sprint, columnId: string): string | null => {
+  const column = getSprintColumnValue(sprint, columnId);
+  return column?.__typename === 'DateValue' ? (column.date ?? null) : null;
 };
 
 /**
- * Parse column value from raw string data
- * @param rawValue - The raw value to parse (can be any type)
- * @param columnValueName - Optional name of the column for better error messages
- * @returns Parsed JSON object or null if rawValue is not a valid string
- * @throws Error if JSON parsing fails
+ * Get timeline value from sprint column (for sprint timeline)
  */
-export const parseColumnValue = (rawValue: any, columnValueName?: string) => {
-        try {
-          return rawValue && typeof(rawValue) === 'string' && rawValue.length > 0 ? JSON.parse(rawValue) : null;
-        } catch (parseError) {
-          if (columnValueName) {
-            throw new Error(`Failed to parse column value '${columnValueName}': ${parseError instanceof Error ? parseError.message : 'Unknown parsing error'}`);
-          }
-          throw new Error(`Failed to parse column value: ${parseError instanceof Error ? parseError.message : 'Unknown parsing error'}`);
-        }
-      };
-
-/**
- * Extract document object ID from column value
- * By default,in multiple files column, the first file in the files array is returned
- */
-export const extractDocumentObjectId = (columnValue: any): string | null => {
-  if (!columnValue || typeof columnValue !== 'object') return null;
-  
-  // Check for document ID in various possible fields
-  for (const field of DOCUMENT_ID_FIELDS) {
-    if (columnValue[field]) {
-      return columnValue[field];
-    }
+export const getTimelineValue = (sprint: Sprint, columnId: string): { from: string; to: string } | null => {
+  const column = getSprintColumnValue(sprint, columnId);
+  if (column?.__typename === 'TimelineValue' && column.from && column.to) {
+    return { from: column.from, to: column.to };
   }
-  
-  // Check in files array
-  if (columnValue.files && Array.isArray(columnValue.files) && columnValue.files.length > 0) {
-    const firstFile = columnValue.files[0];
-    for (const field of DOCUMENT_ID_FIELDS) {
-      if (firstFile[field]) {
-        return firstFile[field];
-      }
-    }
+  return null;
+};
+
+/**
+ * Get doc value from sprint column (for sprint summary document)
+ * Returns the document object_id from the DocValue column
+ */
+export const getDocValue = (sprint: Sprint, columnId: string): string | null => {
+  const column = getSprintColumnValue(sprint, columnId);
+  if (column?.__typename === 'DocValue' && column.file?.doc?.object_id) {
+    return column.file.doc.object_id;
   }
-  
   return null;
 };
 

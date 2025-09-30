@@ -1,4 +1,9 @@
-import { SprintState } from '../../../../monday-graphql/generated/graphql';
+import { SprintState, GetSprintsBoardItemsWithColumnsQuery } from '../../../../monday-graphql/generated/graphql';
+
+/**
+ * Sprint item type extracted from the GetSprintsBoardItemsWithColumns query
+ */
+export type Sprint = NonNullable<NonNullable<NonNullable<GetSprintsBoardItemsWithColumnsQuery['boards']>[number]>['items_page']>['items'][number];
 
 /**
  * Shared constants for Monday Dev tools

@@ -1,22 +1,24 @@
 import { z } from 'zod';
 import { 
   Column,
-  GetBoardItemsWithColumnsQuery, 
-  GetBoardItemsWithColumnsQueryVariables,
+  GetSprintsBoardItemsWithColumnsQuery, 
+  GetSprintsBoardItemsWithColumnsQueryVariables,
   GetBoardSchemaQuery,
-  GetBoardSchemaQueryVariables
+  GetBoardSchemaQueryVariables,
 } from '../../../monday-graphql/generated/graphql';
-import { getBoardItemsWithColumns, getBoardSchema } from '../../../monday-graphql/queries.graphql';
+import { getSprintsBoardItemsWithColumns, getBoardSchema } from '../../../monday-graphql/queries.graphql';
 import { ToolInputType, ToolOutputType, ToolType } from '../../tool';
 import { BaseMondayApiTool, createMondayApiAnnotations } from '../platform-api-tools/base-monday-api-tool';
 import { 
   REQUIRED_SPRINT_COLUMNS, 
-  extractDocumentObjectId, 
   validateSprintsBoardSchemaFromColumns, 
-  getColumnValue, 
-  SPRINT_STATUS, 
-  parseColumnValue,
-  ERROR_PREFIXES
+  getCheckboxValue,
+  getDateValue,
+  getTimelineValue,
+  getDocValue,
+  SPRINT_STATUS,
+  ERROR_PREFIXES,
+  Sprint
 } from './shared';
 
 export const getSprintsMetadataToolSchema = {
@@ -60,16 +62,16 @@ Requires the Main Sprints board ID of the monday-dev containing your sprints.`;
       const schemaValidation = await this.validateBoardSchema(input.sprintsBoardId.toString());
       if (!schemaValidation.success) {
         return {
-          content: schemaValidation.error,
+          content: schemaValidation.error || 'Board schema validation failed',
         };
       }
 
       // Step 2: Fetch all sprint items from the board
-      const variables: GetBoardItemsWithColumnsQueryVariables = {
+      const variables: GetSprintsBoardItemsWithColumnsQueryVariables = {
         boardId: input.sprintsBoardId.toString(),
       };
 
-      const res = await this.mondayApi.request<GetBoardItemsWithColumnsQuery>(getBoardItemsWithColumns, variables);
+      const res = await this.mondayApi.request<GetSprintsBoardItemsWithColumnsQuery>(getSprintsBoardItemsWithColumns, variables);
       
       // Validate board exists
       const board = res.boards?.[0];
@@ -97,7 +99,7 @@ Requires the Main Sprints board ID of the monday-dev containing your sprints.`;
   /**
    * Validates that the board has the required sprint columns using board schema API
    */
-  private async validateBoardSchema(boardId: string): Promise<any> {
+  private async validateBoardSchema(boardId: string){
     try {
       const variables: GetBoardSchemaQueryVariables = {
         boardId: boardId.toString(),
@@ -132,7 +134,7 @@ Requires the Main Sprints board ID of the monday-dev containing your sprints.`;
     }
   }
 
-  private generateSprintsMetadataReport(sprints: any[]): string {
+  private generateSprintsMetadataReport(sprints: Sprint[]): string {
     let report = `# Sprints Metadata Report\n\n`;
     report += `**Total Sprints:** ${sprints.length}\n\n`;
     report += `| Sprint Name | Sprint ID | Status | Timeline (Planned) | Start Date (Actual) | End Date (Actual) | Completion | Summary Document ObjectID |\n`;
@@ -142,36 +144,34 @@ Requires the Main Sprints board ID of the monday-dev containing your sprints.`;
       const sprintName = sprint.name || 'Unknown';
       const sprintId = sprint.id;
       
-
-      const sprintActivation = parseColumnValue(getColumnValue(sprint, REQUIRED_SPRINT_COLUMNS.SPRINT_ACTIVATION), REQUIRED_SPRINT_COLUMNS.SPRINT_ACTIVATION);
-      const sprintTimeline = parseColumnValue(getColumnValue(sprint, REQUIRED_SPRINT_COLUMNS.SPRINT_TIMELINE), REQUIRED_SPRINT_COLUMNS.SPRINT_TIMELINE);
-      const sprintCompletion = parseColumnValue(getColumnValue(sprint, REQUIRED_SPRINT_COLUMNS.SPRINT_COMPLETION), REQUIRED_SPRINT_COLUMNS.SPRINT_COMPLETION);
-      const sprintStartDate = parseColumnValue(getColumnValue(sprint, REQUIRED_SPRINT_COLUMNS.SPRINT_START_DATE), REQUIRED_SPRINT_COLUMNS.SPRINT_START_DATE);
-      const sprintEndDate = parseColumnValue(getColumnValue(sprint, REQUIRED_SPRINT_COLUMNS.SPRINT_END_DATE), REQUIRED_SPRINT_COLUMNS.SPRINT_END_DATE);
-      const sprintSummary = parseColumnValue(getColumnValue(sprint, REQUIRED_SPRINT_COLUMNS.SPRINT_SUMMARY), REQUIRED_SPRINT_COLUMNS.SPRINT_SUMMARY);
+      // Get typed column values using helpers
+      const isActivated = getCheckboxValue(sprint, REQUIRED_SPRINT_COLUMNS.SPRINT_ACTIVATION);
+      const isCompleted = getCheckboxValue(sprint, REQUIRED_SPRINT_COLUMNS.SPRINT_COMPLETION);
+      const startDate = getDateValue(sprint, REQUIRED_SPRINT_COLUMNS.SPRINT_START_DATE);
+      const endDate = getDateValue(sprint, REQUIRED_SPRINT_COLUMNS.SPRINT_END_DATE);
+      const timeline = getTimelineValue(sprint, REQUIRED_SPRINT_COLUMNS.SPRINT_TIMELINE);
+      const documentObjectId = getDocValue(sprint, REQUIRED_SPRINT_COLUMNS.SPRINT_SUMMARY);
 
       // Determine status
       let status: string = SPRINT_STATUS.Planned;
-      if (sprintCompletion?.checked) {
+      if (isCompleted) {
         status = SPRINT_STATUS.Completed;
-      } else if (sprintActivation?.checked || sprintStartDate) {
+      } else if (isActivated || startDate) {
         status = SPRINT_STATUS.Active;
       }
 
       // Format timeline
-      const timeline = sprintTimeline 
-        ? `${sprintTimeline.from} to ${sprintTimeline.to}`
+      const timelineText = timeline 
+        ? `${timeline.from} to ${timeline.to}`
         : 'Not set';
 
       // Format dates
-      const startDate = sprintStartDate?.date || 'Not started';
-      const endDate = sprintEndDate?.date || 'Not ended';
-      const completion = sprintCompletion?.checked ? 'Yes' : 'No';
-      
-      // Extract document object ID from sprint summary column
-      const documentObjectId = extractDocumentObjectId(sprintSummary) || 'No document';
+      const startDateText = startDate || 'Not started';
+      const endDateText = endDate || 'Not ended';
+      const completionText = isCompleted ? 'Yes' : 'No';
+      const documentObjectIdText = documentObjectId || 'No document';
 
-      report += `| ${sprintName} | ${sprintId} | ${status} | ${timeline} | ${startDate} | ${endDate} | ${completion} | ${documentObjectId} |\n`;
+      report += `| ${sprintName} | ${sprintId} | ${status} | ${timelineText} | ${startDateText} | ${endDateText} | ${completionText} | ${documentObjectIdText} |\n`;
     });
 
     report += `\n## Status Definitions:\n`;

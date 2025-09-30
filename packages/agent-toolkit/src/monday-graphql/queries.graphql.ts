@@ -21,33 +21,74 @@ export const getBoardItemsByName = gql`
   }
 `;
 
-export const getBoardItemsWithColumns = gql`
-  query GetBoardItemsWithColumns($boardId: ID!) {
+export const getSprintsBoardItemsWithColumns = gql`
+  query GetSprintsBoardItemsWithColumns($boardId: ID!) {
     boards(ids: [$boardId]) {
       items_page {
         items {
           id
           name
           column_values {
+            __typename
             id
-            value
-          }
+            type
+            ... on TextValue {
+              value
+            }
+            ... on DocValue {
+              file {
+                doc {
+                  object_id
+                }
+              }
+            }
+            ... on TimelineValue {
+              from
+              to
+            }
+            ... on CheckboxValue {
+              checked
+            }
+            ... on DateValue {
+              date
+            }
+          } 
         }
       }
     }
   }
 `;
 
-export const getSpecificBoardItem = gql`
-  query GetSpecificBoardItem($boardId: ID!, $itemId: ID!) {
-    boards(ids: [$boardId]) {
-      items_page(query_params: { ids: [$itemId] }) {
-        items {
-          id
-          name
-          column_values {
-            id
-            value
+export const getSprintsByIds = gql`
+  query getSprintsByIds($ids: [ID!]) {
+    items(ids: $ids) {
+      id
+      name
+      board {
+        id
+      }
+      column_values {
+        id
+        type
+        __typename
+        ... on TextValue {
+          value
+        }
+        ... on DateValue {
+          date
+        }
+        ... on TimelineValue {
+          from
+          to
+        }
+        ... on CheckboxValue {
+          checked
+        }
+        ... on DocValue {
+          file {
+            doc {
+              object_id
+            }
           }
         }
       }
