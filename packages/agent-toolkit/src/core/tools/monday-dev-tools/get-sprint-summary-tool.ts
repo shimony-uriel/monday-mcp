@@ -17,6 +17,7 @@ import {
 import {
   ERROR_PREFIXES,
   REQUIRED_SPRINT_COLUMNS,
+  ALL_SPRINT_COLUMNS,
   DOCS_LIMIT,
   getDocValue,
   Sprint,
@@ -116,9 +117,13 @@ When viewing the section "Completed by Assignee", you'll see user IDs in the for
         };
       }
 
-      // Step 2: Validate sprint has required columns by checking the returned data
+      // Step 2: Validate sprint has required columns + summary column
       const columnIds = new Set((sprint.column_values || []).map(cv => cv.id));
-      const missingColumns = Object.values(REQUIRED_SPRINT_COLUMNS).filter(
+      const requiredColumnsForSummary = [
+        ...Object.values(REQUIRED_SPRINT_COLUMNS),
+        ALL_SPRINT_COLUMNS.SPRINT_SUMMARY,
+      ];
+      const missingColumns = requiredColumnsForSummary.filter(
         colId => !columnIds.has(colId)
       );
 
@@ -130,7 +135,7 @@ When viewing the section "Completed by Assignee", you'll see user IDs in the for
       }
 
       // Step 3: Extract sprint summary document object ID using helper
-      const documentObjectId = getDocValue(sprint as Sprint, REQUIRED_SPRINT_COLUMNS.SPRINT_SUMMARY);
+      const documentObjectId = getDocValue(sprint as Sprint, ALL_SPRINT_COLUMNS.SPRINT_SUMMARY);
       
       if (!documentObjectId) {
         return {

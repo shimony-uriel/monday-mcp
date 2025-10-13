@@ -10,7 +10,7 @@ import { getSprintsBoardItemsWithColumns, getBoardSchema } from '../../../monday
 import { ToolInputType, ToolOutputType, ToolType } from '../../tool';
 import { BaseMondayApiTool, createMondayApiAnnotations } from '../platform-api-tools/base-monday-api-tool';
 import { 
-  REQUIRED_SPRINT_COLUMNS, 
+  ALL_SPRINT_COLUMNS,
   validateSprintsBoardSchemaFromColumns, 
   getCheckboxValue,
   getDateValue,
@@ -145,12 +145,12 @@ Requires the Main Sprints board ID of the monday-dev containing your sprints.`;
       const sprintId = sprint.id;
       
       // Get typed column values using helpers
-      const isActivated = getCheckboxValue(sprint, REQUIRED_SPRINT_COLUMNS.SPRINT_ACTIVATION);
-      const isCompleted = getCheckboxValue(sprint, REQUIRED_SPRINT_COLUMNS.SPRINT_COMPLETION);
-      const startDate = getDateValue(sprint, REQUIRED_SPRINT_COLUMNS.SPRINT_START_DATE);
-      const endDate = getDateValue(sprint, REQUIRED_SPRINT_COLUMNS.SPRINT_END_DATE);
-      const timeline = getTimelineValue(sprint, REQUIRED_SPRINT_COLUMNS.SPRINT_TIMELINE);
-      const documentObjectId = getDocValue(sprint, REQUIRED_SPRINT_COLUMNS.SPRINT_SUMMARY);
+      const isActivated = getCheckboxValue(sprint, ALL_SPRINT_COLUMNS.SPRINT_ACTIVATION);
+      const isCompleted = getCheckboxValue(sprint, ALL_SPRINT_COLUMNS.SPRINT_COMPLETION);
+      const startDate = getDateValue(sprint, ALL_SPRINT_COLUMNS.SPRINT_START_DATE);
+      const endDate = getDateValue(sprint, ALL_SPRINT_COLUMNS.SPRINT_END_DATE);
+      const timeline = getTimelineValue(sprint, ALL_SPRINT_COLUMNS.SPRINT_TIMELINE);
+      const documentObjectId = getDocValue(sprint, ALL_SPRINT_COLUMNS.SPRINT_SUMMARY);
 
       // Determine status
       let status: string = SPRINT_STATUS.Planned;
