@@ -1,14 +1,10 @@
-import { SprintState, GetSprintsBoardItemsWithColumnsQuery, GetRecentBoardsQuery } from '../../../../monday-graphql/generated/graphql';
+import { SprintState, GetSprintsBoardItemsWithColumnsQuery } from '../../../../monday-graphql/generated/graphql';
 
 /**
  * Sprint item type extracted from the GetSprintsBoardItemsWithColumns query
  */
 export type Sprint = NonNullable<NonNullable<NonNullable<GetSprintsBoardItemsWithColumnsQuery['boards']>[number]>['items_page']>['items'][number];
 
-/**
- * Board type extracted from the GetRecentBoards query
- */
-export type Board = NonNullable<NonNullable<GetRecentBoardsQuery['boards']>[number]>;
 
 
 /**
