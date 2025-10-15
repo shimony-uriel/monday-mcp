@@ -1,32 +1,30 @@
 import { z } from 'zod';
-import { ToolInputType, ToolOutputType, ToolType } from '../../tool';
-import { BaseMondayApiTool, createMondayApiAnnotations } from '../platform-api-tools/base-monday-api-tool';
-import { 
+import { ToolInputType, ToolOutputType, ToolType } from '../../../tool';
+import { BaseMondayApiTool, createMondayApiAnnotations } from '../../platform-api-tools/base-monday-api-tool';
+import {
   GetSprintsByIdsQuery,
   GetSprintsByIdsQueryVariables,
   ReadDocsQuery,
   ReadDocsQueryVariables,
-  ExportMarkdownFromDocMutation,
-  ExportMarkdownFromDocMutationVariables,
-} from '../../../monday-graphql/generated/graphql';
+  ExportMarkdownFromDocQuery,
+  ExportMarkdownFromDocQueryVariables,
+} from '../../../../monday-graphql/generated/graphql';
 import {
-  getSprintsByIds,
   readDocs as readSprintSummaryDocs,
   exportMarkdownFromDoc as exportSprintSummaryMarkdown,
-} from '../../../monday-graphql/queries.graphql';
+} from '../../../../monday-graphql/queries.graphql';
+import { getSprintsByIds } from './get-sprint-summary-tool.graphql';
 import {
   ERROR_PREFIXES,
-  REQUIRED_SPRINT_COLUMNS,
   ALL_SPRINT_COLUMNS,
   DOCS_LIMIT,
   getDocValue,
   Sprint,
-} from './shared';
+  validateSprintItemColumns,
+} from '../shared';
 
 export const getSprintSummaryToolSchema = {
-  sprintId: z
-    .string()
-    .describe('The ID of the specific sprint to get the summary for (e.g., "9123456789")'),
+  sprintId: z.number().describe('The ID of the sprint to get the summary for (e.g., "9123456789")'),
 };
 
 export class GetSprintSummaryTool extends BaseMondayApiTool<typeof getSprintSummaryToolSchema> {
@@ -64,18 +62,28 @@ When viewing the section "Completed by Assignee", you'll see user IDs in the for
     return getSprintSummaryToolSchema;
   }
 
-  protected async executeInternal(input: ToolInputType<typeof getSprintSummaryToolSchema>): Promise<ToolOutputType<never>> {
+  protected async executeInternal(
+    input: ToolInputType<typeof getSprintSummaryToolSchema>,
+  ): Promise<ToolOutputType<never>> {
     try {
       // Step 1: Get the sprint metadata to find the summary document object ID
       const sprintMetadata = await this.getSprintMetadata(input.sprintId);
       if (!sprintMetadata.success) {
-        return { content: sprintMetadata.error || `${ERROR_PREFIXES.INTERNAL_ERROR} Unknown error occurred while getting sprint metadata` };
+        return {
+          content:
+            sprintMetadata.error ||
+            `${ERROR_PREFIXES.INTERNAL_ERROR} Unknown error occurred while getting sprint metadata`,
+        };
       }
 
       // Step 2: Read the document content using the object ID
       const documentContent = await this.readSprintSummaryDocument(sprintMetadata.documentObjectId!);
       if (!documentContent.success) {
-        return { content: documentContent.error || `${ERROR_PREFIXES.INTERNAL_ERROR} Unknown error occurred while reading document content` };
+        return {
+          content:
+            documentContent.error ||
+            `${ERROR_PREFIXES.INTERNAL_ERROR} Unknown error occurred while reading document content`,
+        };
       }
 
       return {
@@ -91,17 +99,17 @@ When viewing the section "Completed by Assignee", you'll see user IDs in the for
   /**
    * Gets sprint metadata and extracts the summary document object ID
    */
-  private async getSprintMetadata(sprintId: string){
+  private async getSprintMetadata(sprintId: number) {
     try {
       // Step 1: Fetch the specific sprint item by ID
       const variables: GetSprintsByIdsQueryVariables = {
-        ids: [sprintId.toString()],
+        ids: [String(sprintId)],
       };
 
       const res = await this.mondayApi.request<GetSprintsByIdsQuery>(getSprintsByIds, variables);
-      
+
       const sprints = res.items || [];
-      
+
       if (sprints.length === 0) {
         return {
           success: false,
@@ -118,25 +126,18 @@ When viewing the section "Completed by Assignee", you'll see user IDs in the for
       }
 
       // Step 2: Validate sprint has required columns + summary column
-      const columnIds = new Set((sprint.column_values || []).map(cv => cv.id));
-      const requiredColumnsForSummary = [
-        ...Object.values(REQUIRED_SPRINT_COLUMNS),
-        ALL_SPRINT_COLUMNS.SPRINT_SUMMARY,
-      ];
-      const missingColumns = requiredColumnsForSummary.filter(
-        colId => !columnIds.has(colId)
-      );
+      const validation = validateSprintItemColumns(sprint, [ALL_SPRINT_COLUMNS.SPRINT_SUMMARY]);
 
-      if (missingColumns.length > 0) {
+      if (!validation.isValid) {
         return {
           success: false,
-          error: `${ERROR_PREFIXES.VALIDATION_ERROR} Sprint item is missing required columns: ${missingColumns.join(', ')}. This may not be a valid sprint board item.`,
+          error: `${ERROR_PREFIXES.VALIDATION_ERROR} Sprint item is missing required columns: ${validation.missingColumns.join(', ')}. This may not be a valid sprint board item.`,
         };
       }
 
       // Step 3: Extract sprint summary document object ID using helper
       const documentObjectId = getDocValue(sprint as Sprint, ALL_SPRINT_COLUMNS.SPRINT_SUMMARY);
-      
+
       if (!documentObjectId) {
         return {
           success: false,
@@ -160,7 +161,7 @@ When viewing the section "Completed by Assignee", you'll see user IDs in the for
   /**
    * Reads the sprint summary document content
    */
-  private async readSprintSummaryDocument(documentObjectId: string){
+  private async readSprintSummaryDocument(documentObjectId: string) {
     try {
       // Step 1: Fetch document metadata using object ID
       const readDocsVariables: ReadDocsQueryVariables = {
@@ -169,7 +170,7 @@ When viewing the section "Completed by Assignee", you'll see user IDs in the for
       };
 
       const docsResponse = await this.mondayApi.request<ReadDocsQuery>(readSprintSummaryDocs, readDocsVariables);
-      
+
       const docs = docsResponse.docs || [];
       if (docs.length === 0) {
         return {
@@ -185,16 +186,16 @@ When viewing the section "Completed by Assignee", you'll see user IDs in the for
           error: `${ERROR_PREFIXES.DOCUMENT_INVALID} Document data is invalid for object ID ${documentObjectId}.`,
         };
       }
-      
+
       // Step 2: Export document content as markdown
-      const exportVariables: ExportMarkdownFromDocMutationVariables = {
+      const exportVariables: ExportMarkdownFromDocQueryVariables = {
         docId: doc.id,
         blockIds: [], // Empty array to get all blocks
       };
 
-      const exportResponse = await this.mondayApi.request<ExportMarkdownFromDocMutation>(
-        exportSprintSummaryMarkdown, 
-        exportVariables
+      const exportResponse = await this.mondayApi.request<ExportMarkdownFromDocQuery>(
+        exportSprintSummaryMarkdown,
+        exportVariables,
       );
 
       if (!exportResponse.export_markdown_from_doc?.success) {

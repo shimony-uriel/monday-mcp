@@ -9519,6 +9519,7 @@ export type GetSprintsQuery = { __typename?: 'Query', sprints?: Array<{ __typena
 
 export type GetSprintsBoardItemsWithColumnsQueryVariables = Exact<{
   boardId: Scalars['ID']['input'];
+  limit?: InputMaybe<Scalars['Int']['input']>;
 }>;
 
 

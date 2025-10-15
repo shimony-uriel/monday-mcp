@@ -1,6 +1,6 @@
 /**
  * Shared Monday Dev tools module
- * 
+ *
  * This module provides common constants and helpers
  */
 
