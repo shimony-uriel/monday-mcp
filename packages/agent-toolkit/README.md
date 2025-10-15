@@ -23,7 +23,7 @@ The toolkit includes several pre-built tools for common monday.com operations, o
 ### Item Operations
 - `CreateItemTool` - Create a new item in a monday.com board
 - `DeleteItemTool` - Delete an item from a board
-- `GetBoardItemsTool` - Get items by board id and term
+- `GetBoardItemsPageTool` - Get items by board id and apply filters
 - `CreateUpdateTool` - Create a new update on a specific item
 - `ChangeItemColumnValuesTool` - Change the column values of an item in a monday.com board
 - `MoveItemToGroupTool` - Move an item to a group in a monday.com board
@@ -42,7 +42,6 @@ The toolkit includes several pre-built tools for common monday.com operations, o
 - `FormQuestionsEditorTool` - Create, update, or delete a question in a monday.com form
 
 ### Account Operations
-- `GetUsersTool` - Get users, can be filtered by name or partial name
 - `ListUsersAndTeams` - Get users or teams, either by ids, names or by searching the account
 
 ### Dynamic API Tools

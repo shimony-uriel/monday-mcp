@@ -2,6 +2,7 @@ import { MondayAgentToolkit } from 'src/mcp/toolkit';
 import { callToolByNameAsync, callToolByNameRawAsync, createMockApiClient } from '../test-utils/mock-api-client';
 import { GetBoardItemsPageTool, GetBoardItemsPageToolInput, getBoardItemsPageToolSchema } from './get-board-items-page-tool';
 import { z, ZodTypeAny } from 'zod';
+import { GetBoardItemsPageQuery, ItemsOrderByDirection, ItemsQueryRuleOperator } from 'src/monday-graphql';
 
 
 export type inputType = z.objectInputType<GetBoardItemsPageToolInput, ZodTypeAny>;
@@ -16,7 +17,7 @@ describe('GetBoardItemsPageTool', () => {
         .mockReturnValue(mocks.mockApiClient);
   });
 
-  const successfulResponseWithItems = {
+  const successfulResponseWithItems: GetBoardItemsPageQuery = {
     boards: [
       {
         id: '123456789',
@@ -31,6 +32,20 @@ describe('GetBoardItemsPageTool', () => {
               column_values: [
                 { id: 'status', text: 'In Progress', value: '{"label":{"text":"In Progress"}}' },
                 { id: 'priority', text: 'High', value: '{"label":{"text":"High"}}' }
+              ],
+              subitems: [
+                {
+                  id: 'subitem1',
+                  name: 'Subitem 1',
+                  created_at: '2024-01-15T10:30:00Z',
+                  updated_at: '2024-01-16T14:20:00Z'
+                },
+                {
+                  id: 'subitem2',
+                  name: 'Subitem 2',
+                  created_at: '2024-01-15T10:30:00Z',
+                  updated_at: '2024-01-16T14:20:00Z'
+                }
               ]
             },
             {
@@ -50,7 +65,7 @@ describe('GetBoardItemsPageTool', () => {
     ]
   };
 
-  const successfulResponseWithoutColumns = {
+  const successfulResponseWithoutColumns: GetBoardItemsPageQuery = {
     boards: [
       {
         id: '123456789',
@@ -120,7 +135,8 @@ describe('GetBoardItemsPageTool', () => {
           boardId: '123456789',
           limit: 25,
           cursor: undefined,
-          includeColumns: false
+          includeColumns: false,
+          includeSubItems: false
         }
       );
     });
@@ -139,7 +155,8 @@ describe('GetBoardItemsPageTool', () => {
           boardId: '123456789',
           limit: 50,
           cursor: undefined,
-          includeColumns: false
+          includeColumns: false,
+          includeSubItems: false
         }
       );
     });
@@ -159,8 +176,380 @@ describe('GetBoardItemsPageTool', () => {
           boardId: '123456789',
           limit: 25,
           cursor: 'previous_cursor_456',
-          includeColumns: false
+          includeColumns: false,
+          includeSubItems: false
         }
+      );
+    });
+  });
+
+  describe('Cursor Functionality', () => {
+    it('should not include filters when cursor is provided', async () => {
+      mocks.setResponse(successfulResponseWithItems);
+
+      const args: inputType = { 
+        boardId: 123456789, 
+        cursor: 'previous_cursor_456',
+        filters: [
+          {
+            columnId: 'status',
+            compareValue: 'In Progress',
+            operator: ItemsQueryRuleOperator.AnyOf
+          }
+        ],
+        orderBy: [
+          {
+            columnId: 'name',
+            direction: ItemsOrderByDirection.Asc
+          }
+        ]
+      };
+      await callToolByNameAsync('get_board_items_page', args);
+
+
+      expect(mocks.getMockRequest()).toHaveBeenCalledWith(
+        expect.stringContaining('query GetBoardItemsPage'),
+        {
+          boardId: '123456789',
+          limit: 25,
+          cursor: 'previous_cursor_456',
+          includeColumns: false,
+          queryParams: undefined,
+          includeSubItems: false
+        }
+      );
+    });
+
+    it('should include filters when no cursor is provided', async () => {
+      mocks.setResponse(successfulResponseWithItems);
+
+      const args: inputType = { 
+        boardId: 123456789,
+        filters: [
+          {
+            columnId: 'status',
+            compareValue: 'In Progress',
+            operator: 'any_of' as any
+          }
+        ],
+        orderBy: [
+          {
+            columnId: 'name',
+            direction: 'asc' as any
+          }
+        ]
+      };
+      await callToolByNameAsync('get_board_items_page', args);
+      
+      expect(mocks.getMockRequest()).toHaveBeenCalledWith(
+        expect.stringContaining('query GetBoardItemsPage'),
+        {
+          boardId: '123456789',
+          limit: 25,
+          cursor: undefined,
+          includeColumns: false,
+          columnIds: undefined,
+          includeSubItems: false,
+          queryParams: {
+            ids: undefined,
+            operator: 'and',
+            rules: [
+              {
+                column_id: 'status',
+                compare_value: 'In Progress',
+                operator: 'any_of',
+                compare_attribute: undefined
+              }
+            ],
+            order_by: [
+              {
+                column_id: 'name',
+                direction: 'asc'
+              }
+            ]
+          }
+        }
+      );
+    });
+  });
+
+  describe('getItemIdsFromSmartSearchAsync integration', () => {
+    it('should call mockRequest with itemIds from smart search when no initial itemIds are provided', async () => {
+      // Arrange
+      const smartSearchItemIds = [111, 222, 333];
+      const smartSearchResults = {
+        search_items: {
+          results: smartSearchItemIds.map(id => ({ data: { id: id.toString() } }))
+        }
+      };
+      
+      // Mock the smart search request
+      jest.spyOn(mocks, 'mockRequest').mockImplementation((query: string, variables: any) => {
+        if (query.includes('query SmartSearchBoardItemIds')) {
+          return Promise.resolve(smartSearchResults);
+        }
+        // For the main getBoardItemsPage query, just return a dummy response
+        return Promise.resolve(successfulResponseWithItems);
+      });
+
+      const args: inputType = {
+        boardId: 123456789,
+        searchTerm: 'test search'
+      };
+
+      await callToolByNameAsync('get_board_items_page', args);
+
+      // The first call is to smart search, the second is to getBoardItemsPage
+      const calls = mocks.getMockRequest().mock.calls;
+      // Find the call to GetBoardItemsPage
+      const getBoardItemsPageCall = calls.find(call => call[0].includes('query GetBoardItemsPage'));
+      expect(getBoardItemsPageCall).toBeDefined();
+      expect(getBoardItemsPageCall[1].queryParams.ids).toEqual(smartSearchItemIds.map(id => id.toString()));
+    });
+
+    it('should call mockRequest with intersection of itemIds and smart search results', async () => {
+      // Arrange
+      const smartSearchItemIds = [111, 222, 333];
+      const initialItemIds = [222, 444];
+      const expectedIds = [222];
+      const smartSearchResults = {
+        search_items: {
+          results: smartSearchItemIds.map(id => ({ data: { id: id.toString() } }))
+        }
+      };
+
+      // Mock the smart search request
+      jest.spyOn(mocks, 'mockRequest').mockImplementation((query: string, variables: any) => {
+        if (query.includes('query SmartSearchBoardItemIds')) {
+          return Promise.resolve(smartSearchResults);
+        }
+        // For the main getBoardItemsPage query, just return a dummy response
+        return Promise.resolve(successfulResponseWithItems);
+      });
+
+      const args: inputType = {
+        boardId: 123456789,
+        searchTerm: 'test search',
+        itemIds: initialItemIds
+      };
+
+      await callToolByNameAsync('get_board_items_page', args);
+
+      const calls = mocks.getMockRequest().mock.calls;
+      const getBoardItemsPageCall = calls.find(call => call[0].includes('query GetBoardItemsPage'));
+      expect(getBoardItemsPageCall).toBeDefined();
+      expect(getBoardItemsPageCall[1].queryParams.ids).toEqual(expectedIds.map(id => id.toString()));
+    });
+
+    it('should build manual name filter in queryParams.rules if smart search returns no itemIds', async () => {
+      // Arrange
+      const smartSearchResults = {
+        search_items: {
+          results: []
+        }
+      };
+
+      // Mock the smart search request
+      jest.spyOn(mocks, 'mockRequest').mockImplementation((query: string, variables: any) => {
+        if (query.includes('query SmartSearchBoardItemIds')) {
+          return Promise.resolve(smartSearchResults);
+        }
+        // For the main getBoardItemsPage query, just return a dummy response
+        return Promise.resolve(successfulResponseWithItems);
+      });
+
+      const args: inputType = {
+        boardId: 123456789,
+        searchTerm: 'no results'
+      };
+
+      await callToolByNameAsync('get_board_items_page', args);
+
+      // Should call GetBoardItemsPage with manual rule on "name" containing searchTerm
+      const calls = mocks.getMockRequest().mock.calls;
+      const getBoardItemsPageCall = calls.find(call => call[0].includes('query GetBoardItemsPage'));
+      expect(getBoardItemsPageCall).toBeDefined();
+      const queryParams = getBoardItemsPageCall[1].queryParams;
+      expect(Array.isArray(queryParams.rules)).toBe(true);
+      expect(
+        queryParams.rules.some(
+          (rule: any) =>
+            rule.column_id === 'name' &&
+            rule.operator === ItemsQueryRuleOperator.ContainsText &&
+            rule.compare_value === 'no results'
+        )
+      ).toBe(true);
+    });
+  });
+
+  describe('Stringified JSONs functionality', () => {
+    it('should parse stringified JSONs when provided', async () => {
+      mocks.setResponse(successfulResponseWithItems);
+
+      const filtersStringified = JSON.stringify([
+        {
+          columnId: 'status',
+          compareValue: 'In Progress',
+          operator: ItemsQueryRuleOperator.AnyOf
+        }
+      ]);
+      
+      const orderByStringified = JSON.stringify([
+        {
+          columnId: 'name',
+          direction: ItemsOrderByDirection.Asc
+        }
+      ]);
+
+      const args: inputType = { 
+        boardId: 123456789,
+        filtersStringified,
+        orderByStringified
+      };
+      await callToolByNameAsync('get_board_items_page', args);
+
+
+      expect(mocks.getMockRequest()).toHaveBeenCalledWith(
+        expect.stringContaining('query GetBoardItemsPage'),
+        {
+          boardId: '123456789',
+          limit: 25,
+          cursor: undefined,
+          includeColumns: false,
+          columnIds: undefined,
+          includeSubItems: false,
+          queryParams: {
+            ids: undefined,
+            operator: 'and',
+            rules: [
+              {
+                column_id: 'status',
+                compare_value: 'In Progress',
+                operator: ItemsQueryRuleOperator.AnyOf,
+                compare_attribute: undefined
+              }
+            ],
+            order_by: [
+              {
+                column_id: 'name',
+                direction: ItemsOrderByDirection.Asc
+              }
+            ]
+          }
+        }
+      );
+    });
+
+    it('should throw error for invalid stringified JSON', async () => {
+      const args: inputType = { 
+        boardId: 123456789,
+        filtersStringified: 'invalid json'
+      };
+
+      const result = await callToolByNameRawAsync('get_board_items_page', args);
+      expect(result.content[0].text).toContain('filtersStringified is not a valid JSON');
+    });
+
+    it('should handle both regular and stringified JSON parameters', async () => {
+      mocks.setResponse(successfulResponseWithItems);
+
+      const orderByStringified = JSON.stringify([
+        {
+          columnId: 'name',
+          direction: 'asc'
+        }
+      ]);
+
+      const args: inputType = { 
+        boardId: 123456789,
+        filters: [
+          {
+            columnId: 'status',
+            compareValue: 'In Progress',
+            operator: 'any_of' as any
+          }
+        ],
+        orderByStringified
+      };
+      await callToolByNameAsync('get_board_items_page', args);
+
+      expect(mocks.getMockRequest()).toHaveBeenCalledWith(
+        expect.stringContaining('query GetBoardItemsPage'),
+        {
+          boardId: '123456789',
+          limit: 25,
+          cursor: undefined,
+          includeColumns: false,
+          includeSubItems: false,
+          columnIds: undefined,
+          queryParams: {
+            ids: undefined,
+            operator: 'and',
+            rules: [
+              {
+                column_id: 'status',
+                compare_value: 'In Progress',
+                operator: ItemsQueryRuleOperator.AnyOf,
+                compare_attribute: undefined
+              }
+            ],
+            order_by: [
+              {
+                column_id: 'name',
+                direction: ItemsOrderByDirection.Asc
+              }
+            ]
+          }
+        }
+      );
+    });
+
+    it('should not parse stringified JSONs when regular JSON is provided', async () => {
+      mocks.setResponse(successfulResponseWithItems);
+
+      const orderBy = [
+        {
+          columnId: 'priority',
+          direction: ItemsOrderByDirection.Desc
+        }
+      ];
+      const orderByStringified = JSON.stringify([
+        {
+          columnId: 'name',
+          direction: ItemsOrderByDirection.Asc
+        }
+      ]);
+      const args: inputType = { 
+        boardId: 123456789,
+        filters: [
+          {
+            columnId: 'status',
+            compareValue: 'In Progress',
+            operator: ItemsQueryRuleOperator.AnyOf
+          }
+        ],
+        orderBy,
+        orderByStringified
+      };
+      await callToolByNameAsync('get_board_items_page', args);
+
+      expect(mocks.getMockRequest()).toHaveBeenCalledWith(
+        expect.stringContaining('query GetBoardItemsPage'),
+        expect.objectContaining({
+          boardId: '123456789',
+          limit: 25,
+          cursor: undefined,
+          includeColumns: false,
+          columnIds: undefined,
+          queryParams: expect.objectContaining({
+            order_by: [
+              {
+                column_id: 'priority',
+                direction: ItemsOrderByDirection.Desc
+              }
+            ]
+          })
+        })
       );
     });
   });
@@ -203,7 +592,8 @@ describe('GetBoardItemsPageTool', () => {
           boardId: '123456789',
           limit: 25,
           cursor: undefined,
-          includeColumns: true
+          includeColumns: true,
+          includeSubItems: false
         }
       );
     });
@@ -331,6 +721,93 @@ describe('GetBoardItemsPageTool', () => {
       expect(tool.annotations.readOnlyHint).toBe(true);
       expect(tool.annotations.destructiveHint).toBe(false);
       expect(tool.annotations.idempotentHint).toBe(true);
+    });
+  });
+
+  describe('SubItems Functionality', () => {
+    // Parameterized test similar to NUnit's [TestCase(true)], [TestCase(false)]
+    it.each([
+      [true],
+      [false]
+    ])('should only include subitems when includeSubItems is specified, test for includeSubItems = %s', async (includeSubItems: boolean) => {
+      mocks.setResponse(successfulResponseWithItems);
+
+      const args: inputType = {
+        boardId: 123456789,
+        includeSubItems: includeSubItems
+      };
+      const parsedResult = await callToolByNameAsync('get_board_items_page', args);
+
+      expect(parsedResult.items).toHaveLength(2);
+      
+      if (includeSubItems) {
+        // When includeSubItems is true, subitems should be present
+        expect(parsedResult.items[0].subitems).toBeDefined();
+        expect(parsedResult.items[0].subitems).toHaveLength(2);
+        expect(parsedResult.items[0].subitems[0]).toEqual({
+          id: 'subitem1',
+          name: 'Subitem 1',
+          created_at: '2024-01-15T10:30:00Z',
+          updated_at: '2024-01-16T14:20:00Z'
+        });
+        expect(parsedResult.items[0].subitems[1]).toEqual({
+          id: 'subitem2',
+          name: 'Subitem 2',
+          created_at: '2024-01-15T10:30:00Z',
+          updated_at: '2024-01-16T14:20:00Z'
+        });
+        // Item2 has no subitems in the response
+        expect(parsedResult.items[1].subitems).toBeUndefined();
+      } else {
+        // When includeSubItems is false, subitems should not be present
+        expect(parsedResult.items[0].subitems).toBeUndefined();
+        expect(parsedResult.items[1].subitems).toBeUndefined();
+      }
+
+      expect(mocks.getMockRequest()).toHaveBeenCalledWith(
+        expect.stringContaining('query GetBoardItemsPage'),
+        {
+          boardId: '123456789',
+          limit: 25,
+          cursor: undefined,
+          includeColumns: false,
+          includeSubItems: includeSubItems
+        }
+      );
+    });
+
+    it('should only return 1 subitem when subItemLimit is 1', async () => {
+      mocks.setResponse(successfulResponseWithItems);
+
+      const args: inputType = {
+        boardId: 123456789,
+        includeSubItems: true,
+        subItemLimit: 1
+      };
+      const parsedResult = await callToolByNameAsync('get_board_items_page', args);
+
+      expect(parsedResult.items).toHaveLength(2);
+      
+      // First item has subitems - should only return 1
+      expect(parsedResult.items[0].subitems).toBeDefined();
+      expect(parsedResult.items[0].subitems).toHaveLength(1);
+      expect(parsedResult.items[0].subitems[0]).toEqual({
+        id: 'subitem1',
+        name: 'Subitem 1',
+        created_at: '2024-01-15T10:30:00Z',
+        updated_at: '2024-01-16T14:20:00Z'
+      });
+
+      expect(mocks.getMockRequest()).toHaveBeenCalledWith(
+        expect.stringContaining('query GetBoardItemsPage'),
+        {
+          boardId: '123456789',
+          limit: 25,
+          cursor: undefined,
+          includeColumns: false,
+          includeSubItems: true
+        }
+      );
     });
   });
 });
