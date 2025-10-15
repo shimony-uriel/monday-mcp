@@ -10,6 +10,23 @@ export type Sprint = NonNullable<NonNullable<NonNullable<GetSprintsBoardItemsWit
  */
 export type Board = NonNullable<NonNullable<GetRecentBoardsQuery['boards']>[number]>;
 
+/**
+ * Interface for a matched sprints board and tasks board pair
+ */
+export interface SprintsBoardPair {
+  sprintsBoard: {
+    id: string;
+    name: string;
+    workspaceId: string;
+    workspaceName: string;
+  };
+  tasksBoard: {
+    id: string;
+    name: string;
+    workspaceId: string;
+    workspaceName: string;
+  };
+}
 
 /**
  * Shared constants for Monday Dev tools
