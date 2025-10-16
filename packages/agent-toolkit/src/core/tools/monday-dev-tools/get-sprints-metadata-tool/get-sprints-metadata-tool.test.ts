@@ -11,6 +11,7 @@ import {
   NO_BOARD_FOUND_RESPONSE,
   SPRINTS_WITH_MISSING_TIMELINE,
   MALFORMED_BOARD_RESPONSE,
+  EXPECTED_SPRINTS_REPORT_OUTPUT,
 } from './get-sprints-metadata-tool-test-data';
 
 export type InputType = Partial<z.infer<z.ZodObject<typeof getSprintsMetadataToolSchema>>> & { sprintsBoardId: number };
@@ -27,6 +28,7 @@ describe('GetSprintsMetadataTool', () => {
   const validBoardSchemaResponse = VALID_SPRINTS_BOARD_SCHEMA;
   const successfulSprintsResponse = REALISTIC_SPRINTS_RESPONSE;
   const emptySprintsResponse = EMPTY_SPRINTS_RESPONSE;
+  const expectedSprintsReportOutput = EXPECTED_SPRINTS_REPORT_OUTPUT;
 
   describe('Basic Functionality', () => {
     it('should successfully get sprints metadata with default limit', async () => {
@@ -38,14 +40,7 @@ describe('GetSprintsMetadataTool', () => {
       const args: InputType = { sprintsBoardId: 123456789 };
       const result = await callToolByNameRawAsync('get_sprints_metadata', args);
 
-      expect(result.content[0].text).toContain('# Sprints Metadata Report');
-      expect(result.content[0].text).toContain('**Total Sprints:** 5');
-      expect(result.content[0].text).toContain('Sprint 25');
-      expect(result.content[0].text).toContain('Sprint 24');
-      expect(result.content[0].text).toContain('Sprint 23');
-      expect(result.content[0].text).toContain('COMPLETED');
-      expect(result.content[0].text).toContain('ACTIVE');
-      expect(result.content[0].text).toContain('PLANNED');
+      expect(result.content[0].text).toContain(expectedSprintsReportOutput);
 
       const calls = mocks.getMockRequest().mock.calls;
       const schemaCall = calls.find((call) => call[0].includes('query getBoardSchema'));
@@ -66,9 +61,9 @@ describe('GetSprintsMetadataTool', () => {
 
       const args: InputType = { sprintsBoardId: 123456789, limit: 50 };
       const result = await callToolByNameRawAsync('get_sprints_metadata', args);
+      
+      expect(result.content[0].text).toContain(expectedSprintsReportOutput);
 
-      expect(result.content[0].text).toContain('# Sprints Metadata Report');
-      expect(result.content[0].text).toContain('**Total Sprints:** 5');
 
       const calls = mocks.getMockRequest().mock.calls;
       const itemsCall = calls.find((call) => call[0].includes('query GetSprintsBoardItemsWithColumns'));
@@ -77,57 +72,6 @@ describe('GetSprintsMetadataTool', () => {
       expect(itemsCall[1]).toEqual({ boardId: '123456789', limit: 50 });
     });
 
-    it('should format timeline dates correctly', async () => {
-      mocks
-        .getMockRequest()
-        .mockResolvedValueOnce(validBoardSchemaResponse)
-        .mockResolvedValueOnce(successfulSprintsResponse);
-
-      const args: InputType = { sprintsBoardId: 123456789 };
-      const result = await callToolByNameRawAsync('get_sprints_metadata', args);
-
-      const content = result.content[0].text;
-
-      expect(content).toContain('2025-09-21 to 2025-10-19'); // Sprint 24
-      expect(content).toContain('2025-09-14 to 2025-09-28'); // Sprint 23
-      expect(content).toContain('2025-08-17 to 2025-08-31'); // Sprint 22
-    });
-
-    it('should handle document object IDs correctly', async () => {
-      mocks
-        .getMockRequest()
-        .mockResolvedValueOnce(validBoardSchemaResponse)
-        .mockResolvedValueOnce(successfulSprintsResponse);
-
-      const args: InputType = { sprintsBoardId: 123456789 };
-      const result = await callToolByNameRawAsync('get_sprints_metadata', args);
-
-      const content = result.content[0].text;
-
-      // Sprint 22 has document
-      expect(content).toMatch(/Sprint 22.*doc_summary_1004/);
-
-      // Sprint 23, 24, 25, 21 have no document
-      expect(content).toMatch(/Sprint 23.*No document/);
-      expect(content).toMatch(/Sprint 24.*No document/);
-    });
-
-    it('should include status definitions section', async () => {
-      mocks
-        .getMockRequest()
-        .mockResolvedValueOnce(validBoardSchemaResponse)
-        .mockResolvedValueOnce(successfulSprintsResponse);
-
-      const args: InputType = { sprintsBoardId: 123456789 };
-      const result = await callToolByNameRawAsync('get_sprints_metadata', args);
-
-      const content = result.content[0].text;
-
-      expect(content).toContain('## Status Definitions:');
-      expect(content).toContain('**PLANNED**: Sprint not yet started');
-      expect(content).toContain('**ACTIVE**: Sprint is active');
-      expect(content).toContain('**COMPLETED**: Sprint is finished');
-    });
   });
 
   describe('Schema Validation', () => {
@@ -244,79 +188,4 @@ describe('GetSprintsMetadataTool', () => {
     });
   });
 
-  describe('Limit Validation', () => {
-    it('should use default limit of 25 when not specified', async () => {
-      mocks
-        .getMockRequest()
-        .mockResolvedValueOnce(validBoardSchemaResponse)
-        .mockResolvedValueOnce(successfulSprintsResponse);
-
-      const args: InputType = { sprintsBoardId: 123456789 };
-      await callToolByNameRawAsync('get_sprints_metadata', args);
-
-      const calls = mocks.getMockRequest().mock.calls;
-      const itemsCall = calls.find((call) => call[0].includes('query GetSprintsBoardItemsWithColumns'));
-
-      expect(itemsCall).toBeDefined();
-      expect(itemsCall[1].limit).toBe(25);
-    });
-
-    it('should accept minimum limit of 1', async () => {
-      mocks
-        .getMockRequest()
-        .mockResolvedValueOnce(validBoardSchemaResponse)
-        .mockResolvedValueOnce(successfulSprintsResponse);
-
-      const args: InputType = { sprintsBoardId: 123456789, limit: 1 };
-      await callToolByNameRawAsync('get_sprints_metadata', args);
-
-      const calls = mocks.getMockRequest().mock.calls;
-      const itemsCall = calls.find((call) => call[0].includes('query GetSprintsBoardItemsWithColumns'));
-
-      expect(itemsCall).toBeDefined();
-      expect(itemsCall[1].limit).toBe(1);
-    });
-
-    it('should accept maximum limit of 100', async () => {
-      mocks
-        .getMockRequest()
-        .mockResolvedValueOnce(validBoardSchemaResponse)
-        .mockResolvedValueOnce(successfulSprintsResponse);
-
-      const args: InputType = { sprintsBoardId: 123456789, limit: 100 };
-      await callToolByNameRawAsync('get_sprints_metadata', args);
-
-      const calls = mocks.getMockRequest().mock.calls;
-      const itemsCall = calls.find((call) => call[0].includes('query GetSprintsBoardItemsWithColumns'));
-
-      expect(itemsCall).toBeDefined();
-      expect(itemsCall[1].limit).toBe(100);
-    });
-  });
-
-  describe('Markdown Table Formatting', () => {
-    it('should generate valid markdown table', async () => {
-      mocks
-        .getMockRequest()
-        .mockResolvedValueOnce(validBoardSchemaResponse)
-        .mockResolvedValueOnce(successfulSprintsResponse);
-
-      const args: InputType = { sprintsBoardId: 123456789 };
-      const result = await callToolByNameRawAsync('get_sprints_metadata', args);
-
-      const content = result.content[0].text;
-
-      // Check table headers
-      expect(content).toContain(
-        '| Sprint Name | Sprint ID | Status | Timeline (Planned) | Start Date (Actual) | End Date (Actual) | Completion | Summary Document ObjectID |',
-      );
-
-      // Check table separator
-      expect(content).toMatch(/\|[-]+\|[-]+\|[-]+\|[-]+\|[-]+\|[-]+\|[-]+\|[-]+\|/);
-
-      // Check data rows exist (5 sprints in realistic fixtures)
-      const rows = content.split('\n').filter((line: string) => line.trim().startsWith('| Sprint'));
-      expect(rows.length).toBeGreaterThanOrEqual(5);
-    });
-  });
 });

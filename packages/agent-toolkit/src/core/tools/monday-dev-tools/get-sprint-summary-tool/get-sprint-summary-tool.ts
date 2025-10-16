@@ -153,7 +153,7 @@ When viewing the section "Completed by Assignee", you'll see user IDs in the for
     } catch (error) {
       return {
         success: false,
-        error: `${ERROR_PREFIXES.INTERNAL_ERROR} Error getting sprint metadata: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        error: `${ERROR_PREFIXES.INTERNAL_ERROR} Error getting sprint item: ${error instanceof Error ? error.message : 'Unknown error'}`,
       };
     }
   }

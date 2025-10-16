@@ -152,7 +152,7 @@ Requires the Main Sprints board ID of the monday-dev containing your sprints.`;
     let report = `# Sprints Metadata Report\n\n`;
     report += `**Total Sprints:** ${sprints.length}\n\n`;
     report += `| Sprint Name | Sprint ID | Status | Timeline (Planned) | Start Date (Actual) | End Date (Actual) | Completion | Summary Document ObjectID |\n`;
-    report += `|-------------|-----------|--------|--------------------|---------------------|-------------------|------------|---------------------------|w\n`;
+    report += `|-------------|-----------|--------|--------------------|---------------------|-------------------|------------|---------------------------|\n`;
 
     sprints.forEach((sprint) => {
       const sprintName = sprint.name || 'Unknown';

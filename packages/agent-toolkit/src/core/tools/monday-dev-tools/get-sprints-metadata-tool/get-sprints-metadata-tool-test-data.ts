@@ -262,3 +262,21 @@ export const MALFORMED_BOARD_RESPONSE: GetBoardSchemaQuery = {
     },
   ],
 };
+
+/**
+ * Expected markdown report output for realistic sprints response
+ */
+export const EXPECTED_SPRINTS_REPORT_OUTPUT = `**Total Sprints:** 5
+
+| Sprint Name | Sprint ID | Status | Timeline (Planned) | Start Date (Actual) | End Date (Actual) | Completion | Summary Document ObjectID |
+|-------------|-----------|--------|--------------------|---------------------|-------------------|------------|---------------------------|
+| Sprint 25 | 1001 | PLANNED | Not set | Not started | Not ended | No | No document |
+| Sprint 24 | 1002 | PLANNED | 2025-09-21 to 2025-10-19 | Not started | Not ended | No | No document |
+| Sprint 23 | 1003 | ACTIVE | 2025-09-14 to 2025-09-28 | 2025-09-14 | Not ended | No | No document |
+| Sprint 22 | 1004 | COMPLETED | 2025-08-17 to 2025-08-31 | 2025-08-18 | 2025-09-08 | Yes | doc_summary_1004 |
+| Sprint 21 | 1005 | COMPLETED | 2025-08-03 to 2025-08-16 | 2025-08-03 | 2025-08-18 | Yes | No document |
+
+## Status Definitions:
+- **PLANNED**: Sprint not yet started (no activation, no start date)
+- **ACTIVE**: Sprint is active (activated but not completed)
+- **COMPLETED**: Sprint is finished`;

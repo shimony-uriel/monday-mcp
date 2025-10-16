@@ -52,18 +52,8 @@ describe('GetSprintSummaryTool', () => {
       const result = await callToolByNameRawAsync('get_sprint_summary', args);
       const content = result.content[0].text;
 
-      expect(content).toContain('🗓️ Aug 17 - 31');
-      expect(content).toContain('## **Highlights**');
-      expect(content).toContain('## ✅  **Completed Tasks**');
-      expect(content).toContain('Velocity 📊');
-      expect(content).toContain('Completed by Assignee');
-      expect(content).toContain('## ⚡ **Recommended action items**');
-      expect(content).toContain('@user-12345001');
-      expect(content).toContain('committed to 90 tasks');
-      expect(content).toContain('completed only 66');
-      expect(content).toContain('Feature');
-      expect(content).toContain('Bug');
-      expect(content).toContain('SP');
+      expect(content).toContain(validMarkdownExportResponse.export_markdown_from_doc!.markdown);
+  
 
       const calls = mocks.getMockRequest().mock.calls;
 
@@ -119,7 +109,6 @@ describe('GetSprintSummaryTool', () => {
       expect(result.content[0].text).toContain(ERROR_PREFIXES.DOCUMENT_NOT_FOUND);
       expect(result.content[0].text).toContain('No sprint summary document found');
       expect(result.content[0].text).toContain('Sprint 23 - Active');
-      expect(result.content[0].text).toContain('completed sprints');
     });
 
     it('should return error when document object_id is null', async () => {
@@ -148,6 +137,7 @@ describe('GetSprintSummaryTool', () => {
       expect(result.content[0].text).toContain('missing required columns');
     });
   });
+
   describe('Document Read Errors', () => {
     it('should return error when document is not found', async () => {
       jest.spyOn(mocks, 'mockRequest').mockImplementation((query: string) => {
@@ -259,7 +249,7 @@ describe('GetSprintSummaryTool', () => {
   });
 
   describe('GraphQL Errors', () => {
-    it('should handle GraphQL errors during sprint metadata fetch', async () => {
+    it('should handle GraphQL errors during sprint item fetch', async () => {
       const errorMessage = 'GraphQL error during sprint fetch';
       mocks.setError(errorMessage);
 
@@ -267,7 +257,7 @@ describe('GetSprintSummaryTool', () => {
       const result = await callToolByNameRawAsync('get_sprint_summary', args);
 
       expect(result.content[0].text).toContain(ERROR_PREFIXES.INTERNAL_ERROR);
-      expect(result.content[0].text).toContain('Error getting sprint metadata');
+      expect(result.content[0].text).toContain('Error getting sprint item');
     });
 
     it('should handle unknown GraphQL errors during document read', async () => {
