@@ -8,19 +8,6 @@ export const deleteItem = gql`
   }
 `;
 
-export const getBoardItemsByName = gql`
-  query GetBoardItemsByName($boardId: ID!, $term: CompareValue!) {
-    boards(ids: [$boardId]) {
-      items_page(query_params: { rules: [{ column_id: "name", operator: contains_text, compare_value: $term }] }) {
-        items {
-          id
-          name
-        }
-      }
-    }
-  }
-`;
-
 export const createItem = gql`
   mutation createItem($boardId: ID!, $itemName: String!, $groupId: String, $columnValues: JSON) {
     create_item(board_id: $boardId, item_name: $itemName, group_id: $groupId, column_values: $columnValues) {
@@ -50,16 +37,6 @@ export const getBoardSchema = gql`
         type
         title
       }
-    }
-  }
-`;
-
-export const getUsersByName = gql`
-  query getUsersByName($name: String) {
-    users(name: $name) {
-      id
-      name
-      title
     }
   }
 `;
@@ -518,7 +495,7 @@ export const readDocs = gql`
 `;
 
 export const exportMarkdownFromDoc = gql`
-  mutation exportMarkdownFromDoc($docId: ID!, $blockIds: [String!]) {
+  query exportMarkdownFromDoc($docId: ID!, $blockIds: [String!]) {
     export_markdown_from_doc(docId: $docId, blockIds: $blockIds) {
       success
       markdown
@@ -559,140 +536,3 @@ export const getWorkspaceInfo = gql`
     }
   }
 `;
-
-export const getSprintsSnapshots = gql`
-  query GetSprints($sprintIds: [ID!]!) {
-    sprints(ids: $sprintIds) {
-      id
-      name
-      start_date
-      end_date
-      state
-      timeline {
-        from
-        to
-      }
-      snapshots(type: [START, COMPLETE]) {
-        id
-        type
-        created_at
-        updated_at
-        items {
-          id
-          column_values {
-            id
-            type
-            value
-          }
-        }
-        columns_metadata {
-          id
-          done_status_indexes
-        }
-      }
-    }
-  }
-`;
-
-export const getSprintsBoardItemsWithColumns = gql`
-  query GetSprintsBoardItemsWithColumns($boardId: ID!) {
-    boards(ids: [$boardId]) {
-      items_page {
-        items {
-          id
-          name
-          column_values {
-            __typename
-            id
-            type
-            ... on TextValue {
-              value
-            }
-            ... on DocValue {
-              file {
-                doc {
-                  object_id
-                }
-              }
-            }
-            ... on TimelineValue {
-              from
-              to
-            }
-            ... on CheckboxValue {
-              checked
-            }
-            ... on DateValue {
-              date
-            }
-          } 
-        }
-      }
-    }
-  }
-`;
-
-export const getSprintsByIds = gql`
-  query getSprintsByIds($ids: [ID!]) {
-    items(ids: $ids) {
-      id
-      name
-      board {
-        id
-      }
-      column_values {
-        id
-        type
-        __typename
-        ... on TextValue {
-          value
-        }
-        ... on DateValue {
-          date
-        }
-        ... on TimelineValue {
-          from
-          to
-        }
-        ... on CheckboxValue {
-          checked
-        }
-        ... on DocValue {
-          file {
-            doc {
-              object_id
-            }
-          }
-        }
-      }
-    }
-  }
-`;
-
-export const duplicateItem = gql`
-  mutation duplicateItem($boardId: ID!, $itemId: ID!, $withUpdates: Boolean) {
-    duplicate_item(board_id: $boardId, item_id: $itemId, with_updates: $withUpdates) {
-      id
-      name
-    }
-  }
-`;
-
-export const getRecentBoards = gql`
-  query GetRecentBoards($limit: Int) {
-    boards(limit: $limit, order_by: used_at, state: active) {
-      id
-      name
-      workspace {
-        id
-        name
-      }
-      columns {
-        id
-        type
-        settings
-      }
-    }
-  }
-`;
-

@@ -1,14 +1,29 @@
-import { SprintState, GetSprintsBoardItemsWithColumnsQuery, GetRecentBoardsQuery } from '../../../../monday-graphql/generated/graphql';
+import {
+  SprintState,
+  GetSprintsBoardItemsWithColumnsQuery,
+  CheckboxValue,
+  DateValue,
+  TimelineValue,
+  DocValue,
+} from '../../../../monday-graphql/generated/graphql';
 
 /**
  * Sprint item type extracted from the GetSprintsBoardItemsWithColumns query
  */
-export type Sprint = NonNullable<NonNullable<NonNullable<GetSprintsBoardItemsWithColumnsQuery['boards']>[number]>['items_page']>['items'][number];
+export type Sprint = NonNullable<
+  NonNullable<NonNullable<GetSprintsBoardItemsWithColumnsQuery['boards']>[number]>['items_page']
+>['items'][number];
 
 /**
- * Board type extracted from the GetRecentBoards query
- */
+ * Type-safe column typename constants verified against GraphQL types.
+ * TypeScript will error if these don't match the actual __typename values.
+*/
 export type Board = NonNullable<NonNullable<GetRecentBoardsQuery['boards']>[number]>;
+
+export const CHECKBOX_COLUMN_TYPENAME = 'CheckboxValue' satisfies CheckboxValue['__typename'];
+export const DATE_COLUMN_TYPENAME = 'DateValue' satisfies DateValue['__typename'];
+export const TIMELINE_COLUMN_TYPENAME = 'TimelineValue' satisfies TimelineValue['__typename'];
+export const DOC_COLUMN_TYPENAME = 'DocValue' satisfies DocValue['__typename'];
 
 /**
  * Interface for a matched sprints board and tasks board pair
@@ -31,7 +46,6 @@ export interface SprintsBoardPair {
 /**
  * Shared constants for Monday Dev tools
  */
-
 
 // Minimum required columns to identify a sprint board
 export const REQUIRED_SPRINT_COLUMNS = {
@@ -63,7 +77,7 @@ export const ERROR_PREFIXES = {
 } as const;
 
 // Default limits
-export const DOCS_LIMIT =   1
+export const DOCS_LIMIT = 1;
 
 /**
  * Monday Dev task column IDs
@@ -120,4 +134,4 @@ export const REQUIRED_TASKS_COLUMNS = {
 /**
  * Type for Monday column IDs
  */
-export type MondayDevTaskColumnId = typeof MONDAY_DEV_TASK_COLUMN_IDS[keyof typeof MONDAY_DEV_TASK_COLUMN_IDS];
+export type MondayDevTaskColumnId = (typeof MONDAY_DEV_TASK_COLUMN_IDS)[keyof typeof MONDAY_DEV_TASK_COLUMN_IDS];

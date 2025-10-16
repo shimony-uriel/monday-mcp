@@ -479,12 +479,28 @@ export type AppInstallUser = {
   id?: Maybe<Scalars['ID']['output']>;
 };
 
+/** The visibility type of an app */
+export enum AppKind {
+  /** App is private and only visible to the account that created it */
+  Private = 'PRIVATE',
+  /** App is public and can be shared and installed by other accounts */
+  Public = 'PUBLIC'
+}
+
 /** The app monetization status for the current account */
 export type AppMonetizationStatus = {
   __typename?: 'AppMonetizationStatus';
   /** Is apps monetization is supported for the account */
   is_supported: Scalars['Boolean']['output'];
 };
+
+/** The current state of an app based on its version status */
+export enum AppStatus {
+  /** App is in draft state and not yet published */
+  Draft = 'DRAFT',
+  /** App has a live published version */
+  Live = 'LIVE'
+}
 
 /** The account subscription details for the app. */
 export type AppSubscription = {
@@ -553,27 +569,41 @@ export type AppSubscriptions = {
 
 export type AppType = {
   __typename?: 'AppType';
-  /** the api app id */
+  /** The app account ID */
+  account_id?: Maybe<Scalars['ID']['output']>;
+  /** The API app ID */
   api_app_id?: Maybe<Scalars['ID']['output']>;
-  /** the api app id */
+  /** The API app ID */
   client_id?: Maybe<Scalars['String']['output']>;
+  /** The app collaborators */
+  collaborators?: Maybe<Array<User>>;
   created_at?: Maybe<Scalars['Date']['output']>;
+  /** The user who created the app */
+  created_by?: Maybe<Scalars['ID']['output']>;
+  /** The description of the app */
+  description?: Maybe<Scalars['String']['output']>;
   /** The apps' features */
   features?: Maybe<Array<AppFeatureType>>;
   id: Scalars['ID']['output'];
-  /** the app kid */
-  kind?: Maybe<Scalars['String']['output']>;
-  /** the app name */
+  /** The app kind */
+  kind?: Maybe<AppKind>;
+  /** The app name */
   name?: Maybe<Scalars['String']['output']>;
-  /** the app photo url */
+  /** The array of permission scopes */
+  permissions?: Maybe<Array<Scalars['String']['output']>>;
+  /** The app photo URL */
   photo_url?: Maybe<Scalars['String']['output']>;
-  /** the app photo url for small size */
+  /** The app photo URL for small size */
   photo_url_small?: Maybe<Scalars['String']['output']>;
-  /** the app state */
-  state?: Maybe<Scalars['String']['output']>;
+  /** The URL-friendly identifier */
+  slug?: Maybe<Scalars['String']['output']>;
+  /** The app status (i.e. is live?) */
+  status?: Maybe<AppStatus>;
   updated_at?: Maybe<Scalars['Date']['output']>;
-  /** the app user id */
-  user_id?: Maybe<Scalars['ID']['output']>;
+  /** The latest version type */
+  version_type?: Maybe<Scalars['String']['output']>;
+  /** The webhook endpoint URL */
+  webhook_url?: Maybe<Scalars['String']['output']>;
 };
 
 
@@ -695,6 +725,14 @@ export type AssignTeamOwnersResult = {
   errors?: Maybe<Array<AssignTeamOwnersError>>;
   /** The team for which the owners were changed. */
   team?: Maybe<Team>;
+};
+
+/** Assignee filter for search queries */
+export type AssigneeInput = {
+  /** List of person IDs to filter by */
+  personIds?: InputMaybe<Array<Scalars['ID']['input']>>;
+  /** List of team IDs to filter by */
+  teamIds?: InputMaybe<Array<Scalars['ID']['input']>>;
 };
 
 /** Text formatting attributes (bold, italic, links, colors, etc.) */
@@ -1260,6 +1298,85 @@ export enum BoardsOrderBy {
   UsedAt = 'used_at'
 }
 
+/** Boost configuration for search results. Key-value pairs where key is strategy type and value is boost weight. */
+export type BoostConfigurationInput = {
+  /** Boost strategies as key-value pairs (strategy: weight). Empty object {} disables all boosts. */
+  boosts?: InputMaybe<Scalars['JSON']['input']>;
+};
+
+/** Reason for failure when status is Rejected or Failed */
+export enum BulkImportFailureReason {
+  /** The authorization failed. */
+  AuthorizationFailed = 'AUTHORIZATION_FAILED',
+  /** The board capacity exceeded. */
+  BoardCapacityExceeded = 'BOARD_CAPACITY_EXCEEDED',
+  /** An internal error occurred. */
+  InternalError = 'INTERNAL_ERROR',
+  /** The upload is invalid. */
+  InvalidUpload = 'INVALID_UPLOAD',
+  /** The permission was denied. */
+  PermissionDenied = 'PERMISSION_DENIED'
+}
+
+/** Initialization response for bulk import containing import ID and upload URL */
+export type BulkImportInit = {
+  __typename?: 'BulkImportInit';
+  /** The unique identifier of the bulk import operation */
+  import_id?: Maybe<Scalars['ID']['output']>;
+  /** The URL where the file should be uploaded for processing */
+  upload_url?: Maybe<Scalars['String']['output']>;
+};
+
+/** Item counts for a bulk import process */
+export type BulkImportItemCounts = {
+  __typename?: 'BulkImportItemCounts';
+  /** Number of items that have been created */
+  created?: Maybe<Scalars['Int']['output']>;
+  /** Number of valid items that failed during import execution */
+  failed?: Maybe<Scalars['Int']['output']>;
+  /** Number of items that failed validation */
+  invalid?: Maybe<Scalars['Int']['output']>;
+  /** Number of items that were skipped */
+  skipped?: Maybe<Scalars['Int']['output']>;
+  /** Total number of items submitted for import */
+  submitted?: Maybe<Scalars['Int']['output']>;
+  /** Number of items that have been updated */
+  updated?: Maybe<Scalars['Int']['output']>;
+};
+
+/** Current state of the import process */
+export enum BulkImportState {
+  /** The import is completed. */
+  Completed = 'COMPLETED',
+  /** The import is failed. */
+  Failed = 'FAILED',
+  /** The import is processing. */
+  Processing = 'PROCESSING',
+  /** The import is rejected. */
+  Rejected = 'REJECTED',
+  /** The upload is pending. */
+  UploadPending = 'UPLOAD_PENDING'
+}
+
+/** Status information for a bulk import process */
+export type BulkImportStatus = {
+  __typename?: 'BulkImportStatus';
+  /** Item counts breakdown for the import process */
+  counts?: Maybe<BulkImportItemCounts>;
+  /** Reason for failure when status is Rejected or Failed */
+  failure_reason?: Maybe<BulkImportFailureReason>;
+  /** Indicates if the upload is completely done */
+  fully_imported?: Maybe<Scalars['Boolean']['output']>;
+  /** Progress percentage (0-100) of the import process */
+  progress_percentage?: Maybe<Scalars['Int']['output']>;
+  /** Indicates if a report file has been generated */
+  report_created?: Maybe<Scalars['Boolean']['output']>;
+  /** URL to download the import report, valid for 10 minutes */
+  report_url?: Maybe<Scalars['String']['output']>;
+  /** Current state of the import process */
+  status?: Maybe<BulkImportState>;
+};
+
 export type ButtonValue = ColumnValue & {
   __typename?: 'ButtonValue';
   /** The button's color in hex value. */
@@ -1660,6 +1777,24 @@ export type CountryValue = ColumnValue & {
   updated_at?: Maybe<Scalars['Date']['output']>;
   /** The column's raw value in JSON format. */
   value?: Maybe<Scalars['JSON']['output']>;
+};
+
+/** Input for creating an app with its configuration data. */
+export type CreateAppInput = {
+  /** Array of user IDs with access */
+  collaborators?: InputMaybe<Array<Scalars['ID']['input']>>;
+  /** Detailed description of the app */
+  description?: InputMaybe<Scalars['String']['input']>;
+  /** App visibility type */
+  kind?: InputMaybe<AppKind>;
+  /** The display name of the app */
+  name: Scalars['String']['input'];
+  /** Array of permission scopes */
+  permissions?: InputMaybe<Array<Scalars['String']['input']>>;
+  /** URL-friendly identifier */
+  slug?: InputMaybe<Scalars['String']['input']>;
+  /** Webhook endpoint URL */
+  webhook_url?: InputMaybe<Scalars['String']['input']>;
 };
 
 /**
@@ -2122,8 +2257,6 @@ export enum DiscountPeriod {
 
 /** Input for creating divider blocks */
 export type DividerBlockInput = {
-  /** Optional UUID for the block */
-  block_id?: InputMaybe<Scalars['String']['input']>;
   /** The parent block id to append the created block under. */
   parent_block_id?: InputMaybe<Scalars['String']['input']>;
 };
@@ -2191,6 +2324,16 @@ export type DocBlocksFromMarkdownResult = {
   /** True if markdown was successfully converted and added to the document */
   success: Scalars['Boolean']['output'];
 };
+
+/** The kind/type of document access level */
+export enum DocKind {
+  /** Private document */
+  Private = 'private',
+  /** Public document */
+  Public = 'public',
+  /** Shareable document */
+  Share = 'share'
+}
 
 export type DocValue = ColumnValue & {
   __typename?: 'DocValue';
@@ -3483,15 +3626,6 @@ export type HierarchyObjectIdInputType = {
   type: GraphqlMondayObject;
 };
 
-export enum HostType {
-  /** Workflow hosted in the account */
-  Account = 'ACCOUNT',
-  /** Workflow hosted under an app feature object */
-  AppFeatureObject = 'APP_FEATURE_OBJECT',
-  /** Workflow hosted in a board */
-  Board = 'BOARD'
-}
-
 export type HourValue = ColumnValue & {
   __typename?: 'HourValue';
   /** The column that this value belongs to. */
@@ -3513,8 +3647,6 @@ export type HourValue = ColumnValue & {
 
 /** Input for creating image blocks */
 export type ImageBlockInput = {
-  /** Optional UUID for the block */
-  block_id?: InputMaybe<Scalars['String']['input']>;
   /** The parent block id to append the created block under. */
   parent_block_id?: InputMaybe<Scalars['String']['input']>;
   /** The public URL of the image */
@@ -3534,6 +3666,17 @@ export type ImageContent = DocBaseBlockContent & {
   public_url: Scalars['String']['output'];
   /** The width of the image */
   width?: Maybe<Scalars['Int']['output']>;
+};
+
+/** Response from importing an HTML document. Contains success status and the ID of the newly created document. */
+export type ImportDocFromHtmlResult = {
+  __typename?: 'ImportDocFromHtmlResult';
+  /** The ID of the newly created document. Use this ID to reference or modify the imported document. */
+  doc_id?: Maybe<Scalars['String']['output']>;
+  /** Detailed error message if the operation failed. Check this when success is false. */
+  error?: Maybe<Scalars['String']['output']>;
+  /** True if HTML was successfully converted and imported as a new document */
+  success: Scalars['Boolean']['output'];
 };
 
 /** Content inserted in delta operations */
@@ -3704,6 +3847,16 @@ export type ItemIdValue = ColumnValue & {
   value?: Maybe<Scalars['JSON']['output']>;
 };
 
+/** Input type for item nickname configuration */
+export type ItemNicknameInput = {
+  /** The plural form of the item nickname */
+  plural?: InputMaybe<Scalars['String']['input']>;
+  /** The preset type for item nickname */
+  preset_type?: InputMaybe<Scalars['String']['input']>;
+  /** The singular form of the item nickname */
+  singular?: InputMaybe<Scalars['String']['input']>;
+};
+
 /** Sort direction */
 export enum ItemsOrderByDirection {
   /** Ascending order */
@@ -3861,8 +4014,6 @@ export type LastUpdatedValue = ColumnValue & {
  * • Use afterBlockId only to order siblings *within* the same cell.
  */
 export type LayoutBlockInput = {
-  /** Optional UUID for the block */
-  block_id?: InputMaybe<Scalars['String']['input']>;
   /** The number of columns in the layout */
   column_count: Scalars['Int']['input'];
   /** The column style configuration */
@@ -3936,8 +4087,6 @@ export type ListBlockContent = DocBaseBlockContent & {
 /** Input for creating list blocks (bulleted, numbered, todo) */
 export type ListBlockInput = {
   alignment?: InputMaybe<BlockAlignment>;
-  /** Optional UUID for the block */
-  block_id?: InputMaybe<Scalars['String']['input']>;
   /** The text content in delta format - array of operations with insert content and optional attributes */
   delta_format: Array<OperationInput>;
   direction?: InputMaybe<BlockDirection>;
@@ -4210,6 +4359,8 @@ export type Mutation = {
    * @deprecated use add_users_to_board instead
    */
   add_subscribers_to_board?: Maybe<Array<Maybe<User>>>;
+  /** Adds users to an existing object as either subscribers or owners. Subscribers receive notifications about object changes, while owners have full control permissions. Works with any object type including boards, docs, dashboards, workflows, and specialized objects (CRM, capacity manager, etc.). Equivalent to the add_users_to_board mutation in the boards API. */
+  add_subscribers_to_object?: Maybe<Object>;
   /** Add teams subscribers to a board. */
   add_teams_to_board?: Maybe<Array<Maybe<Team>>>;
   /** Add teams to a workspace. */
@@ -4226,10 +4377,14 @@ export type Mutation = {
   archive_group?: Maybe<Group>;
   /** Archive an item. */
   archive_item?: Maybe<Item>;
+  /** Archives an object in the Monday.com Objects Platform, changing its state to "archived" while preserving all data. Archived objects remain in the system but are hidden from regular views. This operation works for any object type including boards, docs, dashboards, workflows, and specialized objects (CRM, capacity manager, etc.). Under the hood, this archives the board that represents this object. */
+  archive_object?: Maybe<Object>;
   /** Assigns the specified users as owners of the specified team. */
   assign_team_owners?: Maybe<AssignTeamOwnersResult>;
   /** Extends trial period of an application to selected accounts */
   batch_extend_trial_period?: Maybe<BatchExtendTrialPeriod>;
+  /** Initialize bulk import for a board and group. Returns import ID and upload URL to begin the process. */
+  bulk_import_items?: Maybe<BulkImportInit>;
   /** Change a column's properties */
   change_column_metadata?: Maybe<Column>;
   /** Change a column's title */
@@ -4250,6 +4405,8 @@ export type Mutation = {
   connect_project_to_portfolio?: Maybe<ConnectProjectResult>;
   /** Convert an existing monday.com board into a project with enhanced project management capabilities. This mutation transforms a regular board by applying project-specific features and configurations through column mappings that define how existing board columns should be interpreted in the project context. The conversion process is asynchronous and returns a process_id for tracking completion. Optionally accepts a callback URL for notification when the conversion completes. Use this when you have an existing board with data that needs to be upgraded to a full project with advanced project management features like Resource Planner integration. */
   convert_board_to_project?: Maybe<ConvertBoardToProjectResult>;
+  /** Creates a new app with the specified configuration. */
+  create_app?: Maybe<AppType>;
   /** Create a new app feature. */
   create_app_feature?: Maybe<AppFeatureType>;
   /** Create a new board. */
@@ -4285,6 +4442,8 @@ export type Mutation = {
   create_item?: Maybe<Item>;
   /** Create a new notification. */
   create_notification?: Maybe<Notification>;
+  /** Creates a new object in the Monday.com Objects Platform. The type of object created is determined by the app_feature_reference_id parameter. This mutation can create boards, docs, dashboards, workflows, or specialized objects like CRM, capacity manager, etc. Under the hood, this creates a board with the specified app_feature_id. */
+  create_object?: Maybe<Object>;
   /** Create a new tag or get it if it already exists. */
   create_or_get_tag?: Maybe<Tag>;
   /** Create a new portfolio */
@@ -4315,11 +4474,9 @@ export type Mutation = {
   deactivate_managed_column?: Maybe<ManagedColumn>;
   /** Deactivates the specified users. */
   deactivate_users?: Maybe<DeactivateUsersResult>;
-  /** Delete an app feature. */
-  delete_app_feature?: Maybe<AppFeatureType>;
   /** Delete a board. */
   delete_board?: Maybe<Board>;
-  /** Delete a column. */
+  /** Deletes a column from a board. Cannot delete mandatory columns (e.g., name column). */
   delete_column?: Maybe<Column>;
   delete_custom_activity?: Maybe<CustomActivity>;
   /** Delete an existing dashboard. */
@@ -4341,6 +4498,8 @@ export type Mutation = {
   /** Delete managed column mutation. */
   delete_managed_column?: Maybe<ManagedColumn>;
   delete_marketplace_app_discount: DeleteMarketplaceAppDiscountResult;
+  /** Permanently deletes an object from the Monday.com Objects Platform. Unlike archiving, deletion is only reversible for 30 days and removes all associated data. This operation works for any object type including boards, docs, dashboards, workflows, and specialized objects (CRM, capacity manager, etc.). WARNING: This operation cannot be undone after 30 days. */
+  delete_object?: Maybe<Object>;
   /** Permanently remove a question from a form. This action cannot be undone. */
   delete_question?: Maybe<Scalars['Boolean']['output']>;
   /** Remove subscribers from the board. */
@@ -4372,9 +4531,9 @@ export type Mutation = {
   /** Duplicate an item. */
   duplicate_item?: Maybe<Item>;
   edit_update: Update;
-  /** Converts document content into standard markdown format for external use, backup, or processing. Exports the entire document by default, or specific blocks if block IDs are provided. Use this to extract content for integration with other systems, create backups, generate reports, or process document content with external tools. The output is clean, portable markdown that preserves formatting and structure. */
-  export_markdown_from_doc?: Maybe<ExportMarkdownResult>;
   grant_marketplace_app_discount: GrantMarketplaceAppDiscountResult;
+  /** Imports HTML content as a new document by converting it into document blocks. The HTML will be parsed and converted into the appropriate document block types (text, headers, lists, etc.). Returns the ID of the newly created document on success. */
+  import_doc_from_html?: Maybe<ImportDocFromHtmlResult>;
   /** Increase operations counter */
   increase_app_subscription_operations?: Maybe<AppSubscriptionOperationsCounter>;
   /** Invite users to the account. */
@@ -4385,6 +4544,8 @@ export type Mutation = {
   /** Move an item to a different group. */
   move_item_to_group?: Maybe<Item>;
   pin_to_top: Update;
+  /** Publishes object out of draft state. Returns {success: true} on success, {success: false} on failure. */
+  publish_object?: Maybe<ObjectOperationResponse>;
   /** Remove mock app subscription for the current account */
   remove_mock_app_subscription?: Maybe<AppSubscription>;
   /** Remove a required column from a board */
@@ -4406,8 +4567,12 @@ export type Mutation = {
   shorten_form_url?: Maybe<FormShortenedLink>;
   unlike_update: Update;
   unpin_from_top: Update;
+  /** Unpublishes object from public state back to draft state. Returns {success: true} on success, {success: false} on failure. */
+  unpublish_object?: Maybe<ObjectOperationResponse>;
+  /** Updates an existing app. If the app latest version is live, a new draft version is automatically created and updated. */
+  update_app?: Maybe<AppType>;
   /** Update an app feature. */
-  updateAppFeature?: Maybe<AppFeatureType>;
+  update_app_feature?: Maybe<AppFeatureType>;
   /** Updates the content of a specific article block. The block must belong to a draft article that the user has permission to edit. Cannot update blocks of published articles. */
   update_article_block?: Maybe<ArticleBlock>;
   /** Update item column value by existing assets */
@@ -4452,6 +4617,8 @@ export type Mutation = {
   update_mute_board_settings?: Maybe<Array<BoardMuteSettings>>;
   /** Updates a notification setting's enabled status. */
   update_notification_setting?: Maybe<Array<NotificationSetting>>;
+  /** Updates an object. */
+  update_object?: Maybe<Object>;
   /** Update the position of a dashboard. */
   update_overview_hierarchy?: Maybe<UpdateOverviewHierarchy>;
   /** Updates a status column's properties including title, description, and status label settings. Status columns allow users to track item progress through customizable labels (e.g., "Working on it", "Done", "Stuck"). This mutation is specifically for status/color columns and provides type-safe updates. */
@@ -4529,6 +4696,14 @@ export type MutationAdd_Subscribers_To_BoardArgs = {
 
 
 /** Root mutation type for the Dependencies service */
+export type MutationAdd_Subscribers_To_ObjectArgs = {
+  id: Scalars['ID']['input'];
+  kind?: InputMaybe<SubscriberKind>;
+  user_ids: Array<Scalars['ID']['input']>;
+};
+
+
+/** Root mutation type for the Dependencies service */
 export type MutationAdd_Teams_To_BoardArgs = {
   board_id: Scalars['ID']['input'];
   kind?: InputMaybe<BoardSubscriberKind>;
@@ -4587,6 +4762,12 @@ export type MutationArchive_ItemArgs = {
 
 
 /** Root mutation type for the Dependencies service */
+export type MutationArchive_ObjectArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+/** Root mutation type for the Dependencies service */
 export type MutationAssign_Team_OwnersArgs = {
   team_id: Scalars['ID']['input'];
   user_ids: Array<Scalars['ID']['input']>;
@@ -4599,6 +4780,13 @@ export type MutationBatch_Extend_Trial_PeriodArgs = {
   app_id: Scalars['ID']['input'];
   duration_in_days: Scalars['Int']['input'];
   plan_id: Scalars['String']['input'];
+};
+
+
+/** Root mutation type for the Dependencies service */
+export type MutationBulk_Import_ItemsArgs = {
+  board_id: Scalars['ID']['input'];
+  group_id: Scalars['ID']['input'];
 };
 
 
@@ -4678,6 +4866,12 @@ export type MutationConvert_Board_To_ProjectArgs = {
 
 
 /** Root mutation type for the Dependencies service */
+export type MutationCreate_AppArgs = {
+  input: CreateAppInput;
+};
+
+
+/** Root mutation type for the Dependencies service */
 export type MutationCreate_App_FeatureArgs = {
   app_id: Scalars['ID']['input'];
   app_version_id?: InputMaybe<Scalars['ID']['input']>;
@@ -4700,6 +4894,7 @@ export type MutationCreate_BoardArgs = {
   description?: InputMaybe<Scalars['String']['input']>;
   empty?: InputMaybe<Scalars['Boolean']['input']>;
   folder_id?: InputMaybe<Scalars['ID']['input']>;
+  item_nickname?: InputMaybe<ItemNicknameInput>;
   template_id?: InputMaybe<Scalars['ID']['input']>;
   workspace_id?: InputMaybe<Scalars['ID']['input']>;
 };
@@ -4857,6 +5052,22 @@ export type MutationCreate_NotificationArgs = {
 
 
 /** Root mutation type for the Dependencies service */
+export type MutationCreate_ObjectArgs = {
+  description?: InputMaybe<Scalars['String']['input']>;
+  folder_id?: InputMaybe<Scalars['ID']['input']>;
+  name: Scalars['String']['input'];
+  object_type_unique_key: Scalars['String']['input'];
+  owner_ids?: InputMaybe<Array<Scalars['ID']['input']>>;
+  owner_team_ids?: InputMaybe<Array<Scalars['ID']['input']>>;
+  payload?: InputMaybe<Scalars['JSON']['input']>;
+  privacy_kind: PrivacyKind;
+  subscriber_ids?: InputMaybe<Array<Scalars['ID']['input']>>;
+  subscriber_teams_ids?: InputMaybe<Array<Scalars['ID']['input']>>;
+  workspace_id?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+/** Root mutation type for the Dependencies service */
 export type MutationCreate_Or_Get_TagArgs = {
   board_id?: InputMaybe<Scalars['ID']['input']>;
   tag_name?: InputMaybe<Scalars['String']['input']>;
@@ -5008,12 +5219,6 @@ export type MutationDeactivate_UsersArgs = {
 
 
 /** Root mutation type for the Dependencies service */
-export type MutationDelete_App_FeatureArgs = {
-  id: Scalars['ID']['input'];
-};
-
-
-/** Root mutation type for the Dependencies service */
 export type MutationDelete_BoardArgs = {
   board_id: Scalars['ID']['input'];
 };
@@ -5093,6 +5298,12 @@ export type MutationDelete_Managed_ColumnArgs = {
 export type MutationDelete_Marketplace_App_DiscountArgs = {
   account_slug: Scalars['String']['input'];
   app_id: Scalars['ID']['input'];
+};
+
+
+/** Root mutation type for the Dependencies service */
+export type MutationDelete_ObjectArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -5217,17 +5428,20 @@ export type MutationEdit_UpdateArgs = {
 
 
 /** Root mutation type for the Dependencies service */
-export type MutationExport_Markdown_From_DocArgs = {
-  blockIds?: InputMaybe<Array<Scalars['String']['input']>>;
-  docId: Scalars['ID']['input'];
-};
-
-
-/** Root mutation type for the Dependencies service */
 export type MutationGrant_Marketplace_App_DiscountArgs = {
   account_slug: Scalars['String']['input'];
   app_id: Scalars['ID']['input'];
   data: GrantMarketplaceAppDiscountData;
+};
+
+
+/** Root mutation type for the Dependencies service */
+export type MutationImport_Doc_From_HtmlArgs = {
+  folderId?: InputMaybe<Scalars['ID']['input']>;
+  html: Scalars['String']['input'];
+  kind?: InputMaybe<DocKind>;
+  title?: InputMaybe<Scalars['String']['input']>;
+  workspaceId: Scalars['ID']['input'];
 };
 
 
@@ -5274,6 +5488,12 @@ export type MutationMove_Item_To_GroupArgs = {
 export type MutationPin_To_TopArgs = {
   id: Scalars['ID']['input'];
   item_id?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+/** Root mutation type for the Dependencies service */
+export type MutationPublish_ObjectArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -5353,7 +5573,20 @@ export type MutationUnpin_From_TopArgs = {
 
 
 /** Root mutation type for the Dependencies service */
-export type MutationUpdateAppFeatureArgs = {
+export type MutationUnpublish_ObjectArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+/** Root mutation type for the Dependencies service */
+export type MutationUpdate_AppArgs = {
+  id: Scalars['ID']['input'];
+  input: UpdateAppInput;
+};
+
+
+/** Root mutation type for the Dependencies service */
+export type MutationUpdate_App_FeatureArgs = {
   id: Scalars['ID']['input'];
   input: UpdateAppFeatureInput;
 };
@@ -5549,6 +5782,13 @@ export type MutationUpdate_Notification_SettingArgs = {
 
 
 /** Root mutation type for the Dependencies service */
+export type MutationUpdate_ObjectArgs = {
+  id: Scalars['String']['input'];
+  input: UpdateObjectInput;
+};
+
+
+/** Root mutation type for the Dependencies service */
 export type MutationUpdate_Overview_HierarchyArgs = {
   attributes: UpdateOverviewHierarchyAttributesInput;
   overview_id: Scalars['ID']['input'];
@@ -5640,8 +5880,6 @@ export type MutationUse_TemplateArgs = {
 
 /** The notice-box's own ID must be captured.  Every block that should appear inside it must be created with parentBlockId = that ID (and can still use afterBlockId for ordering among siblings). */
 export type NoticeBoxBlockInput = {
-  /** Optional UUID for the block */
-  block_id?: InputMaybe<Scalars['String']['input']>;
   /** The parent block id to append the created block under. */
   parent_block_id?: InputMaybe<Scalars['String']['input']>;
   theme: NoticeBoxTheme;
@@ -5669,24 +5907,10 @@ export enum NoticeBoxTheme {
 /** A notification. */
 export type Notification = {
   __typename?: 'Notification';
-  /** The board that is associated with the notification. */
-  board?: Maybe<Board>;
-  /** The date and time the notification was created. */
-  created_at?: Maybe<Scalars['Date']['output']>;
-  /** The users who created the notification. */
-  creators: Array<User>;
   /** The notification's unique identifier. */
   id: Scalars['ID']['output'];
-  /** The item that is associated with the notification. */
-  item?: Maybe<Item>;
-  /** Whether the notification has been read. */
-  read: Scalars['Boolean']['output'];
   /** The notification text. */
   text?: Maybe<Scalars['String']['output']>;
-  /** The title of the notification. */
-  title?: Maybe<Scalars['String']['output']>;
-  /** The update that triggered the notification. */
-  update?: Maybe<Update>;
 };
 
 /** Represents notification settings configuration */
@@ -5723,6 +5947,29 @@ export enum NotificationTargetType {
   Project = 'Project'
 }
 
+/** A notification. */
+export type NotificationV2 = {
+  __typename?: 'NotificationV2';
+  /** The board that is associated with the notification. */
+  board?: Maybe<Board>;
+  /** The date and time the notification was created. */
+  created_at?: Maybe<Scalars['Date']['output']>;
+  /** The users who created the notification. */
+  creators: Array<User>;
+  /** The unique identifier of the notification. */
+  id: Scalars['ID']['output'];
+  /** The item that is associated with the notification. */
+  item?: Maybe<Item>;
+  /** Whether the notification has been read. */
+  read: Scalars['Boolean']['output'];
+  /** The text content of the notification. */
+  text?: Maybe<Scalars['String']['output']>;
+  /** The title of the notification. */
+  title?: Maybe<Scalars['String']['output']>;
+  /** The update that triggered the notification. */
+  update?: Maybe<Update>;
+};
+
 /** Indicates where the unit symbol should be placed in a number value */
 export enum NumberValueUnitDirection {
   /** The symbol is placed on the left of the number */
@@ -5750,12 +5997,56 @@ export type NumbersValue = ColumnValue & {
   value?: Maybe<Scalars['JSON']['output']>;
 };
 
+/** The central type in the Monday.com Objects Platform, representing any entity in the system. This unified type can represent instances of boards, docs, dashboards, workflows, and specialized objects. The specific type of an object is determined by its app_feature_reference_id. */
+export type Object = {
+  __typename?: 'Object';
+  /** The ID of the user who created this object. Useful for tracking object origin. */
+  creator?: Maybe<Scalars['String']['output']>;
+  /** Optional description of the object, providing additional context about its purpose or contents. */
+  description?: Maybe<Scalars['String']['output']>;
+  /** The ID of the folder containing this object, if the object is organized in a folder structure. */
+  folder_id?: Maybe<Scalars['String']['output']>;
+  /** The unique identifier of the object. Can be used to reference this specific object in queries and mutations. */
+  id?: Maybe<Scalars['String']['output']>;
+  /** The display name of the object. This is what appears in the Monday.com interface. */
+  name?: Maybe<Scalars['String']['output']>;
+  /** List of users who are owners of this object. Owners have full control permissions. */
+  owners?: Maybe<Array<User>>;
+  /** The kind/visibility setting of the object (private, public, share). Determines who can access it. */
+  privacy_kind?: Maybe<Scalars['String']['output']>;
+  /** The current state of the object. Determines visibility in the interface. */
+  state?: Maybe<Scalars['String']['output']>;
+  /** List of users who are subscribers to this object. Subscribers receive notifications about changes. */
+  subscribers?: Maybe<Array<User>>;
+  /** Timestamp of when the object was last updated. Format is ISO 8601. */
+  updated_at?: Maybe<Scalars['String']['output']>;
+  /** The ID of the workspace containing this object. Null indicates the object is in the main workspace. */
+  workspace_id?: Maybe<Scalars['String']['output']>;
+};
+
 export type ObjectDynamicPositionInput = {
   /** The next object in the list */
   nextObject?: InputMaybe<HierarchyObjectIdInputType>;
   /** The previous object in the list */
   prevObject?: InputMaybe<HierarchyObjectIdInputType>;
 };
+
+/** Response for object operations indicating success or failure */
+export type ObjectOperationResponse = {
+  __typename?: 'ObjectOperationResponse';
+  /** Indicates whether the operation was successful */
+  success?: Maybe<Scalars['Boolean']['output']>;
+};
+
+/** The state of the object. */
+export enum ObjectState {
+  /** The object is active. */
+  Active = 'ACTIVE',
+  /** The object is archived. */
+  Archived = 'ARCHIVED',
+  /** The object is deleted. */
+  Deleted = 'DELETED'
+}
 
 /** Represents a monday object. */
 export enum ObjectType {
@@ -5766,6 +6057,19 @@ export enum ObjectType {
   /** Represents an overview object type. */
   Overview = 'Overview'
 }
+
+/** Represents object type unique key and metadata. */
+export type ObjectTypeUniqueKey = {
+  __typename?: 'ObjectTypeUniqueKey';
+  /** The name of the app feature object type (e.g., 'Workflow', 'Capacity manager'). */
+  app_feature_name?: Maybe<Scalars['String']['output']>;
+  /** The name of the app that provides this object type. */
+  app_name?: Maybe<Scalars['String']['output']>;
+  /** A short description of what this object type represents. */
+  description?: Maybe<Scalars['String']['output']>;
+  /** The unique identifier for the object type, formatted as 'app_slug::app_feature_slug' */
+  object_type_unique_key?: Maybe<Scalars['String']['output']>;
+};
 
 /** A delta operation with insert content and optional formatting attributes */
 export type Operation = {
@@ -5783,6 +6087,14 @@ export type OperationInput = {
   /** Content to insert - either text or blot object */
   insert: InsertOpsInput;
 };
+
+/** Defines the sorting order for returned objects in the objects query. */
+export enum OrderBy {
+  /** Sort objects by their creation date, from newest to oldest. */
+  CreatedAt = 'CREATED_AT',
+  /** Sort objects by when they were last used, from most recent to least recent. */
+  UsedAt = 'USED_AT'
+}
 
 /** The working status of a user. */
 export type OutOfOffice = {
@@ -5824,8 +6136,6 @@ export type Overview = {
 
 /** Input for creating page break blocks */
 export type PageBreakBlockInput = {
-  /** Optional UUID for the block */
-  block_id?: InputMaybe<Scalars['String']['input']>;
   /** The parent block id to append the created block under. */
   parent_block_id?: InputMaybe<Scalars['String']['input']>;
 };
@@ -6030,6 +6340,14 @@ export type PrefillSettingsInput = {
   source?: InputMaybe<FormQuestionPrefillSources>;
 };
 
+/** The kind/visibility setting of the article (private, public). Determines who can access it. */
+export enum PrivacyKind {
+  /** Private objects are only visible to specific users who are members of the object. */
+  Private = 'PRIVATE',
+  /** Public objects are visible to all users within the account, unless their access is blocked on a higher level in the hierarchy, or by specific object permission. */
+  Public = 'PUBLIC'
+}
+
 /** The product to invite the users to. */
 export enum Product {
   Crm = 'crm',
@@ -6151,6 +6469,8 @@ export type Query = {
   board_candidates?: Maybe<Array<Board>>;
   /** Get a collection of boards. */
   boards?: Maybe<Array<Maybe<Board>>>;
+  /** Get the status of a bulk import items process */
+  bulk_import_items_status: BulkImportStatus;
   /** Get the complexity data of your queries. */
   complexity?: Maybe<Complexity>;
   /** Fetch a single connection by its unique ID. */
@@ -6164,6 +6484,8 @@ export type Query = {
   docs?: Maybe<Array<Maybe<Document>>>;
   /** Export the dependency graph for a specific board */
   export_graph?: Maybe<BoardGraphExport>;
+  /** Converts document content into standard markdown format for external use, backup, or processing. Exports the entire document by default, or specific blocks if block IDs are provided. Use this to extract content for integration with other systems, create backups, generate reports, or process document content with external tools. The output is clean, portable markdown that preserves formatting and structure. */
+  export_markdown_from_doc?: Maybe<ExportMarkdownResult>;
   /** Get all personal list items by list ID */
   favorites?: Maybe<Array<GraphqlHierarchyObjectItem>>;
   /** Get a collection of folders. Note: This query won't return folders from closed workspaces to which you are not subscribed */
@@ -6172,8 +6494,6 @@ export type Query = {
   form?: Maybe<ResponseForm>;
   /** Retrieves the JSON schema definition for a specific column type. Use this query before calling update_column mutation to understand the structure and validation rules for the defaults parameter. The schema defines what properties are available when updating columns of a specific type. */
   get_column_type_schema?: Maybe<Scalars['JSON']['output']>;
-  /** Get list of live workflows with pagination */
-  get_live_workflows?: Maybe<Array<Workflow>>;
   /**
    * Retrieves the JSON schema definition for a specific create view type.
    *       Use this query before calling create_view mutation to understand the structure and validation rules for the settings parameter.
@@ -6201,13 +6521,19 @@ export type Query = {
   mute_board_settings?: Maybe<Array<BoardMuteSettings>>;
   /** Get next pages of board's items (rows) by cursor. */
   next_items_page: ItemsResponse;
-  notifications?: Maybe<Array<Notification>>;
+  notifications?: Maybe<Array<NotificationV2>>;
   /** Retrieves the current user's notification settings across all available channels. */
   notifications_settings?: Maybe<Array<NotificationSetting>>;
+  /** Retrieves a list of available object types that can be created or queried. Each object type is uniquely identified by an 'object_type_unique_key'. This key is required for mutations like 'create_object' and for filtering in the 'objects' query. Use this query to discover what types of objects are available in the system (e.g., 'workflows', 'projects') and get their corresponding unique keys. The structure of unique key is 'app_slug::app_feature_slug'. */
+  object_types_unique_keys?: Maybe<Array<ObjectTypeUniqueKey>>;
+  /** Retrieves a list of objects from the Monday.com Objects Platform based on specified filters. This query can return any type of object (board, doc, dashboard, workflow, etc.) depending on the filter criteria. Use object_type_unique_keys to filter for specific object types. */
+  objects?: Maybe<Array<Object>>;
   /** Platform API data. */
   platform_api?: Maybe<PlatformApi>;
   /** Get a collection of replies filtered by board IDs and date range. */
   replies?: Maybe<Array<Reply>>;
+  /** Search for items using various search strategies. */
+  search_items?: Maybe<SearchItemsGraphQlResultsView>;
   /** Get a collection of monday dev sprints */
   sprints?: Maybe<Array<Sprint>>;
   /** Get a collection of tags. */
@@ -6334,6 +6660,12 @@ export type QueryBoardsArgs = {
 
 
 /** Root query type for the Dependencies service */
+export type QueryBulk_Import_Items_StatusArgs = {
+  import_id: Scalars['ID']['input'];
+};
+
+
+/** Root query type for the Dependencies service */
 export type QueryConnectionArgs = {
   id: Scalars['Int']['input'];
 };
@@ -6385,6 +6717,13 @@ export type QueryExport_GraphArgs = {
 
 
 /** Root query type for the Dependencies service */
+export type QueryExport_Markdown_From_DocArgs = {
+  blockIds?: InputMaybe<Array<Scalars['String']['input']>>;
+  docId: Scalars['ID']['input'];
+};
+
+
+/** Root query type for the Dependencies service */
 export type QueryFoldersArgs = {
   ids?: InputMaybe<Array<Scalars['ID']['input']>>;
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -6402,14 +6741,6 @@ export type QueryFormArgs = {
 /** Root query type for the Dependencies service */
 export type QueryGet_Column_Type_SchemaArgs = {
   type: ColumnType;
-};
-
-
-/** Root query type for the Dependencies service */
-export type QueryGet_Live_WorkflowsArgs = {
-  hostInstanceId: Scalars['String']['input'];
-  hostType: HostType;
-  pagination?: InputMaybe<PaginationInput>;
 };
 
 
@@ -6509,12 +6840,40 @@ export type QueryNotifications_SettingsArgs = {
 
 
 /** Root query type for the Dependencies service */
+export type QueryObjectsArgs = {
+  ids?: InputMaybe<Array<Scalars['ID']['input']>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  object_type_unique_keys?: InputMaybe<Array<Scalars['String']['input']>>;
+  order_by?: InputMaybe<OrderBy>;
+  privacy_kind?: InputMaybe<PrivacyKind>;
+  state?: InputMaybe<ObjectState>;
+  workspace_ids?: InputMaybe<Array<Scalars['ID']['input']>>;
+};
+
+
+/** Root query type for the Dependencies service */
 export type QueryRepliesArgs = {
   board_ids: Array<Scalars['ID']['input']>;
   created_at_from?: InputMaybe<Scalars['String']['input']>;
   created_at_to?: InputMaybe<Scalars['String']['input']>;
   limit?: InputMaybe<Scalars['Int']['input']>;
   page?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+/** Root query type for the Dependencies service */
+export type QuerySearch_ItemsArgs = {
+  assignee?: InputMaybe<AssigneeInput>;
+  boardId?: InputMaybe<Scalars['ID']['input']>;
+  boosts?: InputMaybe<BoostConfigurationInput>;
+  dateRange?: InputMaybe<SearchDateRangeInput>;
+  exactMatch?: InputMaybe<Scalars['Boolean']['input']>;
+  query?: InputMaybe<Scalars['String']['input']>;
+  rerankingStrategy?: InputMaybe<RerankingStrategy>;
+  searchType: Search;
+  size: Scalars['Int']['input'];
+  status?: InputMaybe<Scalars['String']['input']>;
+  workspaceIds?: InputMaybe<Array<Scalars['ID']['input']>>;
 };
 
 
@@ -6620,6 +6979,15 @@ export type QueryWorkspacesArgs = {
   state?: InputMaybe<State>;
 };
 
+/** Contains the results of the query. */
+export type QueryResult = {
+  __typename?: 'QueryResult';
+  /** The item data from the search result. */
+  data: Item;
+  /** The relevance score of the search result. */
+  score: Scalars['Float']['output'];
+};
+
 export type QuestionOptionInput = {
   /** The label to display for the option */
   label: Scalars['String']['input'];
@@ -6718,6 +7086,12 @@ export type RequiredColumns = {
   required_column_ids: Array<Scalars['String']['output']>;
 };
 
+/** Algorithms for reranking results. */
+export enum RerankingStrategy {
+  /** Use cross-encoder model for reranking results. */
+  CrossEncoder = 'CROSS_ENCODER'
+}
+
 export type ResponseForm = {
   __typename?: 'ResponseForm';
   /** Object containing accessibility settings such as language, alt text, and reading direction. */
@@ -6755,6 +7129,37 @@ export enum ScopeType {
   AccountNewUserDefaults = 'AccountNewUserDefaults',
   User = 'User'
 }
+
+/** Available search modes. */
+export enum Search {
+  /** Combined lexical and semantic search with reranking. */
+  Hybrid = 'HYBRID',
+  /** Keyword-based search using text matching. */
+  Lexical = 'LEXICAL',
+  /** Vector-based search using semantic similarity. */
+  Semantic = 'SEMANTIC'
+}
+
+/** Date range filter for search queries */
+export type SearchDateRangeInput = {
+  /** Filter items created after this date */
+  createdAfter?: InputMaybe<Scalars['ISO8601DateTime']['input']>;
+  /** Filter items created before this date */
+  createdBefore?: InputMaybe<Scalars['ISO8601DateTime']['input']>;
+  /** Filter items updated after this date */
+  updatedAfter?: InputMaybe<Scalars['ISO8601DateTime']['input']>;
+  /** Filter items updated before this date */
+  updatedBefore?: InputMaybe<Scalars['ISO8601DateTime']['input']>;
+};
+
+/** Response of the search request. */
+export type SearchItemsGraphQlResultsView = {
+  __typename?: 'SearchItemsGraphQlResultsView';
+  /** Indicates if the results have been reranked */
+  reranked?: Maybe<Scalars['Boolean']['output']>;
+  /** The results of the items search. */
+  results: Array<QueryResult>;
+};
 
 /** Response type for detailed board permissions. Contains information about the permissions that were set. */
 export type SetBoardPermissionResponse = {
@@ -7020,6 +7425,14 @@ export type StatusValue = ColumnValue & {
   value?: Maybe<Scalars['JSON']['output']>;
 };
 
+/** Defines the type of the user's role as members of the object */
+export enum SubscriberKind {
+  /** User will be added as an owner of the object, granting them full control permissions. */
+  Owner = 'OWNER',
+  /** User will be added as a subscriber to the object, receiving notifications about changes. */
+  Subscriber = 'SUBSCRIBER'
+}
+
 /** The discounts granted to the subscription */
 export type SubscriptionDiscount = {
   __typename?: 'SubscriptionDiscount';
@@ -7092,8 +7505,6 @@ export type SubtasksValue = ColumnValue & {
  *    Use `afterBlockId` only to order siblings within the same cell.
  */
 export type TableBlockInput = {
-  /** Optional UUID for the block */
-  block_id?: InputMaybe<Scalars['String']['input']>;
   /** The number of columns in the table */
   column_count: Scalars['Int']['input'];
   /** The column style configuration */
@@ -7254,8 +7665,6 @@ export type TextBlockContent = DocBaseBlockContent & {
 /** Input for creating text blocks (normal text, titles, quote, code) */
 export type TextBlockInput = {
   alignment?: InputMaybe<BlockAlignment>;
-  /** Optional UUID for the block */
-  block_id?: InputMaybe<Scalars['String']['input']>;
   /** The text content in delta format - array of operations with insert content and optional attributes */
   delta_format: Array<OperationInput>;
   direction?: InputMaybe<BlockDirection>;
@@ -7538,6 +7947,24 @@ export type UpdateAppFeatureInput = {
   deployment?: InputMaybe<AppFeatureReleaseInput>;
 };
 
+/** Input for updating an existing app. Creates draft version for live apps. */
+export type UpdateAppInput = {
+  /** Array of user IDs with access (replaces existing collaborators) */
+  collaborators?: InputMaybe<Array<Scalars['ID']['input']>>;
+  /** Detailed description of the app */
+  description?: InputMaybe<Scalars['String']['input']>;
+  /** App visibility type */
+  kind?: InputMaybe<AppKind>;
+  /** The display name of the app */
+  name?: InputMaybe<Scalars['String']['input']>;
+  /** Array of permission scopes (replaces existing permissions) */
+  permissions?: InputMaybe<Array<Scalars['String']['input']>>;
+  /** URL-friendly identifier (only settable if app has no existing slug) */
+  slug?: InputMaybe<Scalars['String']['input']>;
+  /** Webhook endpoint URL */
+  webhook_url?: InputMaybe<Scalars['String']['input']>;
+};
+
 /** Attributes for updating a board's position and location */
 export type UpdateBoardHierarchyAttributesInput = {
   /** The ID of the account product where the board should be placed */
@@ -7564,7 +7991,7 @@ export type UpdateBoardHierarchyResult = {
 /** Input type for updating a single dependency relationship between pulses */
 export type UpdateDependencyColumnInput = {
   /** The ID of the pulse to create or remove a dependency relationship with */
-  linkedPulseId: Scalars['Int']['input'];
+  linkedPulseId: Scalars['ID']['input'];
   /** Optional metadata containing dependency configuration (type and lag) */
   metadata?: InputMaybe<MetadataInput>;
 };
@@ -7664,6 +8091,16 @@ export type UpdateObjectHierarchyPositionInput = {
   newPosition?: InputMaybe<ObjectDynamicPositionInput>;
   /** The favorite's object to update */
   object: HierarchyObjectIdInputType;
+};
+
+/** Input for updating an object */
+export type UpdateObjectInput = {
+  /** The new description for the object */
+  description?: InputMaybe<Scalars['String']['input']>;
+  /** The new name for the object. */
+  name?: InputMaybe<Scalars['String']['input']>;
+  /** The new privacy kind for the object. */
+  privacy_kind?: InputMaybe<PrivacyKind>;
 };
 
 /** Result type for updating an overview's hierarchy */
@@ -7963,8 +8400,6 @@ export enum VersionKind {
 
 /** Input for creating video blocks */
 export type VideoBlockInput = {
-  /** Optional UUID for the block */
-  block_id?: InputMaybe<Scalars['String']['input']>;
   /** The parent block id to append the created block under. */
   parent_block_id?: InputMaybe<Scalars['String']['input']>;
   /** The raw URL of the video */
@@ -8157,72 +8592,6 @@ export type WidgetSchemaInfo = {
   schema?: Maybe<Scalars['JSON']['output']>;
   /** The widget kind (e.g., Chart, Number, Battery) */
   widget_type?: Maybe<ExternalWidget>;
-};
-
-export type Workflow = {
-  __typename?: 'Workflow';
-  /** Reference ID of the creator app feature */
-  creatorAppFeatureReferenceId?: Maybe<Scalars['Int']['output']>;
-  /** ID of the creator app */
-  creatorAppId?: Maybe<Scalars['Int']['output']>;
-  /** Detailed description of the workflow */
-  description?: Maybe<Scalars['String']['output']>;
-  /** Instance ID of the host */
-  hostInstanceId?: Maybe<Scalars['Int']['output']>;
-  /** Type of host for this workflow */
-  hostType?: Maybe<HostType>;
-  /** Workflow numeric ID (supports both integer and bigint) */
-  id?: Maybe<Scalars['String']['output']>;
-  /** Notice/Error message for the workflow */
-  noticeMessage?: Maybe<Scalars['String']['output']>;
-  /** Title of the workflow */
-  title?: Maybe<Scalars['String']['output']>;
-  /** Define the workflow's steps and the configuration of each step */
-  workflowBlocks?: Maybe<Array<WorkflowBlock>>;
-  /** Hierarchy level the workflow is hosted in */
-  workflowHostData?: Maybe<WorkflowHostData>;
-  /** Variables used within this workflow. To get the accurate JSON schema call the GraphQL query 'get_workflow_variable_schemas' */
-  workflowVariables?: Maybe<Scalars['JSON']['output']>;
-};
-
-export type WorkflowBlock = {
-  __typename?: 'WorkflowBlock';
-  /** Reference ID of the block */
-  blockReferenceId?: Maybe<Scalars['Int']['output']>;
-  /** Configuration for credential sources */
-  credentialsSourceConfig?: Maybe<Scalars['JSON']['output']>;
-  /** Defines the input fields of the workflow block. This corresponds to the input fields defined by the block used in the Workflow Block. You must call the remote_options query to retrieve the allowed values for any custom input field before configuring it. */
-  inputFields?: Maybe<Array<WorkflowBlockInputField>>;
-  kind?: Maybe<WorkflowBlockKind>;
-  /** Configuration for the next workflow blocks. To get the accurate JSON schema call the graphQL query 'get_workflow_block_next_mapping_schemas */
-  nextWorkflowBlocksConfig?: Maybe<Scalars['JSON']['output']>;
-  /** Title of the workflow block */
-  title?: Maybe<Scalars['String']['output']>;
-  /** Unique node identifier within the workflow */
-  workflowNodeId?: Maybe<Scalars['Int']['output']>;
-};
-
-export type WorkflowBlockInputField = {
-  __typename?: 'WorkflowBlockInputField';
-  /** The block's field key */
-  fieldKey?: Maybe<Scalars['String']['output']>;
-  /** Key of the workflow variable defining the configuration for the field key. Always a positive number */
-  workflowVariableKey?: Maybe<Scalars['Int']['output']>;
-};
-
-/** The kind of workflow block. This is the type of the block that is used in the UI */
-export enum WorkflowBlockKind {
-  /** A wait block */
-  Wait = 'WAIT'
-}
-
-/** Hierarchy level the workflow is hosted in */
-export type WorkflowHostData = {
-  __typename?: 'WorkflowHostData';
-  /** Instance ID of the host */
-  id?: Maybe<Scalars['Int']['output']>;
-  /** Type of host for this workflow */
-  type?: Maybe<HostType>;
 };
 
 /** A monday.com workspace. */
@@ -8534,6 +8903,21 @@ export enum __TypeKind {
   NonNull = 'NON_NULL'
 }
 
+export type GetSprintsByIdsQueryVariables = Exact<{
+  ids?: InputMaybe<Array<Scalars['ID']['input']> | Scalars['ID']['input']>;
+}>;
+
+
+export type GetSprintsByIdsQuery = { __typename?: 'Query', items?: Array<{ __typename?: 'Item', id: string, name: string, board?: { __typename?: 'Board', id: string } | null, column_values: Array<{ __typename: 'BatteryValue', id: string, type: ColumnType } | { __typename: 'BoardRelationValue', id: string, type: ColumnType } | { __typename: 'ButtonValue', id: string, type: ColumnType } | { __typename: 'CheckboxValue', checked?: boolean | null, id: string, type: ColumnType } | { __typename: 'ColorPickerValue', id: string, type: ColumnType } | { __typename: 'CountryValue', id: string, type: ColumnType } | { __typename: 'CreationLogValue', id: string, type: ColumnType } | { __typename: 'DateValue', date?: string | null, id: string, type: ColumnType } | { __typename: 'DependencyValue', id: string, type: ColumnType } | { __typename: 'DirectDocValue', id: string, type: ColumnType } | { __typename: 'DocValue', id: string, type: ColumnType, file?: { __typename?: 'FileDocValue', doc: { __typename?: 'Document', object_id: string } } | null } | { __typename: 'DropdownValue', id: string, type: ColumnType } | { __typename: 'EmailValue', id: string, type: ColumnType } | { __typename: 'FileValue', id: string, type: ColumnType } | { __typename: 'FormulaValue', id: string, type: ColumnType } | { __typename: 'GroupValue', id: string, type: ColumnType } | { __typename: 'HourValue', id: string, type: ColumnType } | { __typename: 'IntegrationValue', id: string, type: ColumnType } | { __typename: 'ItemIdValue', id: string, type: ColumnType } | { __typename: 'LastUpdatedValue', id: string, type: ColumnType } | { __typename: 'LinkValue', id: string, type: ColumnType } | { __typename: 'LocationValue', id: string, type: ColumnType } | { __typename: 'LongTextValue', id: string, type: ColumnType } | { __typename: 'MirrorValue', id: string, type: ColumnType } | { __typename: 'NumbersValue', id: string, type: ColumnType } | { __typename: 'PeopleValue', id: string, type: ColumnType } | { __typename: 'PersonValue', id: string, type: ColumnType } | { __typename: 'PhoneValue', id: string, type: ColumnType } | { __typename: 'ProgressValue', id: string, type: ColumnType } | { __typename: 'RatingValue', id: string, type: ColumnType } | { __typename: 'StatusValue', id: string, type: ColumnType } | { __typename: 'SubtasksValue', id: string, type: ColumnType } | { __typename: 'TagsValue', id: string, type: ColumnType } | { __typename: 'TeamValue', id: string, type: ColumnType } | { __typename: 'TextValue', value?: any | null, id: string, type: ColumnType } | { __typename: 'TimeTrackingValue', id: string, type: ColumnType } | { __typename: 'TimelineValue', from?: any | null, to?: any | null, id: string, type: ColumnType } | { __typename: 'UnsupportedValue', id: string, type: ColumnType } | { __typename: 'VoteValue', id: string, type: ColumnType } | { __typename: 'WeekValue', id: string, type: ColumnType } | { __typename: 'WorldClockValue', id: string, type: ColumnType }> } | null> | null };
+
+export type GetSprintsBoardItemsWithColumnsQueryVariables = Exact<{
+  boardId: Scalars['ID']['input'];
+  limit?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type GetSprintsBoardItemsWithColumnsQuery = { __typename?: 'Query', boards?: Array<{ __typename?: 'Board', items_page: { __typename?: 'ItemsResponse', items: Array<{ __typename?: 'Item', id: string, name: string, column_values: Array<{ __typename: 'BatteryValue', id: string, type: ColumnType } | { __typename: 'BoardRelationValue', id: string, type: ColumnType } | { __typename: 'ButtonValue', id: string, type: ColumnType } | { __typename: 'CheckboxValue', checked?: boolean | null, id: string, type: ColumnType } | { __typename: 'ColorPickerValue', id: string, type: ColumnType } | { __typename: 'CountryValue', id: string, type: ColumnType } | { __typename: 'CreationLogValue', id: string, type: ColumnType } | { __typename: 'DateValue', date?: string | null, id: string, type: ColumnType } | { __typename: 'DependencyValue', id: string, type: ColumnType } | { __typename: 'DirectDocValue', id: string, type: ColumnType } | { __typename: 'DocValue', id: string, type: ColumnType, file?: { __typename?: 'FileDocValue', doc: { __typename?: 'Document', object_id: string } } | null } | { __typename: 'DropdownValue', id: string, type: ColumnType } | { __typename: 'EmailValue', id: string, type: ColumnType } | { __typename: 'FileValue', id: string, type: ColumnType } | { __typename: 'FormulaValue', id: string, type: ColumnType } | { __typename: 'GroupValue', id: string, type: ColumnType } | { __typename: 'HourValue', id: string, type: ColumnType } | { __typename: 'IntegrationValue', id: string, type: ColumnType } | { __typename: 'ItemIdValue', id: string, type: ColumnType } | { __typename: 'LastUpdatedValue', id: string, type: ColumnType } | { __typename: 'LinkValue', id: string, type: ColumnType } | { __typename: 'LocationValue', id: string, type: ColumnType } | { __typename: 'LongTextValue', id: string, type: ColumnType } | { __typename: 'MirrorValue', id: string, type: ColumnType } | { __typename: 'NumbersValue', id: string, type: ColumnType } | { __typename: 'PeopleValue', id: string, type: ColumnType } | { __typename: 'PersonValue', id: string, type: ColumnType } | { __typename: 'PhoneValue', id: string, type: ColumnType } | { __typename: 'ProgressValue', id: string, type: ColumnType } | { __typename: 'RatingValue', id: string, type: ColumnType } | { __typename: 'StatusValue', id: string, type: ColumnType } | { __typename: 'SubtasksValue', id: string, type: ColumnType } | { __typename: 'TagsValue', id: string, type: ColumnType } | { __typename: 'TeamValue', id: string, type: ColumnType } | { __typename: 'TextValue', value?: any | null, id: string, type: ColumnType } | { __typename: 'TimeTrackingValue', id: string, type: ColumnType } | { __typename: 'TimelineValue', from?: any | null, to?: any | null, id: string, type: ColumnType } | { __typename: 'UnsupportedValue', id: string, type: ColumnType } | { __typename: 'VoteValue', id: string, type: ColumnType } | { __typename: 'WeekValue', id: string, type: ColumnType } | { __typename: 'WorldClockValue', id: string, type: ColumnType }> }> } } | null> | null };
+
 export type CreateFolderMutationVariables = Exact<{
   workspaceId: Scalars['ID']['input'];
   name: Scalars['String']['input'];
@@ -8556,6 +8940,24 @@ export type CreateGroupMutationVariables = Exact<{
 
 
 export type CreateGroupMutation = { __typename?: 'Mutation', create_group?: { __typename?: 'Group', id: string, title: string } | null };
+
+export type CreateSubitemMutationVariables = Exact<{
+  parentItemId: Scalars['ID']['input'];
+  itemName: Scalars['String']['input'];
+  columnValues?: InputMaybe<Scalars['JSON']['input']>;
+}>;
+
+
+export type CreateSubitemMutation = { __typename?: 'Mutation', create_subitem?: { __typename?: 'Item', id: string, name: string, parent_item?: { __typename?: 'Item', id: string } | null } | null };
+
+export type DuplicateItemMutationVariables = Exact<{
+  boardId: Scalars['ID']['input'];
+  itemId: Scalars['ID']['input'];
+  withUpdates?: InputMaybe<Scalars['Boolean']['input']>;
+}>;
+
+
+export type DuplicateItemMutation = { __typename?: 'Mutation', duplicate_item?: { __typename?: 'Item', id: string, name: string } | null };
 
 export type CreateWorkspaceMutationVariables = Exact<{
   name: Scalars['String']['input'];
@@ -8609,7 +9011,37 @@ export type GetBoardInfoQueryVariables = Exact<{
 }>;
 
 
-export type GetBoardInfoQuery = { __typename?: 'Query', boards?: Array<{ __typename?: 'Board', id: string, name: string, description?: string | null, state: State, board_kind: BoardKind, permissions: string, url: string, updated_at?: any | null, item_terminology?: string | null, items_count?: number | null, items_limit?: number | null, board_folder_id?: string | null, creator: { __typename?: 'User', id: string, name: string, email: string }, workspace?: { __typename?: 'Workspace', id?: string | null, name: string, kind?: WorkspaceKind | null, description?: string | null } | null, columns?: Array<{ __typename?: 'Column', id: string, title: string, description?: string | null, type: ColumnType, settings_str: string } | null> | null, groups?: Array<{ __typename?: 'Group', id: string, title: string } | null> | null, owners: Array<{ __typename?: 'User', id: string, name: string } | null>, team_owners?: Array<{ __typename?: 'Team', id: string, name: string, picture_url?: string | null }> | null, tags?: Array<{ __typename?: 'Tag', id: string, name: string } | null> | null, top_group: { __typename?: 'Group', id: string } } | null> | null };
+export type GetBoardInfoQuery = { __typename?: 'Query', boards?: Array<{ __typename?: 'Board', id: string, name: string, description?: string | null, state: State, board_kind: BoardKind, permissions: string, url: string, updated_at?: any | null, item_terminology?: string | null, items_count?: number | null, items_limit?: number | null, board_folder_id?: string | null, creator: { __typename?: 'User', id: string, name: string, email: string }, workspace?: { __typename?: 'Workspace', id?: string | null, name: string, kind?: WorkspaceKind | null, description?: string | null } | null, columns?: Array<{ __typename?: 'Column', id: string, title: string, description?: string | null, type: ColumnType, settings?: any | null } | null> | null, groups?: Array<{ __typename?: 'Group', id: string, title: string } | null> | null, owners: Array<{ __typename?: 'User', id: string, name: string } | null>, team_owners?: Array<{ __typename?: 'Team', id: string, name: string, picture_url?: string | null }> | null, tags?: Array<{ __typename?: 'Tag', id: string, name: string } | null> | null, top_group: { __typename?: 'Group', id: string } } | null> | null };
+
+export type GetBoardInfoJustColumnsQueryVariables = Exact<{
+  boardId: Scalars['ID']['input'];
+}>;
+
+
+export type GetBoardInfoJustColumnsQuery = { __typename?: 'Query', boards?: Array<{ __typename?: 'Board', columns?: Array<{ __typename?: 'Column', id: string, title: string, description?: string | null, type: ColumnType, settings?: any | null } | null> | null } | null> | null };
+
+export type ItemDataFragmentFragment = { __typename?: 'Item', id: string, name: string, created_at?: any | null, updated_at?: any | null, column_values?: Array<{ __typename?: 'BatteryValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'BoardRelationValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'ButtonValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'CheckboxValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'ColorPickerValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'CountryValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'CreationLogValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'DateValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'DependencyValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'DirectDocValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'DocValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'DropdownValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'EmailValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'FileValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'FormulaValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'GroupValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'HourValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'IntegrationValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'ItemIdValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'LastUpdatedValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'LinkValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'LocationValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'LongTextValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'MirrorValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'NumbersValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'PeopleValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'PersonValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'PhoneValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'ProgressValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'RatingValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'StatusValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'SubtasksValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'TagsValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'TeamValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'TextValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'TimeTrackingValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'TimelineValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'UnsupportedValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'VoteValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'WeekValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'WorldClockValue', id: string, text?: string | null, value?: any | null }> };
+
+export type GetBoardItemsPageQueryVariables = Exact<{
+  boardId: Scalars['ID']['input'];
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  cursor?: InputMaybe<Scalars['String']['input']>;
+  includeColumns: Scalars['Boolean']['input'];
+  columnIds?: InputMaybe<Array<Scalars['String']['input']> | Scalars['String']['input']>;
+  queryParams?: InputMaybe<ItemsQuery>;
+  includeSubItems: Scalars['Boolean']['input'];
+}>;
+
+
+export type GetBoardItemsPageQuery = { __typename?: 'Query', boards?: Array<{ __typename?: 'Board', id: string, name: string, items_page: { __typename?: 'ItemsResponse', cursor?: string | null, items: Array<{ __typename?: 'Item', id: string, name: string, created_at?: any | null, updated_at?: any | null, subitems?: Array<{ __typename?: 'Item', id: string, name: string, created_at?: any | null, updated_at?: any | null, column_values?: Array<{ __typename?: 'BatteryValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'BoardRelationValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'ButtonValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'CheckboxValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'ColorPickerValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'CountryValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'CreationLogValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'DateValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'DependencyValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'DirectDocValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'DocValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'DropdownValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'EmailValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'FileValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'FormulaValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'GroupValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'HourValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'IntegrationValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'ItemIdValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'LastUpdatedValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'LinkValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'LocationValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'LongTextValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'MirrorValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'NumbersValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'PeopleValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'PersonValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'PhoneValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'ProgressValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'RatingValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'StatusValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'SubtasksValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'TagsValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'TeamValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'TextValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'TimeTrackingValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'TimelineValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'UnsupportedValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'VoteValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'WeekValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'WorldClockValue', id: string, text?: string | null, value?: any | null }> } | null> | null, column_values?: Array<{ __typename?: 'BatteryValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'BoardRelationValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'ButtonValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'CheckboxValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'ColorPickerValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'CountryValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'CreationLogValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'DateValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'DependencyValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'DirectDocValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'DocValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'DropdownValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'EmailValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'FileValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'FormulaValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'GroupValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'HourValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'IntegrationValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'ItemIdValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'LastUpdatedValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'LinkValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'LocationValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'LongTextValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'MirrorValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'NumbersValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'PeopleValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'PersonValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'PhoneValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'ProgressValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'RatingValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'StatusValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'SubtasksValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'TagsValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'TeamValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'TextValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'TimeTrackingValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'TimelineValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'UnsupportedValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'VoteValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'WeekValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'WorldClockValue', id: string, text?: string | null, value?: any | null }> }> } } | null> | null };
+
+export type SmartSearchBoardItemIdsQueryVariables = Exact<{
+  searchTerm: Scalars['String']['input'];
+  boardId: Scalars['ID']['input'];
+}>;
+
+
+export type SmartSearchBoardItemIdsQuery = { __typename?: 'Query', search_items?: { __typename?: 'SearchItemsGraphQlResultsView', results: Array<{ __typename?: 'QueryResult', data: { __typename?: 'Item', id: string } }> } | null };
 
 export type GetBoardItemsPageQueryVariables = Exact<{
   boardId: Scalars['ID']['input'];
@@ -8922,14 +9354,6 @@ export type DeleteItemMutationVariables = Exact<{
 
 export type DeleteItemMutation = { __typename?: 'Mutation', delete_item?: { __typename?: 'Item', id: string } | null };
 
-export type GetBoardItemsByNameQueryVariables = Exact<{
-  boardId: Scalars['ID']['input'];
-  term: Scalars['CompareValue']['input'];
-}>;
-
-
-export type GetBoardItemsByNameQuery = { __typename?: 'Query', boards?: Array<{ __typename?: 'Board', items_page: { __typename?: 'ItemsResponse', items: Array<{ __typename?: 'Item', id: string, name: string }> } } | null> | null };
-
 export type CreateItemMutationVariables = Exact<{
   boardId: Scalars['ID']['input'];
   itemName: Scalars['String']['input'];
@@ -8955,13 +9379,6 @@ export type GetBoardSchemaQueryVariables = Exact<{
 
 
 export type GetBoardSchemaQuery = { __typename?: 'Query', boards?: Array<{ __typename?: 'Board', groups?: Array<{ __typename?: 'Group', id: string, title: string } | null> | null, columns?: Array<{ __typename?: 'Column', id: string, type: ColumnType, title: string } | null> | null } | null> | null };
-
-export type GetUsersByNameQueryVariables = Exact<{
-  name?: InputMaybe<Scalars['String']['input']>;
-}>;
-
-
-export type GetUsersByNameQuery = { __typename?: 'Query', users?: Array<{ __typename?: 'User', id: string, name: string, title?: string | null } | null> | null };
 
 export type ChangeItemColumnValuesMutationVariables = Exact<{
   boardId: Scalars['ID']['input'];
@@ -9103,13 +9520,13 @@ export type ReadDocsQueryVariables = Exact<{
 
 export type ReadDocsQuery = { __typename?: 'Query', docs?: Array<{ __typename?: 'Document', id: string, object_id: string, name: string, doc_kind: BoardKind, created_at?: any | null, settings?: any | null, url?: string | null, relative_url?: string | null, workspace_id?: string | null, doc_folder_id?: string | null, created_by?: { __typename?: 'User', id: string, name: string } | null, workspace?: { __typename?: 'Workspace', id?: string | null, name: string } | null } | null> | null };
 
-export type ExportMarkdownFromDocMutationVariables = Exact<{
+export type ExportMarkdownFromDocQueryVariables = Exact<{
   docId: Scalars['ID']['input'];
   blockIds?: InputMaybe<Array<Scalars['String']['input']> | Scalars['String']['input']>;
 }>;
 
 
-export type ExportMarkdownFromDocMutation = { __typename?: 'Mutation', export_markdown_from_doc?: { __typename?: 'ExportMarkdownResult', success: boolean, markdown?: string | null, error?: string | null } | null };
+export type ExportMarkdownFromDocQuery = { __typename?: 'Query', export_markdown_from_doc?: { __typename?: 'ExportMarkdownResult', success: boolean, markdown?: string | null, error?: string | null } | null };
 
 export type GetWorkspaceInfoQueryVariables = Exact<{
   workspace_id: Scalars['ID']['input'];
@@ -9117,40 +9534,3 @@ export type GetWorkspaceInfoQueryVariables = Exact<{
 
 
 export type GetWorkspaceInfoQuery = { __typename?: 'Query', workspaces?: Array<{ __typename?: 'Workspace', id?: string | null, name: string, description?: string | null, kind?: WorkspaceKind | null, created_at?: any | null, state?: State | null, is_default_workspace?: boolean | null, owners_subscribers?: Array<{ __typename?: 'User', id: string, name: string, email: string } | null> | null } | null> | null, boards?: Array<{ __typename?: 'Board', id: string, name: string, board_folder_id?: string | null } | null> | null, docs?: Array<{ __typename?: 'Document', id: string, name: string, doc_folder_id?: string | null } | null> | null, folders?: Array<{ __typename?: 'Folder', id: string, name: string } | null> | null };
-
-export type GetSprintsQueryVariables = Exact<{
-  sprintIds: Array<Scalars['ID']['input']> | Scalars['ID']['input'];
-}>;
-
-
-export type GetSprintsQuery = { __typename?: 'Query', sprints?: Array<{ __typename?: 'Sprint', id: string, name?: string | null, start_date?: any | null, end_date?: any | null, state?: SprintState | null, timeline?: { __typename?: 'SprintTimeline', from?: any | null, to?: any | null } | null, snapshots?: Array<{ __typename?: 'SprintSnapshot', id?: string | null, type?: SprintSnapshotKind | null, created_at?: any | null, updated_at?: any | null, items?: Array<{ __typename?: 'SprintSnapshotItem', id: string, column_values?: Array<{ __typename?: 'SprintSnapshotItemColumnValue', id: string, type: string, value?: any | null }> | null }> | null, columns_metadata?: Array<{ __typename?: 'SprintSnapshotColumnMetadata', id: string, done_status_indexes: Array<number> }> | null }> | null }> | null };
-
-export type GetSprintsBoardItemsWithColumnsQueryVariables = Exact<{
-  boardId: Scalars['ID']['input'];
-}>;
-
-
-export type GetSprintsBoardItemsWithColumnsQuery = { __typename?: 'Query', boards?: Array<{ __typename?: 'Board', items_page: { __typename?: 'ItemsResponse', items: Array<{ __typename?: 'Item', id: string, name: string, column_values: Array<{ __typename: 'BatteryValue', id: string, type: ColumnType } | { __typename: 'BoardRelationValue', id: string, type: ColumnType } | { __typename: 'ButtonValue', id: string, type: ColumnType } | { __typename: 'CheckboxValue', checked?: boolean | null, id: string, type: ColumnType } | { __typename: 'ColorPickerValue', id: string, type: ColumnType } | { __typename: 'CountryValue', id: string, type: ColumnType } | { __typename: 'CreationLogValue', id: string, type: ColumnType } | { __typename: 'DateValue', date?: string | null, id: string, type: ColumnType } | { __typename: 'DependencyValue', id: string, type: ColumnType } | { __typename: 'DirectDocValue', id: string, type: ColumnType } | { __typename: 'DocValue', id: string, type: ColumnType, file?: { __typename?: 'FileDocValue', doc: { __typename?: 'Document', object_id: string } } | null } | { __typename: 'DropdownValue', id: string, type: ColumnType } | { __typename: 'EmailValue', id: string, type: ColumnType } | { __typename: 'FileValue', id: string, type: ColumnType } | { __typename: 'FormulaValue', id: string, type: ColumnType } | { __typename: 'GroupValue', id: string, type: ColumnType } | { __typename: 'HourValue', id: string, type: ColumnType } | { __typename: 'IntegrationValue', id: string, type: ColumnType } | { __typename: 'ItemIdValue', id: string, type: ColumnType } | { __typename: 'LastUpdatedValue', id: string, type: ColumnType } | { __typename: 'LinkValue', id: string, type: ColumnType } | { __typename: 'LocationValue', id: string, type: ColumnType } | { __typename: 'LongTextValue', id: string, type: ColumnType } | { __typename: 'MirrorValue', id: string, type: ColumnType } | { __typename: 'NumbersValue', id: string, type: ColumnType } | { __typename: 'PeopleValue', id: string, type: ColumnType } | { __typename: 'PersonValue', id: string, type: ColumnType } | { __typename: 'PhoneValue', id: string, type: ColumnType } | { __typename: 'ProgressValue', id: string, type: ColumnType } | { __typename: 'RatingValue', id: string, type: ColumnType } | { __typename: 'StatusValue', id: string, type: ColumnType } | { __typename: 'SubtasksValue', id: string, type: ColumnType } | { __typename: 'TagsValue', id: string, type: ColumnType } | { __typename: 'TeamValue', id: string, type: ColumnType } | { __typename: 'TextValue', value?: any | null, id: string, type: ColumnType } | { __typename: 'TimeTrackingValue', id: string, type: ColumnType } | { __typename: 'TimelineValue', from?: any | null, to?: any | null, id: string, type: ColumnType } | { __typename: 'UnsupportedValue', id: string, type: ColumnType } | { __typename: 'VoteValue', id: string, type: ColumnType } | { __typename: 'WeekValue', id: string, type: ColumnType } | { __typename: 'WorldClockValue', id: string, type: ColumnType }> }> } } | null> | null };
-
-export type GetSprintsByIdsQueryVariables = Exact<{
-  ids?: InputMaybe<Array<Scalars['ID']['input']> | Scalars['ID']['input']>;
-}>;
-
-
-export type GetSprintsByIdsQuery = { __typename?: 'Query', items?: Array<{ __typename?: 'Item', id: string, name: string, board?: { __typename?: 'Board', id: string } | null, column_values: Array<{ __typename: 'BatteryValue', id: string, type: ColumnType } | { __typename: 'BoardRelationValue', id: string, type: ColumnType } | { __typename: 'ButtonValue', id: string, type: ColumnType } | { __typename: 'CheckboxValue', checked?: boolean | null, id: string, type: ColumnType } | { __typename: 'ColorPickerValue', id: string, type: ColumnType } | { __typename: 'CountryValue', id: string, type: ColumnType } | { __typename: 'CreationLogValue', id: string, type: ColumnType } | { __typename: 'DateValue', date?: string | null, id: string, type: ColumnType } | { __typename: 'DependencyValue', id: string, type: ColumnType } | { __typename: 'DirectDocValue', id: string, type: ColumnType } | { __typename: 'DocValue', id: string, type: ColumnType, file?: { __typename?: 'FileDocValue', doc: { __typename?: 'Document', object_id: string } } | null } | { __typename: 'DropdownValue', id: string, type: ColumnType } | { __typename: 'EmailValue', id: string, type: ColumnType } | { __typename: 'FileValue', id: string, type: ColumnType } | { __typename: 'FormulaValue', id: string, type: ColumnType } | { __typename: 'GroupValue', id: string, type: ColumnType } | { __typename: 'HourValue', id: string, type: ColumnType } | { __typename: 'IntegrationValue', id: string, type: ColumnType } | { __typename: 'ItemIdValue', id: string, type: ColumnType } | { __typename: 'LastUpdatedValue', id: string, type: ColumnType } | { __typename: 'LinkValue', id: string, type: ColumnType } | { __typename: 'LocationValue', id: string, type: ColumnType } | { __typename: 'LongTextValue', id: string, type: ColumnType } | { __typename: 'MirrorValue', id: string, type: ColumnType } | { __typename: 'NumbersValue', id: string, type: ColumnType } | { __typename: 'PeopleValue', id: string, type: ColumnType } | { __typename: 'PersonValue', id: string, type: ColumnType } | { __typename: 'PhoneValue', id: string, type: ColumnType } | { __typename: 'ProgressValue', id: string, type: ColumnType } | { __typename: 'RatingValue', id: string, type: ColumnType } | { __typename: 'StatusValue', id: string, type: ColumnType } | { __typename: 'SubtasksValue', id: string, type: ColumnType } | { __typename: 'TagsValue', id: string, type: ColumnType } | { __typename: 'TeamValue', id: string, type: ColumnType } | { __typename: 'TextValue', value?: any | null, id: string, type: ColumnType } | { __typename: 'TimeTrackingValue', id: string, type: ColumnType } | { __typename: 'TimelineValue', from?: any | null, to?: any | null, id: string, type: ColumnType } | { __typename: 'UnsupportedValue', id: string, type: ColumnType } | { __typename: 'VoteValue', id: string, type: ColumnType } | { __typename: 'WeekValue', id: string, type: ColumnType } | { __typename: 'WorldClockValue', id: string, type: ColumnType }> } | null> | null };
-
-export type DuplicateItemMutationVariables = Exact<{
-  boardId: Scalars['ID']['input'];
-  itemId: Scalars['ID']['input'];
-  withUpdates?: InputMaybe<Scalars['Boolean']['input']>;
-}>;
-
-
-export type DuplicateItemMutation = { __typename?: 'Mutation', duplicate_item?: { __typename?: 'Item', id: string, name: string } | null };
-
-export type GetRecentBoardsQueryVariables = Exact<{
-  limit?: InputMaybe<Scalars['Int']['input']>;
-}>;
-
-
-export type GetRecentBoardsQuery = { __typename?: 'Query', boards?: Array<{ __typename?: 'Board', id: string, name: string, workspace?: { __typename?: 'Workspace', id?: string | null, name: string } | null, columns?: Array<{ __typename?: 'Column', id: string, type: ColumnType, settings?: any | null } | null> | null } | null> | null };
