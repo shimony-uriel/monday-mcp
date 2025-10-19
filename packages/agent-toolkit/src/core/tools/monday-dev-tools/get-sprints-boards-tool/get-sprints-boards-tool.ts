@@ -1,10 +1,10 @@
-import { ToolInputType, ToolOutputType, ToolType } from '../../tool';
-import { BaseMondayApiTool, createMondayApiAnnotations } from '../platform-api-tools/base-monday-api-tool';
+import { ToolInputType, ToolOutputType, ToolType } from '../../../tool';
+import { BaseMondayApiTool, createMondayApiAnnotations } from '../../platform-api-tools/base-monday-api-tool';
 import { 
   GetRecentBoardsQuery,
   GetRecentBoardsQueryVariables,
-} from '../../../monday-graphql/generated/graphql';
-import { getRecentBoards } from '../../../monday-graphql/queries.graphql';
+} from '../../../../monday-graphql/generated/graphql';
+import { getRecentBoards } from './get-sprints-boards-tool.graphql';
 import {
   REQUIRED_SPRINT_COLUMNS,
   REQUIRED_TASKS_COLUMNS,
@@ -12,7 +12,7 @@ import {
   ERROR_PREFIXES,
   Board,
   SprintsBoardPair,
-} from './shared';
+} from '../shared';
 
 export const getSprintsBoardsToolSchema = {};
 

@@ -2054,11 +2054,11 @@ export enum CustomizableBoardSettings {
 export type DailyAnalytics = {
   __typename?: 'DailyAnalytics';
   /** API usage per app. */
-  by_app: Array<PlatformApiDailyAnalyticsByApp>;
+  by_app?: Maybe<Array<PlatformApiDailyAnalyticsByApp>>;
   /** API usage per day. */
-  by_day: Array<PlatformApiDailyAnalyticsByDay>;
+  by_day?: Maybe<Array<PlatformApiDailyAnalyticsByDay>>;
   /** API usage per user. */
-  by_user: Array<PlatformApiDailyAnalyticsByUser>;
+  by_user?: Maybe<Array<PlatformApiDailyAnalyticsByUser>>;
   /** Last time the API usage data was updated. */
   last_updated?: Maybe<Scalars['ISO8601DateTime']['output']>;
 };
@@ -6308,7 +6308,7 @@ export type PlatformApiDailyAnalyticsByUser = {
   /** API usage for the user. */
   usage: Scalars['Int']['output'];
   /** User. */
-  user: User;
+  user?: Maybe<User>;
 };
 
 /** The position relative method. */
@@ -8910,6 +8910,13 @@ export type GetSprintsByIdsQueryVariables = Exact<{
 
 export type GetSprintsByIdsQuery = { __typename?: 'Query', items?: Array<{ __typename?: 'Item', id: string, name: string, board?: { __typename?: 'Board', id: string } | null, column_values: Array<{ __typename: 'BatteryValue', id: string, type: ColumnType } | { __typename: 'BoardRelationValue', id: string, type: ColumnType } | { __typename: 'ButtonValue', id: string, type: ColumnType } | { __typename: 'CheckboxValue', checked?: boolean | null, id: string, type: ColumnType } | { __typename: 'ColorPickerValue', id: string, type: ColumnType } | { __typename: 'CountryValue', id: string, type: ColumnType } | { __typename: 'CreationLogValue', id: string, type: ColumnType } | { __typename: 'DateValue', date?: string | null, id: string, type: ColumnType } | { __typename: 'DependencyValue', id: string, type: ColumnType } | { __typename: 'DirectDocValue', id: string, type: ColumnType } | { __typename: 'DocValue', id: string, type: ColumnType, file?: { __typename?: 'FileDocValue', doc: { __typename?: 'Document', object_id: string } } | null } | { __typename: 'DropdownValue', id: string, type: ColumnType } | { __typename: 'EmailValue', id: string, type: ColumnType } | { __typename: 'FileValue', id: string, type: ColumnType } | { __typename: 'FormulaValue', id: string, type: ColumnType } | { __typename: 'GroupValue', id: string, type: ColumnType } | { __typename: 'HourValue', id: string, type: ColumnType } | { __typename: 'IntegrationValue', id: string, type: ColumnType } | { __typename: 'ItemIdValue', id: string, type: ColumnType } | { __typename: 'LastUpdatedValue', id: string, type: ColumnType } | { __typename: 'LinkValue', id: string, type: ColumnType } | { __typename: 'LocationValue', id: string, type: ColumnType } | { __typename: 'LongTextValue', id: string, type: ColumnType } | { __typename: 'MirrorValue', id: string, type: ColumnType } | { __typename: 'NumbersValue', id: string, type: ColumnType } | { __typename: 'PeopleValue', id: string, type: ColumnType } | { __typename: 'PersonValue', id: string, type: ColumnType } | { __typename: 'PhoneValue', id: string, type: ColumnType } | { __typename: 'ProgressValue', id: string, type: ColumnType } | { __typename: 'RatingValue', id: string, type: ColumnType } | { __typename: 'StatusValue', id: string, type: ColumnType } | { __typename: 'SubtasksValue', id: string, type: ColumnType } | { __typename: 'TagsValue', id: string, type: ColumnType } | { __typename: 'TeamValue', id: string, type: ColumnType } | { __typename: 'TextValue', value?: any | null, id: string, type: ColumnType } | { __typename: 'TimeTrackingValue', id: string, type: ColumnType } | { __typename: 'TimelineValue', from?: any | null, to?: any | null, id: string, type: ColumnType } | { __typename: 'UnsupportedValue', id: string, type: ColumnType } | { __typename: 'VoteValue', id: string, type: ColumnType } | { __typename: 'WeekValue', id: string, type: ColumnType } | { __typename: 'WorldClockValue', id: string, type: ColumnType }> } | null> | null };
 
+export type GetRecentBoardsQueryVariables = Exact<{
+  limit?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type GetRecentBoardsQuery = { __typename?: 'Query', boards?: Array<{ __typename?: 'Board', id: string, name: string, workspace?: { __typename?: 'Workspace', id?: string | null, name: string } | null, columns?: Array<{ __typename?: 'Column', id: string, type: ColumnType, settings?: any | null } | null> | null } | null> | null };
+
 export type GetSprintsBoardItemsWithColumnsQueryVariables = Exact<{
   boardId: Scalars['ID']['input'];
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -9042,16 +9049,6 @@ export type SmartSearchBoardItemIdsQueryVariables = Exact<{
 
 
 export type SmartSearchBoardItemIdsQuery = { __typename?: 'Query', search_items?: { __typename?: 'SearchItemsGraphQlResultsView', results: Array<{ __typename?: 'QueryResult', data: { __typename?: 'Item', id: string } }> } | null };
-
-export type GetBoardItemsPageQueryVariables = Exact<{
-  boardId: Scalars['ID']['input'];
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  cursor?: InputMaybe<Scalars['String']['input']>;
-  includeColumns: Scalars['Boolean']['input'];
-}>;
-
-
-export type GetBoardItemsPageQuery = { __typename?: 'Query', boards?: Array<{ __typename?: 'Board', id: string, name: string, items_page: { __typename?: 'ItemsResponse', cursor?: string | null, items: Array<{ __typename?: 'Item', id: string, name: string, created_at?: any | null, updated_at?: any | null, column_values?: Array<{ __typename?: 'BatteryValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'BoardRelationValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'ButtonValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'CheckboxValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'ColorPickerValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'CountryValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'CreationLogValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'DateValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'DependencyValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'DirectDocValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'DocValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'DropdownValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'EmailValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'FileValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'FormulaValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'GroupValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'HourValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'IntegrationValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'ItemIdValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'LastUpdatedValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'LinkValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'LocationValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'LongTextValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'MirrorValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'NumbersValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'PeopleValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'PersonValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'PhoneValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'ProgressValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'RatingValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'StatusValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'SubtasksValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'TagsValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'TeamValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'TextValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'TimeTrackingValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'TimelineValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'UnsupportedValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'VoteValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'WeekValue', id: string, text?: string | null, value?: any | null } | { __typename?: 'WorldClockValue', id: string, text?: string | null, value?: any | null }> }> } } | null> | null };
 
 export type GetColumnTypeSchemaQueryVariables = Exact<{
   type: ColumnType;
