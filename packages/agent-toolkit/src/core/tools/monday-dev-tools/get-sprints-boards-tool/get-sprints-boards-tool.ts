@@ -120,6 +120,10 @@ Searches recently used boards (up to 100). If none found, ask user to provide bo
    * We can identify pairs from either direction:
    * - From sprints board: sprint_tasks column references tasks board
    * - From tasks board: task_sprint column references sprints board
+   * 
+   * Note: If a board in the pair is not found in the recent boards list (RECENT_BOARDS_LIMIT),
+   * its name and workspace will show as "Unknown" or generic names (e.g., "Tasks Board {id}").
+   * The board relationship and ID are still valid and functional.
    */
   private extractBoardPairs(boards: Board[]): SprintsBoardPair[] {
     const pairsMap = new Map<string, SprintsBoardPair>(); // Key: "sprintsBoardId:tasksBoardId"
@@ -260,11 +264,11 @@ No board pairs with sprint relationships found in your recent boards.
 ### Possible Reasons:
 1. Boards exist but not accessed recently by your account
 2. Missing access permissions to sprint/task boards
-3. Monday-dev sprints not set up in account
+3. Monday-dev product was not set up in account
 
 ### Next Steps:
-1. Access monday-dev boards in UI to refresh recent boards list
-2. Verify permissions to view sprint and task boards
+1. Ask user to access monday-dev boards in UI to refresh recent boards list
+2. Ask user to verify permissions to view sprint and task boards
 3. Ask user to provide board IDs manually if known`;
   }
 }

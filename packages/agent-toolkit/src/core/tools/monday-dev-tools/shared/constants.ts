@@ -5,6 +5,7 @@ import {
   DateValue,
   TimelineValue,
   DocValue,
+  GetRecentBoardsQuery,
 } from '../../../../monday-graphql/generated/graphql';
 
 /**
