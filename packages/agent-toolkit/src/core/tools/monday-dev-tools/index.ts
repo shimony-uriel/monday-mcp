@@ -12,4 +12,3 @@ export const allMondayDevTools: BaseMondayApiToolConstructor[] = [
 export * from './get-sprint-summary-tool/get-sprint-summary-tool';
 export * from './get-sprints-metadata-tool/get-sprints-metadata-tool';
 export * from './get-sprints-boards-tool/get-sprints-boards-tool';
-export * from './shared';
