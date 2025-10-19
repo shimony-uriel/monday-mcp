@@ -34,7 +34,7 @@ export const getSprintsMetadataToolSchema = {
     .max(MAX_LIMIT)
     .optional()
     .default(DEFAULT_LIMIT)
-    .describe('The number of sprints to retrieve (default: 25, max: 100)'),
+    .describe(`The number of sprints to retrieve (default: ${DEFAULT_LIMIT}, max: ${MAX_LIMIT})`),
 };
 
 export class GetSprintsMetadataTool extends BaseMondayApiTool<typeof getSprintsMetadataToolSchema> {
@@ -62,7 +62,7 @@ A table of sprints with the following information:
 - Sprint summary document object ID
 
 ## Parameters:
-- **limit**: Number of sprints to retrieve (default: 25, max: 500)
+- **limit**: Number of sprints to retrieve (default: ${DEFAULT_LIMIT}, max: ${MAX_LIMIT})
 
 Requires the Main Sprints board ID of the monday-dev containing your sprints.`;
   }

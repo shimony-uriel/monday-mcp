@@ -6,4 +6,3 @@ export const allMondayDevTools: BaseMondayApiToolConstructor[] = [GetSprintsMeta
 
 export * from './get-sprint-summary-tool/get-sprint-summary-tool';
 export * from './get-sprints-metadata-tool/get-sprints-metadata-tool';
-export * from './shared';
