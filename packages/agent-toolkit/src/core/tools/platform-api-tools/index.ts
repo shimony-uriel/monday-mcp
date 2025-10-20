@@ -115,3 +115,5 @@ export * from './create-folder-tool/create-folder-tool';
 export * from './move-object-tool/move-object-tool';
 // Dashboard Tools
 export * from './dashboard-tools';
+// Monday Dev Tools
+export * from '../monday-dev-tools';
