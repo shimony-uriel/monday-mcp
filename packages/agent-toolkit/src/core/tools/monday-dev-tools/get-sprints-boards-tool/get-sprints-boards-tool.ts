@@ -138,7 +138,8 @@ ${multiplePairsWarning}## Boards
 
 Found **${pairs.length}** matched pair(s):
 
-${pairDetails}${technicalReference}`;
+${pairDetails}
+${technicalReference}`;
   }
 
   private generateNotFoundMessage(boardsChecked: number): string {
@@ -160,9 +161,7 @@ No board pairs with sprint relationships found in your recent boards.
   }
 
 
-/**
- * Creates board info object with fallback for missing boards
- */
+
 private createBoardInfo(
   boardId: string,
   board: Board | undefined,
@@ -176,9 +175,7 @@ private createBoardInfo(
   };
 }
 
-/**
- * Processes a sprints board and adds its pair to the map if found
- */
+
 private processSprintsBoard(
   board: Board,
   boardsById: Map<string, Board>,
@@ -200,9 +197,7 @@ private processSprintsBoard(
   });
 }
 
-/**
- * Processes a tasks board and adds its pair to the map if found
- */
+
 private processTasksBoard(
   board: Board,
   boardsById: Map<string, Board>,
