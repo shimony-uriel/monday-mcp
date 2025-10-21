@@ -389,7 +389,6 @@ Found **1** matched pair(s):
 - ID: \`2001\`
 - Name: Tasks Board
 - Workspace: Development Team (ID: ws_1)
-
 ---
 
 ## 📋 Technical Reference
@@ -401,19 +400,14 @@ Found **1** matched pair(s):
 • Move Between Sprints: Update \`task_sprint\` with new sprint item ID
 • Backlog Tasks: \`task_sprint\` is empty/null
 
-**Critical:** \`task_sprint\` column references ONLY its paired sprints board. Cross-pair operations WILL FAIL.
-`;
+**Critical:** \`task_sprint\` column references ONLY its paired sprints board. Cross-pair operations WILL FAIL.`;
 
 export const EXPECTED_MULTIPLE_PAIRS_OUTPUT = `# Monday-Dev Sprints Boards Discovery
 
 ## ⚠️ Multiple SprintsBoard Detected
-
 **2** different board pairs found. Each pair is isolated and workspace-specific.
-
 **AI Agent - REQUIRED:** Before ANY operation, confirm with user which pair and workspace to use.
-
 ---
-
 ## Boards
 
 Found **2** matched pair(s):
@@ -428,7 +422,6 @@ Found **2** matched pair(s):
 - ID: \`2001\`
 - Name: Frontend Tasks
 - Workspace: Frontend Team (ID: ws_frontend)
-
 ---
 
 ### Pair 2
@@ -441,7 +434,6 @@ Found **2** matched pair(s):
 - ID: \`2002\`
 - Name: Backend Tasks
 - Workspace: Backend Team (ID: ws_backend)
-
 ---
 
 ## 📋 Technical Reference
@@ -453,8 +445,7 @@ Found **2** matched pair(s):
 • Move Between Sprints: Update \`task_sprint\` with new sprint item ID
 • Backlog Tasks: \`task_sprint\` is empty/null
 
-**Critical:** \`task_sprint\` column references ONLY its paired sprints board. Cross-pair operations WILL FAIL.
-`;
+**Critical:** \`task_sprint\` column references ONLY its paired sprints board. Cross-pair operations WILL FAIL.`;
 
 export const EXPECTED_SPRINTS_BOARD_ONLY_OUTPUT = `# Monday-Dev Sprints Boards Discovery
 
@@ -472,7 +463,6 @@ Found **1** matched pair(s):
 - ID: \`2001\`
 - Name: Tasks Board 2001
 - Workspace: Unknown (ID: unknown)
-
 ---
 
 ## 📋 Technical Reference
@@ -484,8 +474,7 @@ Found **1** matched pair(s):
 • Move Between Sprints: Update \`task_sprint\` with new sprint item ID
 • Backlog Tasks: \`task_sprint\` is empty/null
 
-**Critical:** \`task_sprint\` column references ONLY its paired sprints board. Cross-pair operations WILL FAIL.
-`;
+**Critical:** \`task_sprint\` column references ONLY its paired sprints board. Cross-pair operations WILL FAIL.`;
 
 export const EXPECTED_TASKS_BOARD_ONLY_OUTPUT = `# Monday-Dev Sprints Boards Discovery
 
@@ -503,7 +492,6 @@ Found **1** matched pair(s):
 - ID: \`2001\`
 - Name: Tasks Board
 - Workspace: Development Team (ID: ws_1)
-
 ---
 
 ## 📋 Technical Reference
@@ -515,8 +503,7 @@ Found **1** matched pair(s):
 • Move Between Sprints: Update \`task_sprint\` with new sprint item ID
 • Backlog Tasks: \`task_sprint\` is empty/null
 
-**Critical:** \`task_sprint\` column references ONLY its paired sprints board. Cross-pair operations WILL FAIL.
-`;
+**Critical:** \`task_sprint\` column references ONLY its paired sprints board. Cross-pair operations WILL FAIL.`;
 
 export const EXPECTED_NO_BOARDS_ERROR = `BOARD_NOT_FOUND: No boards found in your account. Please verify you have access to monday.com boards.`;
 
@@ -552,7 +539,6 @@ Found **1** matched pair(s):
 - ID: \`2001\`
 - Name: Tasks Board
 - Workspace: Unknown (ID: unknown)
-
 ---
 
 ## 📋 Technical Reference
@@ -564,8 +550,7 @@ Found **1** matched pair(s):
 • Move Between Sprints: Update \`task_sprint\` with new sprint item ID
 • Backlog Tasks: \`task_sprint\` is empty/null
 
-**Critical:** \`task_sprint\` column references ONLY its paired sprints board. Cross-pair operations WILL FAIL.
-`;
+**Critical:** \`task_sprint\` column references ONLY its paired sprints board. Cross-pair operations WILL FAIL.`;
 
 export const EXPECTED_GRAPHQL_ERROR = `INTERNAL_ERROR: Error retrieving sprints boards: GraphQL error occurred`;
 

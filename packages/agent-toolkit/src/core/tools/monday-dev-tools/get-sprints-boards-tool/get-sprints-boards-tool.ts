@@ -136,8 +136,7 @@ ${multiplePairsWarning}## Boards
 
 Found **${pairs.length}** matched pair(s):
 
-${pairDetails}
-${technicalReference}`;
+${pairDetails}${technicalReference}`;
   }
 
   private generateNotFoundMessage(boardsChecked: number): string {
