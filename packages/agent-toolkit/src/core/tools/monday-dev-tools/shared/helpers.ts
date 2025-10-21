@@ -54,29 +54,6 @@ export const getSprintColumnDisplayName = (columnId: keyof typeof SPRINT_COLUMN_
   return SPRINT_COLUMN_DISPLAY_NAMES[columnId] || columnId;
 };
 
-export const validateSprintsBoardSchemaFromColumns = (
-  boardColumns: Column[],
-): { isValid: boolean; errorMessage: string } => {
-  const existingColumnIds = new Set(
-    boardColumns.filter((col): col is NonNullable<Column> => col !== null).map((col) => col.id),
-  );
-
-  const requiredColumns = Object.values(REQUIRED_SPRINT_COLUMNS);
-  const validation = validateItemColumns(existingColumnIds, requiredColumns);
-
-  if (!validation.isValid) {
-    let errorMessage = `BoardID provided is not a valid sprints board. Missing required columns:\n\n`;
-
-    validation.missingColumns.forEach((columnId) => {
-      const columnDisplayName = getSprintColumnDisplayName(columnId as keyof typeof SPRINT_COLUMN_DISPLAY_NAMES);
-      errorMessage += `- ${columnDisplayName}\n`;
-    });
-
-    return { isValid: false, errorMessage };
-  }
-
-  return { isValid: true, errorMessage: '' };
-};
 
 /**
  * Generic function to validate item has required columns
@@ -150,7 +127,7 @@ export const getRelatedBoardIdFromRelationColumn = (column: NonNullable<Board['c
 };
 
 
-export const getBoardRelationColumns = (
+export const getBoardRelationColumn = (
   board: Board,
   columnId: string
 ): NonNullable<Board['columns']>[number] | null => {

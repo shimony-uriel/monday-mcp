@@ -13,12 +13,12 @@ import {
   Board,
   SprintsBoardPair,
   isSprintsBoard,
-  isTasksBoard,findBoardRelationColumn,
-getRelatedBoardIdFromColumn
+  isTasksBoard,
+  getRelatedBoardIdFromRelationColumn,
+  getBoardRelationColumn,
 } from '../shared';
 
 export const getSprintsBoardsToolSchema = {};
-
 
 export class GetSprintsBoardsTool extends BaseMondayApiTool<typeof getSprintsBoardsToolSchema> {
   name = 'get-monday-dev-sprints-boards';
@@ -88,7 +88,6 @@ Searches recently used boards (up to ${RECENT_BOARDS_LIMIT}). If none found, ask
     }
   }
 
-  
   private generateMultiplePairsWarning(pairsCount: number): string {
     return `## ⚠️ Multiple SprintsBoard Detected
 **${pairsCount}** different board pairs found. Each pair is isolated and workspace-specific.
@@ -97,7 +96,6 @@ Searches recently used boards (up to ${RECENT_BOARDS_LIMIT}). If none found, ask
 `;
   }
 
-    
   private generatePairDetails(pair: SprintsBoardPair, index: number): string {
     return `### Pair ${index + 1}
 **Sprints Board:**
@@ -160,9 +158,7 @@ No board pairs with sprint relationships found in your recent boards.
 3. Ask user to provide board IDs manually if known`;
   }
 
-
-
-private createBoardInfo(
+  private createBoardInfo(
   boardId: string,
   board: Board | undefined,
   fallbackName: string
@@ -175,16 +171,15 @@ private createBoardInfo(
   };
 }
 
-
-private processSprintsBoard(
+  private processSprintsBoard(
   board: Board,
   boardsById: Map<string, Board>,
   pairsMap: Map<string, SprintsBoardPair>
 ){
-  const sprintTasksColumn = findBoardRelationColumn(board, REQUIRED_SPRINT_COLUMNS.SPRINT_TASKS);
+  const sprintTasksColumn = getBoardRelationColumn(board, REQUIRED_SPRINT_COLUMNS.SPRINT_TASKS);
   if (!sprintTasksColumn) return;
 
-  const tasksBoardId = getRelatedBoardIdFromColumn(sprintTasksColumn);
+  const tasksBoardId = getRelatedBoardIdFromRelationColumn(sprintTasksColumn);
   if (!tasksBoardId) return;
 
   const pairKey = `${board.id}:${tasksBoardId}`;
@@ -197,16 +192,15 @@ private processSprintsBoard(
   });
 }
 
-
-private processTasksBoard(
+  private processTasksBoard(
   board: Board,
   boardsById: Map<string, Board>,
   pairsMap: Map<string, SprintsBoardPair>
 ){
-  const taskSprintColumn = findBoardRelationColumn(board, MONDAY_DEV_TASK_COLUMN_IDS.TASK_SPRINT);
+  const taskSprintColumn = getBoardRelationColumn(board, MONDAY_DEV_TASK_COLUMN_IDS.TASK_SPRINT);
   if (!taskSprintColumn) return;
 
-  const sprintsBoardId = getRelatedBoardIdFromColumn(taskSprintColumn);
+  const sprintsBoardId = getRelatedBoardIdFromRelationColumn(taskSprintColumn);
   if (!sprintsBoardId) return;
 
   const pairKey = `${sprintsBoardId}:${board.id}`;
@@ -219,18 +213,18 @@ private processTasksBoard(
   });
 }
 
-/**
- * Extracts board pairs directly from column relationships
+  /**
+   * Extracts board pairs directly from column relationships
  * This approach works even if one board in the pair wasn't fetched (not in recent boards limit)
  * We can identify pairs from either direction:
  * - From sprints board: sprint_tasks column references tasks board
  * - From tasks board: task_sprint column references sprints board
  * 
  * Note: If a board in the pair is not found in the recent boards list,
- * its name and workspace will show as "Unknown" or generic names (e.g., "Tasks Board {id}").
- * The board relationship and ID are still valid and functional.
- */
-private extractBoardPairs(boards: Board[]): SprintsBoardPair[] {
+   * its name and workspace will show as "Unknown" or generic names (e.g., "Tasks Board {id}").
+   * The board relationship and ID are still valid and functional.
+   */
+  private extractBoardPairs(boards: Board[]): SprintsBoardPair[] {
   const pairsMap = new Map<string, SprintsBoardPair>();
   const boardsById = new Map(boards.map((board) => [board.id, board]));
 
@@ -247,7 +241,5 @@ private extractBoardPairs(boards: Board[]): SprintsBoardPair[] {
   }
 
   return Array.from(pairsMap.values());
+  }
 }
-
-}
-
