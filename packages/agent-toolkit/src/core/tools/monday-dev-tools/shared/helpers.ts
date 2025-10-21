@@ -19,18 +19,15 @@ export const getSprintColumnValue = (sprint: Sprint, columnId: string) => {
   return sprint.column_values?.find((cv) => cv.id === columnId);
 };
 
-
 export const getCheckboxValue = (sprint: Sprint, columnId: string): boolean | null => {
   const column = getSprintColumnValue(sprint, columnId);
   return column?.__typename === CHECKBOX_COLUMN_TYPENAME ? (column.checked ?? false) : null;
 };
 
-
 export const getDateValue = (sprint: Sprint, columnId: string): string | null => {
   const column = getSprintColumnValue(sprint, columnId);
   return column?.__typename === DATE_COLUMN_TYPENAME ? (column.date ?? null) : null;
 };
-
 
 export const getTimelineValue = (sprint: Sprint, columnId: string): { from: string; to: string } | null => {
   const column = getSprintColumnValue(sprint, columnId);
