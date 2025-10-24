@@ -2,7 +2,7 @@
  * Shared helper functions for Monday Dev tools
  */
 
-import { Column } from '../../../../monday-graphql/generated/graphql';
+import { ColumnType } from '../../../../monday-graphql/generated/graphql';
 import {
   REQUIRED_SPRINT_COLUMNS,
   REQUIRED_TASKS_COLUMNS,
@@ -132,5 +132,5 @@ export const getBoardRelationColumn = (
 
   return board.columns
     .filter((col): col is NonNullable<typeof col> => col !== null)
-    .find((col) => col.id === columnId && col.type === 'board_relation') || null;
+    .find((col) => col.id === columnId && col.type === ColumnType.BoardRelation) || null;
 };
