@@ -118,6 +118,7 @@ Searches recently used boards (up to ${RECENT_BOARDS_LIMIT}). If none found, ask
 **Sprint Operations** (all require correct board pair):
 • Add to Sprint: Update \`task_sprint\` column with sprint item ID
 • Remove from Sprint: Clear \`task_sprint\` column (set to null)
+• Search in Sprint: Filter where \`task_sprint\` equals sprint item ID
 • Move Between Sprints: Update \`task_sprint\` with new sprint item ID
 • Backlog Tasks: \`task_sprint\` is empty/null
 
