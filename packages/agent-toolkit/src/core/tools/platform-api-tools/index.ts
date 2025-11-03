@@ -27,7 +27,7 @@ import { MoveItemToGroupTool } from './move-item-to-group-tool';
 import { ReadDocsTool } from './read-docs-tool';
 import { WorkspaceInfoTool } from './workspace-info-tool/workspace-info-tool';
 import { ListWorkspaceTool } from './list-workspace-tool/list-workspace-tool';
-import { CreateDocTool } from './create-doc-tool';
+import { CreateDocTool } from './create-doc-tool/create-doc-tool';
 import { CreateDashboardTool } from './dashboard-tools/create-dashboard-tool';
 import { AllWidgetsSchemaTool } from './dashboard-tools/all-widgets-schema-tool';
 import { CreateWidgetTool } from './dashboard-tools/create-widget-tool';
@@ -36,6 +36,7 @@ import { UpdateFolderTool } from './update-folder-tool/update-folder-tool';
 import { CreateWorkspaceTool } from './create-workspace-tool/create-workspace-tool';
 import { CreateFolderTool } from './create-folder-tool/create-folder-tool';
 import { MoveObjectTool } from './move-object-tool/move-object-tool';
+import { BoardInsightsTool } from './board-insights/board-insights-tool';
 
 export const allGraphqlApiTools: BaseMondayApiToolConstructor[] = [
   DeleteItemTool,
@@ -75,7 +76,8 @@ export const allGraphqlApiTools: BaseMondayApiToolConstructor[] = [
   // Dashboard Tools
   CreateDashboardTool,
   AllWidgetsSchemaTool,
-  CreateWidgetTool  
+  CreateWidgetTool,
+  BoardInsightsTool,
 ];
 
 export * from './all-monday-api-tool';
@@ -105,7 +107,7 @@ export * from './move-item-to-group-tool';
 export * from './read-docs-tool';
 export * from './workspace-info-tool/workspace-info-tool';
 export * from './list-workspace-tool/list-workspace-tool';
-export * from './create-doc-tool';
+export * from './create-doc-tool/create-doc-tool';
 export * from './get-board-activity/get-board-activity-tool';
 export * from './get-board-info/get-board-info-tool';
 export * from './update-workspace-tool/update-workspace-tool';
@@ -113,6 +115,7 @@ export * from './update-folder-tool/update-folder-tool';
 export * from './create-workspace-tool/create-workspace-tool';
 export * from './create-folder-tool/create-folder-tool';
 export * from './move-object-tool/move-object-tool';
+export * from './board-insights/board-insights-tool';
 // Dashboard Tools
 export * from './dashboard-tools';
 // Monday Dev Tools

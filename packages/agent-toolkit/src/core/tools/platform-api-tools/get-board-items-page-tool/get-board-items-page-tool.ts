@@ -4,6 +4,7 @@ import { GetBoardItemsPageQuery, GetBoardItemsPageQueryVariables, ItemsOrderByDi
 import { getBoardItemsPage, smartSearchGetBoardItemIds } from './get-board-items-page-tool.graphql';
 import { ToolInputType, ToolOutputType, ToolType } from '../../../tool';
 import { BaseMondayApiTool, createMondayApiAnnotations } from '../base-monday-api-tool';
+import { fallbackToStringifiedVersionIfNull, STRINGIFIED_SUFFIX } from '../../../../utils/microsoft-copilot.utils';
 
 const DEFAULT_LIMIT = 25;
 const MAX_LIMIT = 500;
@@ -58,9 +59,9 @@ PERFORMANCE OPTIMIZATION: Only set this to true when you actually need the colum
   filters: z.array(z.object({
     columnId: z.string().describe('The id of the column to filter by'),
     compareAttribute: z.string().optional().describe('The attribute to compare the value to'),
-    compareValue: z.any().describe('The value to compare the attribute to. This can be a string or index value depending on the column type.'),
+    compareValue: z.union([z.string(), z.number(), z.boolean(), z.array(z.union([z.string(), z.number()]))]).describe('The value to compare the attribute to. This can be a string or index value depending on the column type.'),
     operator: z.nativeEnum(ItemsQueryRuleOperator).optional().default(ItemsQueryRuleOperator.AnyOf).describe('The operator to use for the filter'),
-  })).optional().describe('The configuration of filters to apply on the items. Before sending the filters, use get_board_info tool to check "Filtering Guidelines" section for filtering by the column.'),
+  })).optional().describe('The configuration of filters to apply on the items. Before sending the filters, use get_board_info tool to check "filteringGuidelines" key for filtering by the column.'),
   filtersOperator: z.nativeEnum(ItemsQueryOperator).optional().default(ItemsQueryOperator.And).describe('The operator to use for the filters'),
   
   columnIds: z.array(z.string()).optional().describe('The ids of the item columns and subitem columns to get, can be used to reduce the response size when user asks for specific columns. Works only when includeColumns is true. If not provided, all columns will be returned'),
@@ -95,16 +96,6 @@ export class GetBoardItemsPageTool extends BaseMondayApiTool<GetBoardItemsPageTo
   getInputSchema(): GetBoardItemsPageToolInput {
     return getBoardItemsPageToolSchema;
   }
-
-  private parseAndAssignJsonField(input: ToolInputType<GetBoardItemsPageToolInput>, jsonKey: keyof ToolInputType<GetBoardItemsPageToolInput>, stringifiedJsonKey: keyof ToolInputType<GetBoardItemsPageToolInput>) {
-    if(input[stringifiedJsonKey] && !input[jsonKey]) {
-      try {
-        (input as any)[jsonKey] = JSON.parse(input[stringifiedJsonKey] as string);
-      } catch {
-        throw new Error(`${stringifiedJsonKey} is not a valid JSON`);
-      }
-    }
-  }
   
   protected async executeInternal(input: ToolInputType<GetBoardItemsPageToolInput>): Promise<ToolOutputType<never>> {
     // Passing filters + cursor returns an error as cursor has them encoded in it
@@ -120,7 +111,7 @@ export class GetBoardItemsPageTool extends BaseMondayApiTool<GetBoardItemsPageTo
           };
         }
       } catch {
-        this.parseAndAssignJsonField(input, 'filters', 'filtersStringified');
+        fallbackToStringifiedVersionIfNull(input, 'filters', getBoardItemsPageToolSchema.filters);
         input.filters = this.rebuildFiltersWithManualSearch(input.searchTerm, input.filters);
       }
       
@@ -135,8 +126,8 @@ export class GetBoardItemsPageTool extends BaseMondayApiTool<GetBoardItemsPageTo
       includeSubItems: input.includeSubItems
     };
 
-    this.parseAndAssignJsonField(input, 'filters', 'filtersStringified');
-    this.parseAndAssignJsonField(input, 'orderBy', 'orderByStringified');
+    fallbackToStringifiedVersionIfNull(input, 'filters', getBoardItemsPageToolSchema.filters);
+    fallbackToStringifiedVersionIfNull(input, 'orderBy', getBoardItemsPageToolSchema.orderBy);
 
     if(canIncludeFilters && (input.itemIds || input.filters || input.orderBy)) { 
       variables.queryParams = {
